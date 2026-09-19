@@ -1,0 +1,13 @@
+﻿= Extension risk and body kits
+:navtitle: Extensions
+
+Extensions are the final bolt-on layer, but they can cut into the body kit — or deeper.
+There is no fair rule that limits them to additive patches only.
+
+== Practical controls
+
+* Publish stable `data-adt-*` slots and documented CSS anchors on each body kit major version.
+* Treat layout-breaking extensions as *body-kit-specific*; declare compatible majors.
+* Prefer injecting into slots over replacing `body.hbs` / column shells.
+* Chassis contracts (viewport overflow, scheme hooks) change rarely; body silhouettes may change more often.
+* If an extension must re-weld the body, it becomes a fork of that body kit — own it explicitly.

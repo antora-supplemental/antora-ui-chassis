@@ -1,0 +1,11 @@
+﻿{
+  id: "color-scheme",
+  name: "Color scheme hooks",
+  version: "0.1.0",
+  type: "ui-chassis-component",
+  description: "Unthemed light/dark hooks and color-scheme; palettes are paint.",
+  layer: "chassis",
+  slots: {
+    head: { stylesheets: ["css/color-scheme.css"] },
+  },
+}

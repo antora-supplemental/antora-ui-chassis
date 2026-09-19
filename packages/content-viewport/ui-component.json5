@@ -1,0 +1,12 @@
+﻿{
+  id: "content-viewport",
+  name: "Content viewport",
+  version: "0.1.0",
+  type: "ui-chassis-component",
+  description: "Unthemed article viewport: min-width containment + wide-table wrapper scroll.",
+  layer: "chassis",
+  slots: {
+    head: { stylesheets: ["css/content-viewport.css"] },
+    foot: { scripts: ["js/adt-table-scroll.js"] },
+  },
+}

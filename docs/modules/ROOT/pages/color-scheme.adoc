@@ -1,0 +1,18 @@
+= Color scheme and retiring antora-dark-mode
+
+== Split of responsibility
+
+* *Chassis* (`packages/color-scheme`) — `color-scheme`, `html.dark-theme` / `data-theme` hooks, no brand palette.
+* *Body kit* — where the toggle control lives in the chrome.
+* *Paint* — actual light/dark token values (`--adt-canvas`, `--adt-ink`, …).
+
+== Retirement of antora-dark-mode
+
+The separate `antora-dark-mode` extension should become unnecessary once:
+
+. Chassis ships the scheme hooks every body kit consumes.
+. The body kit (Valentus / Default UI) places the toggle.
+. Paint supplies both palettes.
+
+Until then, keep the extension only as a bridge for sites that have not adopted chassis + body toggle yet.
+Do not reinvent dark mode as a permanent bolt-on if chassis already owns the contract.

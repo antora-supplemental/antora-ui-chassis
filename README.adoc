@@ -1,0 +1,43 @@
+= Antora UI Chassis
+:toc: preamble
+
+Unthemed *region components* and contracts for Antora documentation UIs.
+Valentus, Default UI, and other bundles *consume* this package; they do not own it.
+
+== Layers (car metaphor)
+
+image::layer-engine.png[Engine: Antora pipeline + UI model data,width=420]
+
+*Engine* — Antora pipeline and the UI model it emits. Not this repo.
+
+image::layer-chassis.png[Chassis: unthemed region parts and contracts,width=420]
+
+*Chassis* — this repo. Mount points, viewport contracts, scheme hooks. No brand paint.
+
+image::layer-body-kit.png[Body kit: unpainted silhouette / column shell,width=420]
+
+*Body kit* — which parts weld where (columns, TOC side, tool-band rail). Mostly unbranded structure. Lives in Valentus / Default UI.
+
+image::layer-paint-trim.png[Paint and trim: color, chrome, brand finish,width=420]
+
+*Paint & trim* — palettes, type, logo, chrome. Valentus today ships body kit + paint together (normal for a finished car).
+
+== Color scheme (dark / light)
+
+Chassis owns structural scheme hooks. Paint owns palettes. Body kit places the toggle.
+See `docs/modules/ROOT/pages/color-scheme.adoc` — includes the path to *retire* `antora-dark-mode`.
+
+== Extensions
+
+Extensions cannot honestly be limited to additive-only work.
+See `docs/modules/ROOT/pages/extensions.adoc`.
+
+== Packages
+
+* `packages/content-viewport` — article measure + wide-table wrapper scroll
+* `packages/color-scheme` — unthemed dark/light hooks (no brand colors)
+
+== Consume from Valentus
+
+Copy or submodule these packages. Do *not* depend on `antora-ui-default` as a dependency.
+Vendor Default UI snippets by copy into the body kit if needed.

@@ -1,0 +1,11 @@
+﻿= Body kit vs paint
+
+Valentus today ships *body kit + paint* in one bundle (normal for a finished car).
+Refactor path:
+
+. Keep silhouette partials + column CSS as `valentus-body` (or a folder contract).
+. Move tokens / dark palettes / brand chrome to `valentus-paint`.
+. Depend on `antora-ui-chassis` for viewport + scheme hooks.
+
+Default UI remains a peer bundle at `ui.bundle` — stock body + primer — not a dependency of Valentus.
+Vendor any Default UI snippets by copy, never by npm coupling to upstream Default UI.

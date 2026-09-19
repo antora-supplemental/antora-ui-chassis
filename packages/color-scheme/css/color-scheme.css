@@ -1,0 +1,15 @@
+﻿/* Chassis: color-scheme hooks — no brand palette.
+   Themes (paint) assign --adt-canvas, --adt-ink, etc.
+   Body kit places the toggle control. */
+:root {
+  color-scheme: light dark;
+}
+
+html.dark-theme,
+html[data-theme="dark"] {
+  color-scheme: dark;
+}
+
+html[data-theme="light"] {
+  color-scheme: light;
+}
