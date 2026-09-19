@@ -1,13 +1,29 @@
-﻿/* Chassis: color-scheme hooks — no brand palette.
-   Themes (paint) assign --adt-canvas, --adt-ink, etc.
-   Body kit places the toggle control. */
+/* Chassis foundations: color-scheme bus + primer tokens.
+   Paint packs override --adt-* on :root / [data-theme].
+   Consumers (components, body, bolt-ons) must use var(--adt-*, fallback). */
 :root {
   color-scheme: light dark;
+
+  /* Primer palette — legible unbranded defaults; paint replaces these */
+  --adt-canvas: #f3f5f8;
+  --adt-elevated: #ffffff;
+  --adt-ink: #141820;
+  --adt-ink-muted: #5a6270;
+  --adt-border: #d9dee7;
+  --adt-accent: #0f766e;
+  --adt-doc-max: 42rem;
+  --adt-toc-width: 12rem;
 }
 
 html.dark-theme,
 html[data-theme="dark"] {
   color-scheme: dark;
+  --adt-canvas: #111315;
+  --adt-elevated: #1a1d22;
+  --adt-ink: #e8ecf2;
+  --adt-ink-muted: #9aa3b2;
+  --adt-border: #2e3440;
+  --adt-accent: #2dd4bf;
 }
 
 html[data-theme="light"] {

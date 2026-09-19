@@ -16,3 +16,15 @@ The separate `antora-dark-mode` extension should become unnecessary once:
 
 Until then, keep the extension only as a bridge for sites that have not adopted chassis + body toggle yet.
 Do not reinvent dark mode as a permanent bolt-on if chassis already owns the contract.
+
+== CSS short-circuit fallbacks
+
+Foundations (`packages/color-scheme`) *define* `--adt-*` primer tokens.
+Every consumer (chassis components, body kit, paint users, bolt-ons) styles with:
+
+----
+color: var(--adt-ink, CanvasText);
+background: var(--adt-canvas, Canvas);
+----
+
+so a region yanked out of the stack still paints something readable.

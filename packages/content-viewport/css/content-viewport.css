@@ -1,10 +1,18 @@
-﻿/* Chassis: content viewport — structural only (no brand colors).
-   Wide tables: overflow on wrapper, never on the <table> (Antora #users guidance). */
+/* Chassis content-viewport — structural; colors only via tokens with fallbacks.
+   Wide tables: overflow on wrapper, never on <table> (Antora #users guidance).
+   Fallbacks keep a yanked-out region legible without a paint pack. */
 main.adt-article,
 main.adt-article > .content,
 .doc[data-adt-content-viewport] {
   min-width: 0;
   max-width: 100%;
+  color: var(--adt-ink, CanvasText);
+  background: var(--adt-elevated, Canvas);
+}
+
+main.adt-article[data-adt-content-viewport] {
+  width: var(--adt-doc-max, 42rem);
+  max-width: var(--adt-doc-max, 42rem);
 }
 
 .doc .tablecontainer,
@@ -13,6 +21,7 @@ main.adt-article > .content,
   max-width: 100%;
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
+  border-color: var(--adt-border, GrayText);
 }
 
 .doc .tablecontainer > table.tableblock,
@@ -24,15 +33,20 @@ main.adt-article > .content,
 .doc table.tableblock td {
   overflow-wrap: anywhere;
   word-break: break-word;
+  color: var(--adt-ink, CanvasText);
+  border-color: var(--adt-border, GrayText);
 }
 
 .doc table.tableblock code {
   white-space: normal;
   overflow-wrap: anywhere;
+  color: var(--adt-ink, CanvasText);
 }
 
 .doc .listingblock > .content,
 .doc .literalblock > .content {
   max-width: 100%;
   overflow-x: auto;
+  background: var(--adt-canvas, Canvas);
+  color: var(--adt-ink, CanvasText);
 }
