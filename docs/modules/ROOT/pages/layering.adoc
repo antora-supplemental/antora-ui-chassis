@@ -1,0 +1,37 @@
+= UI layering (car metaphor)
+:toc:
+
+How we keep Antora UI work from collapsing into one bundle.
+
+== Why
+
+The wide-table overflow fix forced a sharper question: who owns the *content viewport* contract vs who paints the site?
+Same question shows up for dark/light and for search.
+
+== Layers
+
+[cols="1,2,2"]
+|===
+|Layer |Car |Owns
+
+|Engine |Power unit |Antora pipeline + UI model data
+|Chassis |Frame + mounts |Unthemed region parts + contracts (this repo)
+|Body kit |Unpainted shell |Silhouette / column layout (Valentus body, Default UI body, ...)
+|Paint & trim |Finish |Palettes, type, logo, chrome
+|Bolt-ons |Aftermarket |Extensions (may reach into body; slots preferred)
+|===
+
+Default UI and Valentus are *peers* at `ui.bundle` — each usually ships body kit + paint together.
+Paint stays a first-class replaceable face (keep silhouette, swap colors/logo).
+
+== Images
+
+image::layer-engine.png[Engine,width=420]
+image::layer-chassis.png[Chassis,width=420]
+image::layer-body-kit.png[Body kit,width=420]
+image::layer-paint-trim.png[Paint and trim,width=420]
+
+== Theme signal
+
+Chassis publishes the mode bus. Paint and extensions subscribe.
+See xref:color-scheme.adoc[].
