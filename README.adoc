@@ -1,5 +1,6 @@
 = Antora UI Chassis
 :toc: preamble
+:imagesdir: images
 
 Unthemed *region components* and contracts for Antora documentation UIs.
 Valentus, Default UI, and other bundles *consume* this package; they do not own it.
@@ -41,3 +42,5 @@ See `docs/modules/ROOT/pages/extensions.adoc`.
 
 Copy or submodule these packages. Do *not* depend on `antora-ui-default` as a dependency.
 Vendor Default UI snippets by copy into the body kit if needed.
+
+See also: `docs/modules/ROOT/pages/layering.adoc`.
