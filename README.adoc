@@ -1,6 +1,6 @@
 = Antora UI Chassis
 :toc: preamble
-:imagesdir: images
+:imagesdir: docs/modules/ROOT/images
 
 Unthemed *region components* and contracts for Antora documentation UIs.
 Valentus, Default UI, and other bundles *consume* this package; they do not own it.
