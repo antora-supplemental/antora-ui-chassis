@@ -1,0 +1,34 @@
+= SoftNav
+
+Chassis UI component: same-origin soft navigation for Antora hubs.
+
+== Include
+
+Copy `js/soft-nav.js` into the hub `supplemental-ui/js/` (or consume via chassis slots when the UI bundle supports it) and load it **before** consumer scripts:
+
+----
+<script src="{{{uiRootPath}}}/js/soft-nav.js" defer></script>
+<script src="{{{uiRootPath}}}/js/site-nav-tree-current.js" defer></script>
+----
+
+== API
+
+* `SoftNav.on('before'|'loaded'|'failed', handler)` — returns unsubscribe
+* `SoftNav.registerRegion({ id, extract(doc), apply(fresh, ctx) })`
+* `SoftNav.navigate(url)`
+* `SoftNav.transition` — `'crossfade'` (default) or `'none'`
+
+DOM events: `soft-nav:before`, `soft-nav:loaded`, `soft-nav:failed`.
+Compat: also fires `doc-nav:loaded` on success.
+
+Built-in regions: `mast`, `nav`, `article`. SoftNav does **not** hard-call nav-tree / mermaid / math — those subscribe to `loaded`.
+
+== Consumer pattern
+
+----
+function onSoftNavLoaded (fn) {
+  if (window.SoftNav && SoftNav.on) SoftNav.on('loaded', fn)
+  else document.addEventListener('soft-nav:loaded', function (e) { fn(e.detail || {}) })
+}
+onSoftNavLoaded(function () { /* rebind */ })
+----

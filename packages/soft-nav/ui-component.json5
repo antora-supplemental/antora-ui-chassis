@@ -1,0 +1,11 @@
+{
+  id: "soft-nav",
+  name: "Soft navigation bus",
+  version: "0.1.0",
+  type: "ui-chassis-component",
+  description: "Same-origin soft navigation with region swaps and a subscribe API for consumers.",
+  layer: "chassis",
+  slots: {
+    footer: { scripts: ["js/soft-nav.js"] },
+  },
+}
