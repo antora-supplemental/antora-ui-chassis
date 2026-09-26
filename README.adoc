@@ -37,6 +37,8 @@ See `docs/modules/ROOT/pages/extensions.adoc`.
 
 * `packages/content-viewport` — article measure + wide-table wrapper scroll
 * `packages/color-scheme` — unthemed dark/light hooks (no brand colors)
+* `packages/soft-nav` — same-origin soft navigation bus
+* `packages/diagram-zoom` — in-article diagram zoom + lightbox
 
 == Consume from Valentus
 

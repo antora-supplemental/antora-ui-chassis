@@ -1,0 +1,12 @@
+{
+  id: "diagram-zoom",
+  name: "Diagram zoom / lightbox",
+  version: "0.1.0",
+  type: "ui-chassis-component",
+  description: "In-article zoom chrome and pan/zoom lightbox for baked SVG and client Mermaid diagrams.",
+  layer: "chassis",
+  slots: {
+    head: { stylesheets: ["css/site-diagram-zoom.css"] },
+    footer: { scripts: ["js/site-diagram-zoom.js"] },
+  },
+}

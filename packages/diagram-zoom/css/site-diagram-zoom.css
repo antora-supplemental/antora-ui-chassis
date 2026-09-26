@@ -1,0 +1,152 @@
+/* Diagram zoom / lightbox — chassis structural; colors via Valentus/DevCentr tokens. */
+.adt-diagram-zoom {
+  position: relative;
+  isolation: isolate;
+}
+
+.adt-diagram-zoom__viewport {
+  overflow: auto;
+  max-width: 100%;
+  -webkit-overflow-scrolling: touch;
+}
+
+.adt-diagram-zoom__viewport.is-zoomed {
+  cursor: grab;
+}
+
+.adt-diagram-zoom__toolbar {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  z-index: 2;
+  display: flex;
+  gap: 0.25rem;
+  padding: 0.2rem;
+  border-radius: var(--adt-radius, 8px);
+  border: 1px solid var(--adt-border, color-mix(in srgb, CanvasText 18%, transparent));
+  background: color-mix(in srgb, var(--adt-elevated, Canvas) 92%, transparent);
+  box-shadow: 0 1px 4px color-mix(in srgb, CanvasText 12%, transparent);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 120ms ease;
+}
+
+.adt-diagram-zoom:hover .adt-diagram-zoom__toolbar,
+.adt-diagram-zoom:focus-within .adt-diagram-zoom__toolbar {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.adt-diagram-zoom__btn {
+  appearance: none;
+  margin: 0;
+  min-width: 2rem;
+  height: 2rem;
+  padding: 0 0.4rem;
+  border: 0;
+  border-radius: calc(var(--adt-radius, 8px) - 2px);
+  background: transparent;
+  color: var(--adt-ink, CanvasText);
+  font: 600 0.85rem/1 var(--adt-font-ui, system-ui, sans-serif);
+  cursor: pointer;
+}
+
+.adt-diagram-zoom__btn:hover,
+.adt-diagram-zoom__btn:focus-visible {
+  background: var(--adt-accent-soft, color-mix(in srgb, var(--adt-accent, #178f80) 16%, transparent));
+  color: var(--adt-accent, #178f80);
+  outline: none;
+}
+
+.adt-diagram-zoom__btn:focus-visible {
+  box-shadow: 0 0 0 2px var(--adt-accent, #178f80);
+}
+
+html.dark-theme .adt-diagram-zoom__toolbar {
+  background: color-mix(in srgb, var(--adt-elevated, #25262b) 94%, transparent);
+  border-color: var(--adt-border, #373a40);
+}
+
+.adt-diagram-lightbox[hidden] {
+  display: none !important;
+}
+
+.adt-diagram-lightbox {
+  position: fixed;
+  inset: 0;
+  z-index: 10050;
+  display: grid;
+  place-items: center;
+}
+
+.adt-diagram-lightbox__backdrop {
+  position: absolute;
+  inset: 0;
+  background: color-mix(in srgb, #000 55%, transparent);
+}
+
+.adt-diagram-lightbox__panel {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  width: min(96vw, 1100px);
+  height: min(92vh, 820px);
+  border-radius: var(--adt-radius, 8px);
+  border: 1px solid var(--adt-border, color-mix(in srgb, CanvasText 18%, transparent));
+  background: var(--adt-elevated, Canvas);
+  color: var(--adt-ink, CanvasText);
+  box-shadow: 0 12px 40px color-mix(in srgb, #000 35%, transparent);
+  overflow: hidden;
+}
+
+.adt-diagram-lightbox__toolbar {
+  display: flex;
+  gap: 0.35rem;
+  justify-content: flex-end;
+  align-items: center;
+  padding: 0.45rem 0.6rem;
+  border-bottom: 1px solid var(--adt-border, color-mix(in srgb, CanvasText 14%, transparent));
+  background: color-mix(in srgb, var(--adt-canvas, Canvas) 88%, var(--adt-elevated, Canvas));
+}
+
+.adt-diagram-lightbox__stage {
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+  cursor: grab;
+  touch-action: none;
+  background:
+    radial-gradient(circle at 1px 1px, color-mix(in srgb, var(--adt-border, #888) 45%, transparent) 1px, transparent 0)
+    0 0 / 16px 16px;
+}
+
+.adt-diagram-lightbox__stage:active {
+  cursor: grabbing;
+}
+
+.adt-diagram-lightbox__canvas {
+  width: 100%;
+  height: 100%;
+  display: grid;
+  place-items: center;
+  transform-origin: center center;
+}
+
+.adt-diagram-lightbox__canvas > img,
+.adt-diagram-lightbox__canvas > svg {
+  max-width: 92%;
+  max-height: 92%;
+  height: auto;
+  user-select: none;
+  -webkit-user-drag: none;
+}
+
+html.adt-diagram-lightbox-open {
+  overflow: hidden;
+}
+
+/* Keep AsciiDoc title below chrome when present */
+.adt-diagram-zoom > .title {
+  margin-top: 0.5rem;
+}

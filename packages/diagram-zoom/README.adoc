@@ -1,0 +1,35 @@
+= Diagram zoom
+
+Chassis UI component: in-article zoom controls and a pan/zoom lightbox for Antora diagrams.
+
+== Targets
+
+* Baked figures: `.doc .imageblock` (Kroki `<img>`, Themed SVG / `<themed-svg>`)
+* Client Mermaid: `.doc .adt-mermaid` / `.doc div.mermaid`
+
+== Include
+
+Copy into the hub `supplemental-ui/`:
+
+* `js/site-diagram-zoom.js` -> `supplemental-ui/js/`
+* `css/site-diagram-zoom.css` -> `supplemental-ui/css/`
+
+Load CSS with other supplemental stylesheets (e.g. `head-meta.hbs`) and the script after SoftNav:
+
+----
+<link rel="stylesheet" href="{{{uiRootPath}}}/css/site-diagram-zoom.css">
+...
+<script src="{{{uiRootPath}}}/js/soft-nav.js" defer></script>
+<script src="{{{uiRootPath}}}/js/site-diagram-zoom.js" defer></script>
+----
+
+== Behavior
+
+* Hover/focus chrome: zoom in, zoom out, reset (1:1), expand (lightbox).
+* Lightbox: drag to pan, wheel to zoom, Esc / backdrop / close to dismiss; basic focus cycle.
+* SoftNav: closes lightbox and re-enhances figures on `SoftNav.loaded`.
+* Wheel zoom in-article requires Ctrl/Cmd so normal page and left-nav scroll stay intact.
+
+== Authoring notes
+
+No AsciiDoc roles required. Optional opt-out: add role/class `no-diagram-zoom` on a block (not enhanced when present — reserved for a future filter). Authors choose bake vs client Mermaid separately; zoom attaches to whichever DOM the page has.
