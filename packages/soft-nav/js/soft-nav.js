@@ -1,17 +1,22 @@
 /**
  * SoftNav — same-origin soft navigation bus for Antora UI chrome.
  *
- * Intercepts in-article links within the same Antora component, fetches the
- * next page, swaps registered regions (mast / side nav / article), then emits
- * lifecycle events so consumers rebind without SoftNav naming them.
+ * Intercepts in-article (and same-component nav) links, fetches the next page,
+ * swaps registered regions (mast / article; nav prefers in-place current sync),
+ * then emits lifecycle events so consumers rebind without SoftNav naming them.
  *
- * Cross-component links do a full document load.
+ * Same-component nav-tree clicks soft-navigate so the left rail keeps its
+ * scroll position. Cross-component links do a full document load.
+ *
+ * On each successful load the *content* column scrolls to top for reading
+ * without resetting the independent nav scrollport.
  *
  * Public API:
  *   SoftNav.on('before'|'loaded'|'failed', handler) -> unsubscribe
  *   SoftNav.registerRegion({ id, extract(doc), apply(fresh, ctx) })
  *   SoftNav.navigate(url)
- *   SoftNav.transition = 'crossfade' | 'none'
+ *   SoftNav.transition = 'none' | 'crossfade'  (default: none — DeepWiki-like)
+ *   SoftNav.replaceNav = false | true          (default: false — patch currents)
  *
  * DOM events (detail = ctx): soft-nav:before | soft-nav:loaded | soft-nav:failed
  * Compat: also fires doc-nav:loaded on successful swaps.
@@ -39,7 +44,8 @@
   }
 
   var SoftNav = {
-    transition: 'crossfade',
+    transition: 'none',
+    replaceNav: false,
     on: function (event, handler) {
       if (!listeners[event]) listeners[event] = []
       listeners[event].push(handler)
@@ -93,6 +99,18 @@
 
   function sameComponent (url) {
     return componentName(url) === componentName(window.location.href)
+  }
+
+  function normalizePath (href) {
+    try {
+      var u = pageUrl(href)
+      var path = u.pathname || '/'
+      path = path.replace(/\/index\.html$/i, '/')
+      if (path.length > 1) path = path.replace(/\/+$/, '/') || '/'
+      return path
+    } catch (e) {
+      return String(href || '').split(/[?#]/)[0]
+    }
   }
 
   function absolutize (rootEl, destHref) {
@@ -154,6 +172,68 @@
     return t ? t.textContent : document.title
   }
 
+  function navScrollEl () {
+    return document.querySelector('.nav-container [data-panel=menu]')
+  }
+
+  function readNavScroll () {
+    var el = navScrollEl()
+    return el ? el.scrollTop || 0 : 0
+  }
+
+  function writeNavScroll (y) {
+    var el = navScrollEl()
+    if (!el) return
+    el.scrollTop = y
+    if (typeof window.siteNavTreeSaveScroll === 'function') window.siteNavTreeSaveScroll()
+  }
+
+  function scrollContentToTop () {
+    var articleHost =
+      document.querySelector('main.article .content') ||
+      document.querySelector('main.article') ||
+      document.querySelector('article.doc') ||
+      document.querySelector('.adt-article .content')
+    if (articleHost && typeof articleHost.scrollTo === 'function') {
+      try {
+        articleHost.scrollTo(0, 0)
+      } catch (e) {
+        articleHost.scrollTop = 0
+      }
+    } else if (articleHost) {
+      articleHost.scrollTop = 0
+    }
+    window.scrollTo(0, 0)
+    if (document.scrollingElement) document.scrollingElement.scrollTop = 0
+    if (document.documentElement) document.documentElement.scrollTop = 0
+    if (document.body) document.body.scrollTop = 0
+  }
+
+  function markNavCurrentByUrl (url) {
+    if (typeof window.siteNavTreeMarkCurrentByPath === 'function') {
+      window.siteNavTreeMarkCurrentByPath(url)
+      return
+    }
+    var menu = document.querySelector('.nav-container [data-panel=menu]')
+    if (!menu) return
+    var want = normalizePath(url)
+    var matches = []
+    menu.querySelectorAll('a.nav-link').forEach(function (a) {
+      if (normalizePath(a.getAttribute('href') || a.href) === want) {
+        var li = a.closest('li.nav-item')
+        if (li) matches.push(li)
+      }
+    })
+    if (!matches.length) return
+    matches.sort(function (a, b) {
+      return (parseInt(b.getAttribute('data-depth'), 10) || 0) - (parseInt(a.getAttribute('data-depth'), 10) || 0)
+    })
+    menu.querySelectorAll('.nav-item.is-current-page').forEach(function (el) {
+      el.classList.remove('is-current-page')
+    })
+    matches[0].classList.add('is-current-page')
+  }
+
   SoftNav.registerRegion({
     id: 'mast',
     extract: function (doc) {
@@ -179,10 +259,22 @@
       if (!fresh) return
       var panel = document.querySelector('.nav-container [data-panel=menu]')
       if (!panel) return
+      // Forest nav HTML is identical across pages — keep the live DOM (no flash)
+      // and retarget is-current-page. Opt into full replace with SoftNav.replaceNav.
+      if (!SoftNav.replaceNav && panel.querySelector('nav.nav-menu')) {
+        markNavCurrentByUrl(ctx.url)
+        if (typeof ctx.navScrollY === 'number') writeNavScroll(ctx.navScrollY)
+        return
+      }
+      var savedY = typeof ctx.navScrollY === 'number' ? ctx.navScrollY : readNavScroll()
       var node = document.importNode(fresh, true)
       absolutize(node, ctx.url)
       panel.innerHTML = ''
       while (node.firstChild) panel.appendChild(node.firstChild)
+      writeNavScroll(savedY)
+      requestAnimationFrame(function () {
+        writeNavScroll(savedY)
+      })
     },
   })
 
@@ -204,7 +296,6 @@
         window.location.href = ctx.url
         return
       }
-      var scrollY = window.scrollY
       var node = document.importNode(fresh, true)
       absolutize(node, ctx.url)
       var fade = SoftNav.transition !== 'none'
@@ -217,7 +308,9 @@
             articleHost.style.transition = ''
           }, FADE_MS)
         }
-        window.scrollTo(0, scrollY)
+        scrollContentToTop()
+        if (typeof ctx.navScrollY === 'number') writeNavScroll(ctx.navScrollY)
+        else if (typeof window.siteNavTreeRestoreScroll === 'function') window.siteNavTreeRestoreScroll()
         ctx.articleHost = articleHost
         emit('loaded', ctx)
       }
@@ -251,7 +344,8 @@
 
   function navigate (url, push) {
     var dest = pageUrl(url).href
-    var ctx = { url: dest, push: !!push }
+    var ctx = { url: dest, push: !!push, navScrollY: readNavScroll() }
+    if (typeof window.siteNavTreeSaveScroll === 'function') window.siteNavTreeSaveScroll()
     emit('before', ctx)
     return fetch(dest, { credentials: 'same-origin' })
       .then(function (res) {
@@ -280,14 +374,36 @@
     document.querySelector('article.doc')
   if (!root || !articleHost) return
 
+  function markNavCurrentFromLink (a) {
+    var li = a && a.closest && a.closest('li.nav-item')
+    var menu = document.querySelector('.nav-container [data-panel=menu]')
+    if (!li || !menu) return
+    menu.querySelectorAll('.nav-item.is-current-page').forEach(function (el) {
+      el.classList.remove('is-current-page')
+    })
+    li.classList.add('is-current-page')
+    if (typeof window.siteNavTreeCurrent === 'function') window.siteNavTreeCurrent()
+  }
+
   root.addEventListener('click', function (ev) {
     var a = ev.target.closest('a')
     if (!a || a.target === '_blank' || a.hasAttribute('download')) return
-    if (a.closest('.nav-container')) return
     var href = a.getAttribute('href')
     if (!href || href.charAt(0) === '#') return
-    if (!sameOrigin(a.href) || samePath(a.href)) return
-    if (!sameComponent(a.href)) return
+    if (sameOrigin(a.href) && samePath(a.href)) {
+      if (a.classList.contains('nav-link') && a.closest('.nav-container')) {
+        ev.preventDefault()
+        markNavCurrentFromLink(a)
+      }
+      return
+    }
+    if (!sameOrigin(a.href)) return
+    if (!sameComponent(a.href)) {
+      if (a.closest('.nav-container') && typeof window.siteNavTreeSaveScroll === 'function') {
+        window.siteNavTreeSaveScroll()
+      }
+      return
+    }
     ev.preventDefault()
     navigate(a.href, true)
   })
