@@ -271,6 +271,10 @@
       absolutize(node, ctx.url)
       panel.innerHTML = ''
       while (node.firstChild) panel.appendChild(node.firstChild)
+      panel.removeAttribute('data-snt-hrefs-absolutized')
+      if (typeof window.siteNavTreePrepareNavMenu === 'function') {
+        window.siteNavTreePrepareNavMenu(panel)
+      }
       writeNavScroll(savedY)
       requestAnimationFrame(function () {
         writeNavScroll(savedY)
