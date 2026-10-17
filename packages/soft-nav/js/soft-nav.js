@@ -389,9 +389,13 @@
     if (typeof window.siteNavTreeCurrent === 'function') window.siteNavTreeCurrent()
   }
 
-  root.addEventListener('click', function (ev) {
+  // Capture on document, not bubble on .body: Antora Default UI (01-nav.js)
+  // registers a click stopPropagation on .nav-container, so bubble-phase
+  // listeners above the nav never see tree clicks (hard page load instead).
+  document.addEventListener('click', function (ev) {
+    if (!ev.target || !ev.target.closest) return
     var a = ev.target.closest('a')
-    if (!a || a.target === '_blank' || a.hasAttribute('download')) return
+    if (!a || ev.defaultPrevented || a.target === '_blank' || a.hasAttribute('download')) return
     var href = a.getAttribute('href')
     if (!href || href.charAt(0) === '#') return
     if (sameOrigin(a.href) && samePath(a.href)) {
@@ -410,7 +414,7 @@
     }
     ev.preventDefault()
     navigate(a.href, true)
-  })
+  }, true)
 
   window.addEventListener('popstate', function () {
     navigate(window.location.href, false)
