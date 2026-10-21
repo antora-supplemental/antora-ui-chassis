@@ -43,6 +43,6 @@
     }
   },
   "dependencies": {
-    "@antora-supplemental/soft-nav-context": "file:../soft-nav-context"
+    "@antora-supplemental/soft-nav-context": "github:antora-supplemental/antora-ui-chassis#main&path:packages/soft-nav-context"
   }
 }
