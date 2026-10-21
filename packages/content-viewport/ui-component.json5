@@ -1,4 +1,4 @@
-﻿{
+{
   id: "content-viewport",
   name: "Content viewport",
   version: "0.1.0",
@@ -7,6 +7,6 @@
   layer: "chassis",
   slots: {
     head: { stylesheets: ["css/content-viewport.css"] },
-    foot: { scripts: ["js/adt-table-scroll.js"] },
+    foot: { scripts: ["js/valentus-table-scroll.js"] },
   },
 }

@@ -1,31 +1,31 @@
 /* Chassis content-viewport — structural; colors only via tokens with fallbacks.
    Wide tables: overflow on wrapper, never on <table> (Antora #users guidance).
    Fallbacks keep a yanked-out region legible without a paint pack. */
-main.adt-article,
-main.adt-article > .content,
-.doc[data-adt-content-viewport] {
+main.valentus-article,
+main.valentus-article > .content,
+.doc[data-valentus-content-viewport] {
   min-width: 0;
   max-width: 100%;
-  color: var(--adt-ink, CanvasText);
-  background: var(--adt-elevated, Canvas);
+  color: var(--valentus-ink, CanvasText);
+  background: var(--valentus-elevated, Canvas);
 }
 
-main.adt-article[data-adt-content-viewport] {
-  width: var(--adt-doc-max, 42rem);
-  max-width: var(--adt-doc-max, 42rem);
+main.valentus-article[data-valentus-content-viewport] {
+  width: var(--valentus-doc-max, 42rem);
+  max-width: var(--valentus-doc-max, 42rem);
 }
 
 .doc .tablecontainer,
-.doc .adt-table-scroll {
+.doc .valentus-table-scroll {
   display: block;
   max-width: 100%;
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
-  border-color: var(--adt-border, GrayText);
+  border-color: var(--valentus-border, GrayText);
 }
 
 .doc .tablecontainer > table.tableblock,
-.doc .adt-table-scroll > table.tableblock {
+.doc .valentus-table-scroll > table.tableblock {
   max-width: none;
 }
 
@@ -33,20 +33,20 @@ main.adt-article[data-adt-content-viewport] {
 .doc table.tableblock td {
   overflow-wrap: anywhere;
   word-break: break-word;
-  color: var(--adt-ink, CanvasText);
-  border-color: var(--adt-border, GrayText);
+  color: var(--valentus-ink, CanvasText);
+  border-color: var(--valentus-border, GrayText);
 }
 
 .doc table.tableblock code {
   white-space: normal;
   overflow-wrap: anywhere;
-  color: var(--adt-ink, CanvasText);
+  color: var(--valentus-ink, CanvasText);
 }
 
 .doc .listingblock > .content,
 .doc .literalblock > .content {
   max-width: 100%;
   overflow-x: auto;
-  background: var(--adt-canvas, Canvas);
-  color: var(--adt-ink, CanvasText);
+  background: var(--valentus-canvas, Canvas);
+  color: var(--valentus-ink, CanvasText);
 }

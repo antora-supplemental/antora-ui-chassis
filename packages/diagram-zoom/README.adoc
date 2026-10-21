@@ -5,7 +5,7 @@ Chassis UI component: in-article zoom controls and a pan/zoom lightbox for Antor
 == Targets
 
 * Baked figures: `.doc .imageblock` (Kroki `<img>`, Themed SVG / `<themed-svg>`)
-* Client Mermaid: `.doc .adt-mermaid` / `.doc div.mermaid`
+* Client Mermaid: `.doc .valentus-mermaid` / `.doc div.mermaid`
 
 == Include
 

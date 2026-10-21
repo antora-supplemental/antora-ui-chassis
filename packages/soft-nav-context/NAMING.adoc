@@ -1,0 +1,17 @@
+= Naming: Valentus hooks and SoftNavContext
+
+== `valentus-` (theme and supplemental UI)
+
+CSS classes, custom properties, `data-valentus-*` attributes, and Handlebars partials prefixed with `valentus-` belong to the https://github.com/antora-supplemental/valentus-theme[Valentus theme] and its extensions.
+
+The old `valentus-` prefix (introduced when debranding FoodTruckNerdz layout hooks) had no documented expansion. **`valentus-` replaces it** so authors and search engines can reason about the namespace.
+
+== SoftNavContext (runtime)
+
+* Package: `@antora-supplemental/soft-nav-context`
+* Global: `SoftNavContext`
+* Helper: `bindSoftNavContext()`
+* Per-page node: `#soft-nav-page-context`
+* Events: `soft-nav-context:context`, etc.
+
+Not related to CSS `--valentus-chrome` (header surface tokens).

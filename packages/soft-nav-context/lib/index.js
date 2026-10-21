@@ -3,7 +3,7 @@
 const fs = require('node:fs')
 const path = require('node:path')
 
-const PACKAGE_ID = '@antora-supplemental/adt-chrome'
+const PACKAGE_ID = '@antora-supplemental/soft-nav-context'
 const UI_ROOT = path.join(__dirname, '..')
 
 function walkFiles (dir, base = dir) {
@@ -77,7 +77,7 @@ function ensureArticlePartial (uiCatalog) {
   const body = Buffer.isBuffer(article.contents)
     ? article.contents.toString('utf8')
     : String(article.contents || '')
-  const marker = '{{> adt-page-context}}'
+  const marker = '{{> soft-nav-page-context}}'
   if (body.includes(marker)) return
   article.contents = Buffer.from(`${marker}\n${body}`)
 }
@@ -106,9 +106,9 @@ module.exports.register = function register (context = {}) {
     }
 
     ensureArticlePartial(uiCatalog)
-    appendFooterScriptAfter(uiCatalog, 'js/adt-chrome.js', 'soft-nav.js')
-    appendFooterScriptAfter(uiCatalog, 'js/adt-chrome-compat.js', 'adt-chrome.js')
+    appendFooterScriptAfter(uiCatalog, 'js/soft-nav-context.js', 'soft-nav.js')
+    appendFooterScriptAfter(uiCatalog, 'js/bind-soft-nav-context.js', 'soft-nav-context.js')
 
-    logger.info('AdtChrome: page context partial + runtime (load after soft-nav.js)')
+    logger.info('SoftNavContext: page context partial + runtime (load after soft-nav.js)')
   })
 }

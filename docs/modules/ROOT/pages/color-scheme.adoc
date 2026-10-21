@@ -4,7 +4,7 @@
 
 * *Chassis* (`packages/color-scheme`) — `color-scheme`, `html.dark-theme` / `data-theme` hooks, no brand palette.
 * *Body kit* — where the toggle control lives in the chrome.
-* *Paint* — actual light/dark token values (`--adt-canvas`, `--adt-ink`, …).
+* *Paint* — actual light/dark token values (`--valentus-canvas`, `--valentus-ink`, …).
 
 == Retirement of antora-dark-mode
 
@@ -19,12 +19,12 @@ Do not reinvent dark mode as a permanent bolt-on if chassis already owns the con
 
 == CSS short-circuit fallbacks
 
-Foundations (`packages/color-scheme`) *define* `--adt-*` primer tokens.
+Foundations (`packages/color-scheme`) *define* `--valentus-*` primer tokens.
 Every consumer (chassis components, body kit, paint users, bolt-ons) styles with:
 
 ----
-color: var(--adt-ink, CanvasText);
-background: var(--adt-canvas, Canvas);
+color: var(--valentus-ink, CanvasText);
+background: var(--valentus-canvas, Canvas);
 ----
 
 so a region yanked out of the stack still paints something readable.

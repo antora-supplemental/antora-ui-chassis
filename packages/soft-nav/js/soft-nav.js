@@ -133,15 +133,15 @@
 
   function bindBreadcrumbDropdowns (scope) {
     if (!scope) return
-    ;[].forEach.call(scope.querySelectorAll('.adt-bc-dropdown'), function (el) {
+    ;[].forEach.call(scope.querySelectorAll('.valentus-bc-dropdown'), function (el) {
       el.addEventListener('click', function (e) {
         e.stopPropagation()
       })
     })
-    ;[].forEach.call(scope.querySelectorAll('[data-adt-toggle]'), function (button) {
-      if (button.getAttribute('data-adt-bound')) return
-      button.setAttribute('data-adt-bound', '1')
-      var id = button.getAttribute('data-adt-toggle')
+    ;[].forEach.call(scope.querySelectorAll('[data-valentus-toggle]'), function (button) {
+      if (button.getAttribute('data-valentus-bound')) return
+      button.setAttribute('data-valentus-bound', '1')
+      var id = button.getAttribute('data-valentus-toggle')
       if (!id) return
       var list = document.getElementById(id)
       if (!list) return
@@ -149,11 +149,11 @@
         e.preventDefault()
         e.stopPropagation()
         var isHidden = list.hasAttribute('hidden')
-        ;[].forEach.call(document.querySelectorAll('.adt-bc-dropdown'), function (dd) {
+        ;[].forEach.call(document.querySelectorAll('.valentus-bc-dropdown'), function (dd) {
           if (dd === list) return
           dd.setAttribute('hidden', 'hidden')
         })
-        ;[].forEach.call(document.querySelectorAll('[data-adt-toggle]'), function (b) {
+        ;[].forEach.call(document.querySelectorAll('[data-valentus-toggle]'), function (b) {
           b.setAttribute('aria-expanded', 'false')
         })
         if (isHidden) {
@@ -193,7 +193,7 @@
       document.querySelector('main.article .content') ||
       document.querySelector('main.article') ||
       document.querySelector('article.doc') ||
-      document.querySelector('.adt-article .content')
+      document.querySelector('.valentus-article .content')
     if (articleHost && typeof articleHost.scrollTo === 'function') {
       try {
         articleHost.scrollTo(0, 0)
@@ -237,10 +237,10 @@
   SoftNav.registerRegion({
     id: 'mast',
     extract: function (doc) {
-      return doc.querySelector('.adt-doc-mast-center') || doc.querySelector('nav.breadcrumbs')
+      return doc.querySelector('.valentus-doc-mast-center') || doc.querySelector('nav.breadcrumbs')
     },
     apply: function (fresh, ctx) {
-      var host = document.querySelector('.adt-doc-mast-center')
+      var host = document.querySelector('.valentus-doc-mast-center')
       if (!host) host = document.querySelector('nav.breadcrumbs')
       if (!host || !fresh) return
       var node = document.importNode(fresh, true)

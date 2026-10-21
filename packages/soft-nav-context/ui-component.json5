@@ -1,0 +1,14 @@
+{
+  id: "soft-nav-context",
+  name: "SoftNavContext",
+  version: "0.1.0",
+  type: "ui-chassis-component",
+  description: "Page context store for SoftNav; extensions subscribe via bindSoftNavContext.",
+  layer: "chassis",
+  slots: {
+    footer: {
+      scripts: ["js/soft-nav-context.js", "js/bind-soft-nav-context.js"],
+      after: ["soft-nav"],
+    },
+  },
+}

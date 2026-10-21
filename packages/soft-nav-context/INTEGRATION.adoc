@@ -1,0 +1,33 @@
+= SoftNavContext integration for Antora extensions
+
+Third-party scripts should prefer `SoftNavContext` when present and fall back to SoftNav or full page load.
+
+== Load order
+
+1. `soft-nav.js`
+2. `soft-nav-context.js`
+3. `bind-soft-nav-context.js` (optional helper)
+4. Feature scripts (search, Mermaid, nav-tree, …)
+
+== Page context (build time)
+
+Register `@antora-supplemental/soft-nav-context` on the playbook. The extension injects partial `soft-nav-page-context` into `article` and ships runtime JS.
+
+Each published page exposes `#soft-nav-page-context` (`data-*` attributes). SoftNav fetches the next page; SoftNavContext parses that node from `detail.doc` and updates `SoftNavContext.context`.
+
+== Extension pattern (vanilla)
+
+[source,javascript]
+----
+bindSoftNavContext({
+  onBoot: function () { boot(document) },
+  onContext: function (ctx) { syncFromContext(ctx) },
+  onLoaded: function (nav) { boot(nav.articleHost || document) },
+})
+----
+
+== DOM events
+
+Same phases as `SoftNavContext.on`, prefixed `soft-nav-context:` (detail = context or nav ctx).
+
+See link:NAMING.adoc[NAMING.adoc] for `valentus-` theme hooks vs this runtime.
