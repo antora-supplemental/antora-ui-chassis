@@ -5,8 +5,9 @@
  * swaps registered regions (mast / article; nav prefers in-place current sync),
  * then emits lifecycle events so consumers rebind without SoftNav naming them.
  *
- * Same-component nav-tree clicks soft-navigate so the left rail keeps its
- * scroll position. Cross-component links do a full document load.
+ * Same-component links soft-navigate in place. With site-nav-tree (multi-root
+ * forest), nav-panel `.nav-link` clicks soft-navigate across components too;
+ * other cross-component links still hard-load.
  *
  * On each successful load the *content* column scrolls to top for reading
  * without resetting the independent nav scrollport.
@@ -17,6 +18,7 @@
  *   SoftNav.navigate(url)
  *   SoftNav.transition = 'none' | 'crossfade'  (default: none — DeepWiki-like)
  *   SoftNav.replaceNav = false | true          (default: false — patch currents)
+ *   SoftNav.crossComponentForest = true | false | 'auto'  (default: 'auto')
  *
  * DOM events (detail = ctx): soft-nav:before | soft-nav:loaded | soft-nav:failed
  * Compat: also fires doc-nav:loaded on successful swaps.
@@ -46,6 +48,7 @@
   var SoftNav = {
     transition: 'none',
     replaceNav: false,
+    crossComponentForest: 'auto',
     on: function (event, handler) {
       if (!listeners[event]) listeners[event] = []
       listeners[event].push(handler)
@@ -99,6 +102,42 @@
 
   function sameComponent (url) {
     return componentName(url) === componentName(window.location.href)
+  }
+
+  function navForestMenuLink (a) {
+    return (
+      a &&
+      a.classList &&
+      a.classList.contains('nav-link') &&
+      a.closest &&
+      a.closest('.nav-container [data-panel=menu]')
+    )
+  }
+
+  function siteForestEnabled () {
+    var mode = SoftNav.crossComponentForest
+    if (mode === false) return false
+    if (mode === true) return true
+    var menu = document.querySelector('.nav-container [data-panel=menu]')
+    if (!menu) return false
+    return menu.querySelectorAll('li.nav-item[data-depth="0"]').length > 1
+  }
+
+  function resolveForestNavHref (a) {
+    if (!a) return ''
+    if (typeof window.siteNavTreePrepareNavMenu === 'function') {
+      window.siteNavTreePrepareNavMenu(document.querySelector('.nav-container [data-panel=menu]'))
+    }
+    var raw = a.getAttribute('href') || a.href
+    if (typeof window.siteNavTreeResolveNavLink === 'function') {
+      var resolved = window.siteNavTreeResolveNavLink(raw)
+      if (resolved) return resolved
+    }
+    try {
+      return pageUrl(raw).href
+    } catch (e) {
+      return a.href
+    }
   }
 
   function normalizePath (href) {
@@ -406,14 +445,15 @@
       return
     }
     if (!sameOrigin(a.href)) return
-    if (!sameComponent(a.href)) {
+    var forestNav = navForestMenuLink(a) && siteForestEnabled()
+    if (!sameComponent(a.href) && !forestNav) {
       if (a.closest('.nav-container') && typeof window.siteNavTreeSaveScroll === 'function') {
         window.siteNavTreeSaveScroll()
       }
       return
     }
     ev.preventDefault()
-    navigate(a.href, true)
+    navigate(forestNav ? resolveForestNavHref(a) : a.href, true)
   }, true)
 
   window.addEventListener('popstate', function () {

@@ -1,5 +1,9 @@
 = Changelog
 
+== 0.1.2 — 2026-10-21
+
+* **site-nav-tree forest:** nav-panel `.nav-link` clicks soft-navigate across Antora components when the sidebar has multiple depth-0 roots (`SoftNav.crossComponentForest`, default `'auto'`). Resolves click targets via `siteNavTreeResolveNavLink` when present.
+
 == 0.1.1 — 2026-10-21
 
 * Antora extension `lib/index.js`: publish `js/soft-nav.js` and inject defer script in `footer-content` / `footer-scripts` after `site.js`.
