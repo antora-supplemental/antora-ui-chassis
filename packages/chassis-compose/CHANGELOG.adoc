@@ -1,5 +1,9 @@
 = Changelog
 
+== 0.1.3 — 2026-10-21
+
+* Ships `@antora-supplemental/soft-nav` **0.1.3** (single footer script tag; forest href resolve before `sameComponent` gate).
+
 == 0.1.2 — 2026-10-21
 
 * Dependencies use git `path:` pins for `soft-nav` and `soft-nav-context` (fixes `pnpm install` when compose is installed from GitHub tarball).
