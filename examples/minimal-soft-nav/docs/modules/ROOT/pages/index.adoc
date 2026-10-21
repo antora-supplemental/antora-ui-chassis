@@ -1,0 +1,8 @@
+= SoftNav minimal example
+
+Two pages to exercise in-component navigation.
+
+<<<
+== Second page
+
+Use the sidebar or this link: xref:page-two.adoc[Page two].

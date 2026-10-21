@@ -1,0 +1,42 @@
+= Integration notes (minimal-soft-nav)
+
+== Load order
+
+1. Default UI `site.js`
+2. Hub-owned `soft-nav.js` (copied from `packages/soft-nav/js/`)
+3. Extension-injected `soft-nav-context.js` + `bind-soft-nav-context.js` (via `@antora-supplemental/chassis-compose`)
+
+== Playbook require
+
+[source,yaml]
+----
+antora:
+  extensions:
+    - require: '@antora-supplemental/chassis-compose'
+----
+
+Pin (immutable):
+
+[source,text]
+----
+github:antora-supplemental/antora-ui-chassis#chassis-v0.1.0&path:packages/chassis-compose
+----
+
+== Supplemental UI you must own
+
+|===
+| Asset | Why
+
+| `supplemental-ui/js/soft-nav.js`
+| SoftNav is copy-only — not registered by chassis-compose
+
+| `supplemental-ui/partials/article.hbs` with `{{> soft-nav-page-context}}`
+| Ensures each page exposes `#soft-nav-page-context` (extension also patches `article` when present)
+
+| `supplemental-ui/partials/footer-scripts.hbs`
+| Loads `soft-nav.js` after `site.js` (Default UI footer stem)
+|===
+
+== Extension authors
+
+Use `bindSoftNavContext({ onContext, onLoaded })` in feature scripts — see link:../../packages/soft-nav-context/INTEGRATION.adoc[SoftNavContext INTEGRATION.adoc].

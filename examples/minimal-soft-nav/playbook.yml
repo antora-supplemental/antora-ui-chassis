@@ -1,0 +1,24 @@
+# Minimal SoftNav + SoftNavContext on Antora Default UI (no Valentus).
+site:
+  title: Minimal SoftNav example
+  url: https://example.local
+  start_page: demo::index.adoc
+
+content:
+  sources:
+    - url: .
+      branches: HEAD
+      start_path: docs
+
+ui:
+  bundle:
+    url: https://gitlab.com/antora/antora-ui-default/-/jobs/artifacts/HEAD/raw/build/ui-bundle.zip?job=bundle-stable
+    snapshot: true
+  supplemental_files: ./supplemental-ui
+
+antora:
+  extensions:
+    - require: '@antora-supplemental/chassis-compose'
+
+output:
+  dir: ./build/site

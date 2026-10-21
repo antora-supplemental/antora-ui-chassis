@@ -1,0 +1,5 @@
+name: demo
+title: SoftNav demo
+version: ~
+nav:
+- modules/ROOT/nav.adoc

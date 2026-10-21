@@ -1,0 +1,13 @@
+{
+  "name": "minimal-soft-nav-example",
+  "private": true,
+  "description": "Default UI + SoftNav copy + chassis-compose (soft-nav-context)",
+  "scripts": {
+    "build": "antora playbook.yml"
+  },
+  "devDependencies": {
+    "@antora-supplemental/chassis-compose": "github:antora-supplemental/antora-ui-chassis#chassis-v0.1.0&path:packages/chassis-compose",
+    "@antora/cli": "^3.1.14",
+    "@antora/site-generator": "^3.1.14"
+  }
+}

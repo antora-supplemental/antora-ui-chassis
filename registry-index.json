@@ -1,0 +1,43 @@
+{
+  "schema": "1.0",
+  "generatedAt": "2026-10-21T00:00:00.000Z",
+  "repository": "https://github.com/antora-supplemental/antora-ui-chassis",
+  "source": "registry-index.json",
+  "modules": [
+    {
+      "id": "soft-nav-context",
+      "name": "SoftNavContext",
+      "version": "0.1.1",
+      "type": "playbook-extension",
+      "description": "SoftNav companion — page context partial + runtime for persistent chrome (search scope, dock).",
+      "repository": "https://github.com/antora-supplemental/antora-ui-chassis",
+      "manifestPath": "packages/soft-nav-context/package.json",
+      "modulePath": "packages/soft-nav-context",
+      "requires": ["soft-nav"],
+      "recommends": [],
+      "conflicts": [],
+      "install": {
+        "gitPath": "github:antora-supplemental/antora-ui-chassis#chassis-v0.1.0&path:packages/soft-nav-context",
+        "productTopic": "soft-nav-context"
+      }
+    },
+    {
+      "id": "chassis-compose",
+      "name": "Chassis compose",
+      "version": "0.1.0",
+      "type": "playbook-extension",
+      "description": "Meta extension bundling chassis build-time extensions (registers soft-nav-context).",
+      "repository": "https://github.com/antora-supplemental/antora-ui-chassis",
+      "manifestPath": "packages/chassis-compose/package.json",
+      "modulePath": "packages/chassis-compose",
+      "requires": [],
+      "recommends": ["soft-nav-context"],
+      "conflicts": [],
+      "install": {
+        "gitPath": "github:antora-supplemental/antora-ui-chassis#chassis-v0.1.0&path:packages/chassis-compose",
+        "productTopic": "chassis-compose"
+      }
+    }
+  ],
+  "recipes": []
+}

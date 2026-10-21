@@ -1,0 +1,22 @@
+= Minimal SoftNav + SoftNavContext (Default UI)
+
+Smallest playbook that pairs Antora Default UI with:
+
+* Copied `soft-nav.js` (chassis transport)
+* `@antora-supplemental/chassis-compose` at git tag `chassis-v0.1.0` (registers `soft-nav-context`)
+
+== Quick start
+
+[source,shell]
+----
+pnpm install
+pnpm run build
+# open build/site/index.html via a static server
+----
+
+== What this proves
+
+* `chassis-compose` injects `soft-nav-page-context`, `soft-nav-context.js`, and `bind-soft-nav-context.js` after `soft-nav.js`.
+* Supplemental `article` partial includes `{{> soft-nav-page-context}}`.
+
+See link:INTEGRATION.adoc[INTEGRATION.adoc] and link:../../packages/soft-nav-context/INTEGRATION.adoc[package INTEGRATION.adoc].

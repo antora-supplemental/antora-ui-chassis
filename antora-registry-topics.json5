@@ -1,0 +1,11 @@
+// antora-ui-chassis — unthemed region components + playbook extensions (monorepo).
+{
+  repository: 'https://github.com/antora-supplemental/antora-ui-chassis',
+  githubTopics: [
+    'antora-extension',
+    'antora-ui',
+    'soft-nav-context',
+    'chassis-compose',
+  ],
+  productTopics: ['soft-nav-context', 'chassis-compose'],
+}

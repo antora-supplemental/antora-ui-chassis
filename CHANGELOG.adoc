@@ -2,5 +2,9 @@
 
 == Unreleased
 
+* `soft-nav` Antora extension + `chassis-compose` **0.1.1** bundles runtime inject (meta tag `chassis-v0.1.1`).
+* `soft-nav-context` **0.1.2**: `SoftNavContext.subscribe` / `.signal(key)` thin reactive layer; `bindSoftNavContext` calls `onBoot` when SoftNavContext is present.
+* Registry metadata for `soft-nav-context` and `chassis-compose` (`antora-registry.md`, `registry-index.json`, `antora-registry-topics.json5`).
+* Example `examples/minimal-soft-nav` — Default UI + copied `soft-nav.js` + `chassis-compose` @ `chassis-v0.1.0`.
 * Remove copy-only `packages/diagram-zoom` assets (`site-diagram-zoom.js/css`, `ui-component.json5`); keep `packages/diagram-zoom/README.adoc` redirect to `@antora-supplemental/diagram-lightbox`.
 * README and `chassis-compose` docs no longer list diagram-zoom as an active chassis package.
