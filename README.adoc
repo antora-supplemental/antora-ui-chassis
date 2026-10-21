@@ -38,8 +38,8 @@ See `docs/modules/ROOT/pages/extensions.adoc`.
 * `packages/content-viewport` — article measure + wide-table wrapper scroll
 * `packages/color-scheme` — unthemed dark/light hooks (no brand colors)
 * `packages/soft-nav` — same-origin soft navigation bus
-* `packages/diagram-zoom` — in-article diagram zoom + lightbox
 * `packages/soft-nav-context` — SoftNavContext navigation context (SoftNav companion for persistent chrome)
+* Diagram zoom / lightbox — use `@antora-supplemental/diagram-lightbox` (see removed `packages/diagram-zoom/README.adoc`)
 * `packages/chassis-compose` — meta Antora extension bundling build-time chassis extensions (today: soft-nav-context)
 
 == Releases (git tags)

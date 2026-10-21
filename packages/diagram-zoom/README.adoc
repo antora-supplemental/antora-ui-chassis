@@ -1,41 +1,11 @@
-= Diagram zoom
+= diagram-zoom (removed)
 
-[IMPORTANT]
-====
-*Deprecated.* Prefer `@antora-supplemental/diagram-lightbox` (antora-diagram-engines) for new sites.
-This copy-only chassis folder remains for existing supplemental-ui vendoring until removed.
-====
+This chassis copy-only package was removed after `@antora-supplemental/diagram-lightbox` shipped in link:https://github.com/antora-supplemental/antora-diagram-engines[antora-diagram-engines].
 
-Chassis UI component: in-article zoom controls and a pan/zoom lightbox for Antora diagrams.
+== Adopt instead
 
-== Targets
+* Playbook: `require: '@antora-supplemental/diagram-lightbox'` (`injectAssets: true` default).
+* Partials: `{{> diagram-lightbox-styles}}` in head; `{{> diagram-lightbox-scripts}}` in the footer (after SoftNav when present).
+* Reference wiring: link:https://github.com/antora-supplemental/facto-stack/tree/main/demo/supplemental-ui/partials[facto-stack demo partials^] and `examples/minimal-playbook.yml`.
 
-* Baked figures: `.doc .imageblock` (Kroki `<img>`, Themed SVG / `<themed-svg>`)
-* Client Mermaid: `.doc .valentus-mermaid` / `.doc div.mermaid`
-
-== Include
-
-Copy into the hub `supplemental-ui/`:
-
-* `js/site-diagram-zoom.js` -> `supplemental-ui/js/`
-* `css/site-diagram-zoom.css` -> `supplemental-ui/css/`
-
-Load CSS with other supplemental stylesheets (e.g. `head-meta.hbs`) and the script after SoftNav:
-
-----
-<link rel="stylesheet" href="{{{uiRootPath}}}/css/site-diagram-zoom.css">
-...
-<script src="{{{uiRootPath}}}/js/soft-nav.js" defer></script>
-<script src="{{{uiRootPath}}}/js/site-diagram-zoom.js" defer></script>
-----
-
-== Behavior
-
-* Hover/focus chrome: zoom in, zoom out, reset (1:1), expand (lightbox).
-* Lightbox: drag to pan, wheel to zoom, Esc / backdrop / close to dismiss; basic focus cycle.
-* SoftNav: closes lightbox and re-enhances figures on `SoftNav.loaded`.
-* Wheel zoom in-article requires Ctrl/Cmd so normal page and left-nav scroll stay intact.
-
-== Authoring notes
-
-No AsciiDoc roles required. Optional opt-out: add role/class `no-diagram-zoom` on a block (not enhanced when present — reserved for a future filter). Authors choose bake vs client Mermaid separately; zoom attaches to whichever DOM the page has.
+Do not copy `site-diagram-zoom.js` / `site-diagram-zoom.css` into new hubs.

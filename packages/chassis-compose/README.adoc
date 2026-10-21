@@ -3,7 +3,7 @@
 
 One playbook `require` for chassis Antora extensions that inject UI at build time.
 
-Copy-only chassis packages (`soft-nav.js`, `content-viewport`, `diagram-zoom`, …) are *not* bundled — copy assets into `supplemental-ui/` or require the individual extension packages.
+Copy-only chassis packages (`soft-nav.js`, `content-viewport`, …) are *not* bundled — copy assets into `supplemental-ui/` or require the individual extension packages. Diagram lightbox lives in `@antora-supplemental/diagram-lightbox`, not chassis.
 
 [source,yaml]
 ----

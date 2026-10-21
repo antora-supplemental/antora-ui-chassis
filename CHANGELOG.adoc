@@ -1,0 +1,6 @@
+= Changelog
+
+== Unreleased
+
+* Remove copy-only `packages/diagram-zoom` assets (`site-diagram-zoom.js/css`, `ui-component.json5`); keep `packages/diagram-zoom/README.adoc` redirect to `@antora-supplemental/diagram-lightbox`.
+* README and `chassis-compose` docs no longer list diagram-zoom as an active chassis package.
