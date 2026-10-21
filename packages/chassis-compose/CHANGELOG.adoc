@@ -1,5 +1,9 @@
 = Changelog
 
+== 0.1.4 — 2026-10-21
+
+* **Dependency pin:** `@antora-supplemental/soft-nav` resolves to git tag `soft-nav-v0.1.3` (forest cross-component nav). v0.1.3 still pointed at `soft-nav-v0.1.1`, so hub builds injected pre-forest `soft-nav.js` and cross-component sidebar clicks hard-reloaded.
+
 == 0.1.3 — 2026-10-21
 
 * Ships `@antora-supplemental/soft-nav` **0.1.3** (single footer script tag; forest href resolve before `sameComponent` gate).
