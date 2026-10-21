@@ -1,6 +1,6 @@
 {
   "name": "@antora-supplemental/chassis-compose",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Meta Antora extension: wires chassis build-time extensions (soft-nav, soft-nav-context)",
   "main": "lib/index.js",
   "exports": {
@@ -43,7 +43,7 @@
     }
   },
   "dependencies": {
-    "@antora-supplemental/soft-nav": "file:../soft-nav",
-    "@antora-supplemental/soft-nav-context": "file:../soft-nav-context"
+    "@antora-supplemental/soft-nav": "github:antora-supplemental/antora-ui-chassis#soft-nav-v0.1.1&path:packages/soft-nav",
+    "@antora-supplemental/soft-nav-context": "github:antora-supplemental/antora-ui-chassis#soft-nav-context-v0.2.0&path:packages/soft-nav-context"
   }
 }

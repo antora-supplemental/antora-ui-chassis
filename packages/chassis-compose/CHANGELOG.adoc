@@ -1,5 +1,9 @@
 = Changelog
 
+== 0.1.2 — 2026-10-21
+
+* Dependencies use git `path:` pins for `soft-nav` and `soft-nav-context` (fixes `pnpm install` when compose is installed from GitHub tarball).
+
 == 0.1.1 — 2026-10-21
 
 * Bundle `@antora-supplemental/soft-nav` build-time inject (footer after `site.js`; context scripts still after `soft-nav.js`).
