@@ -17,7 +17,7 @@
       "recommends": [],
       "conflicts": [],
       "install": {
-        "gitPath": "github:antora-supplemental/antora-ui-chassis#chassis-v0.1.0&path:packages/soft-nav-context",
+        "gitPath": "github:antora-supplemental/antora-ui-chassis#chassis-v0.1.1&path:packages/soft-nav-context",
         "productTopic": "soft-nav-context"
       }
     },
@@ -34,7 +34,7 @@
       "recommends": ["soft-nav-context"],
       "conflicts": [],
       "install": {
-        "gitPath": "github:antora-supplemental/antora-ui-chassis#chassis-v0.1.0&path:packages/chassis-compose",
+        "gitPath": "github:antora-supplemental/antora-ui-chassis#chassis-v0.1.1&path:packages/chassis-compose",
         "productTopic": "chassis-compose"
       }
     }

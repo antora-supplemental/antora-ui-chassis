@@ -6,7 +6,7 @@
     "build": "antora playbook.yml"
   },
   "devDependencies": {
-    "@antora-supplemental/chassis-compose": "github:antora-supplemental/antora-ui-chassis#chassis-v0.1.0&path:packages/chassis-compose",
+    "@antora-supplemental/chassis-compose": "github:antora-supplemental/antora-ui-chassis#chassis-v0.1.1&path:packages/chassis-compose",
     "@antora/cli": "^3.1.14",
     "@antora/site-generator": "^3.1.14"
   }

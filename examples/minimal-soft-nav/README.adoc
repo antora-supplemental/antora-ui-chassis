@@ -3,7 +3,7 @@
 Smallest playbook that pairs Antora Default UI with:
 
 * Copied `soft-nav.js` (chassis transport)
-* `@antora-supplemental/chassis-compose` at git tag `chassis-v0.1.0` (registers `soft-nav-context`)
+* `@antora-supplemental/chassis-compose` at git tag `chassis-v0.1.1` (registers `soft-nav-context`)
 
 == Quick start
 
