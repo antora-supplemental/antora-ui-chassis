@@ -40,6 +40,12 @@ See `docs/modules/ROOT/pages/extensions.adoc`.
 * `packages/soft-nav` — same-origin soft navigation bus
 * `packages/diagram-zoom` — in-article diagram zoom + lightbox
 * `packages/soft-nav-context` — SoftNavContext navigation context (SoftNav companion for persistent chrome)
+* `packages/chassis-compose` — meta Antora extension bundling build-time chassis extensions (today: soft-nav-context)
+
+== Releases (git tags)
+
+Per-package tags: `soft-nav-context-vX.Y.Z`, `chassis-compose-vX.Y.Z`.
+Meta tag `chassis-vX.Y.Z` marks the commit Facto stack and other compose pins should use (same commit as the compose package release).
 
 == Consume from Valentus
 

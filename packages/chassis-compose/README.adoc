@@ -1,0 +1,25 @@
+= @antora-supplemental/chassis-compose
+:description: Meta Antora extension bundling chassis build-time extensions.
+
+One playbook `require` for chassis Antora extensions that inject UI at build time.
+
+Copy-only chassis packages (`soft-nav.js`, `content-viewport`, `diagram-zoom`, …) are *not* bundled — copy assets into `supplemental-ui/` or require the individual extension packages.
+
+[source,yaml]
+----
+antora:
+  extensions:
+    - require: '@antora-supplemental/chassis-compose'
+      # softNavContext: { ui: false }   # optional nested override
+----
+
+Bundled today:
+
+* `@antora-supplemental/soft-nav-context` — page context partial + runtime (after `soft-nav.js` when present)
+
+For only SoftNavContext, require `@antora-supplemental/soft-nav-context` directly.
+
+== Releases
+
+Per-package git tags: `soft-nav-context-vX.Y.Z`, `chassis-compose-vX.Y.Z`.
+Meta pin for compose consumers: `chassis-vX.Y.Z` (same commit as the compose package release).

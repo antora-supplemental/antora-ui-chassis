@@ -1,5 +1,11 @@
 = Diagram zoom
 
+[IMPORTANT]
+====
+*Deprecated.* Prefer `@antora-supplemental/diagram-lightbox` (antora-diagram-engines) for new sites.
+This copy-only chassis folder remains for existing supplemental-ui vendoring until removed.
+====
+
 Chassis UI component: in-article zoom controls and a pan/zoom lightbox for Antora diagrams.
 
 == Targets
