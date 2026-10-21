@@ -1,0 +1,11 @@
+{{!-- Per-page navigation context for AdtChrome (schema v1). --}}
+<script
+  type="application/json"
+  id="adt-page-context"
+  data-schema="1"
+  data-url="{{{or page.url page.canonicalUrl}}}"
+  {{#if page.title}}data-title="{{page.title}}"{{/if}}
+  {{#with page.component}}data-component-name="{{name}}" data-component-title="{{#if title}}{{title}}{{else}}{{name}}{{/if}}"{{/with}}
+  {{#if page.version}}data-version="{{page.version}}"{{/if}}
+  {{#with page.componentVersion}}{{#if displayVersion}}data-version-display="{{displayVersion}}"{{/if}}{{/with}}
+></script>

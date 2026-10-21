@@ -1,0 +1,29 @@
+{
+  "name": "@antora-supplemental/adt-chrome",
+  "version": "0.1.0",
+  "description": "Antora extension: navigation context store (AdtChrome) for SoftNav + persistent chrome",
+  "main": "lib/index.js",
+  "exports": {
+    ".": "./lib/index.js",
+    "./lib": "./lib/index.js"
+  },
+  "files": [
+    "lib",
+    "js",
+    "partials",
+    "README.adoc",
+    "INTEGRATION.adoc"
+  ],
+  "keywords": [
+    "antora",
+    "antora-extension",
+    "soft-nav",
+    "docs"
+  ],
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/antora-supplemental/antora-ui-chassis.git",
+    "directory": "packages/adt-chrome"
+  }
+}

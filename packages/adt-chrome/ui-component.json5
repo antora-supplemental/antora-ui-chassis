@@ -1,0 +1,14 @@
+{
+  id: "adt-chrome",
+  name: "AdtChrome navigation context",
+  version: "0.1.0",
+  type: "ui-chassis-component",
+  description: "Reactive page context for SoftNav; extensions subscribe instead of scraping stale chrome DOM.",
+  layer: "chassis",
+  slots: {
+    footer: {
+      scripts: ["js/adt-chrome.js", "js/adt-chrome-compat.js"],
+      after: ["soft-nav"],
+    },
+  },
+}

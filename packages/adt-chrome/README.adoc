@@ -1,0 +1,30 @@
+= AdtChrome (`packages/adt-chrome`)
+
+Navigation context store for Antora supplemental UI when https://github.com/antora-supplemental/antora-ui-chassis/tree/main/packages/soft-nav[SoftNav] keeps chrome alive across in-component page swaps.
+
+== Problem
+
+Persistent UI (search scope, dock, header widgets) is rendered once at build time. SoftNav replaces mast, nav, and article — not the omnibox. Without a shared context layer, each extension re-scrapes `detail.doc` or goes stale.
+
+== Solution
+
+* Build: partial `adt-page-context` embeds per-page metadata (`#adt-page-context`).
+* Runtime: `AdtChrome` parses that node on load and after each soft navigation, then emits `context` / `loaded` phases.
+* Extensions: use `adt-chrome-compat.js` → `adtChromeBind({ onContext, onLoaded, onBoot })`.
+
+See link:INTEGRATION.adoc[INTEGRATION.adoc] for third-party extension authors.
+
+== Antora extension
+
+[source,yaml]
+----
+antora:
+  extensions:
+    - require: '@antora-supplemental/adt-chrome'
+----
+
+Load order in supplemental UI: `soft-nav.js` → `adt-chrome.js` → `adt-chrome-compat.js` → features.
+
+== Chassis slot
+
+`ui-component.json5` declares footer scripts with `after: ["soft-nav"]` for bundle composers.

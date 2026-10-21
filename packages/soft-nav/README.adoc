@@ -23,6 +23,8 @@ Compat: also fires `doc-nav:loaded` on success.
 
 Built-in regions: `mast`, `nav`, `article`. SoftNav does **not** hard-call nav-tree / mermaid / math — those subscribe to `loaded`.
 
+Persistent chrome (search omnibox, dock) is **not** swapped — pair SoftNav with link:../adt-chrome/README.adoc[AdtChrome] so scope/context tracks each navigation.
+
 == Consumer pattern
 
 ----

@@ -1,0 +1,47 @@
+= AdtChrome integration for Antora extensions
+
+Third-party and supplemental scripts should prefer `AdtChrome` when present and fall back to SoftNav or full page load.
+
+== Load order
+
+1. `soft-nav.js`
+2. `adt-chrome.js`
+3. `adt-chrome-compat.js` (optional helper)
+4. Feature scripts (search, Mermaid, nav-tree, …)
+
+== Page context (build time)
+
+Register `@antora-supplemental/adt-chrome` on the playbook. The extension injects partial `adt-page-context` into `article` and ships runtime JS.
+
+Each published page exposes `#adt-page-context` (`data-*` attributes). SoftNav fetches the next page; AdtChrome parses that node from `detail.doc` and updates `AdtChrome.context`.
+
+== Extension pattern (vanilla)
+
+[source,javascript]
+----
+adtChromeBind({
+  onBoot: function () { boot(document) },
+  onContext: function (ctx) { syncFromContext(ctx) },
+  onLoaded: function (nav) { boot(nav.articleHost || document) },
+})
+----
+
+* *Persistent chrome* (search scope, header widgets): implement `onContext` and stop reading stale `data-*` on the live root.
+* *Content-scoped* (diagrams, math): `onLoaded` re-run `boot()` on the swapped article; optional `onContext` for logging.
+
+== Phases
+
+| Phase | When | Use |
+|-------|------|-----|
+| `before` | SoftNav fetch started | Save scroll, close overlays |
+| `context` | PageContext updated | Scope labels, analytics page id |
+| `loaded` | Regions applied | Rebind article scanners |
+| `failed` | SoftNav gave up | Rare; full navigation follows |
+
+== DOM events
+
+Same phases as `AdtChrome.on`, prefixed `adt-chrome:` (detail = context or nav ctx).
+
+== Upstream patches
+
+When proposing changes to `@antora/lunr-extension` or Antora Default UI, keep `#search-input` and dropdown mount behavior; add optional `AdtChrome.on('context')` only for persistent chrome, not for index search itself.
