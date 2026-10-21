@@ -8,10 +8,20 @@
  *     onLoaded: function (navCtx) {},
  *   })
  *
- * Prefers SoftNavContext when present; else SoftNav; else DOMContentLoaded.
+ * Prefers SoftNavContext when present; else SoftNav / DOM events; else DOMContentLoaded.
  */
 ;(function (global) {
   'use strict'
+
+  function onSoftNavPhase (phase, fn) {
+    if (global.SoftNav && typeof global.SoftNav.on === 'function') {
+      global.SoftNav.on(phase, fn)
+      return
+    }
+    global.document.addEventListener('soft-nav:' + phase, function (e) {
+      fn(e.detail || {})
+    })
+  }
 
   function bindSoftNavContext (handlers) {
     handlers = handlers || {}
@@ -30,16 +40,6 @@
       return
     }
 
-    function onSoftNavLoaded (fn) {
-      if (global.SoftNav && typeof global.SoftNav.on === 'function') {
-        global.SoftNav.on('loaded', fn)
-      } else {
-        global.document.addEventListener('soft-nav:loaded', function (e) {
-          fn(e.detail || {})
-        })
-      }
-    }
-
     if (boot) {
       if (global.document.readyState === 'loading') {
         global.document.addEventListener('DOMContentLoaded', boot)
@@ -47,7 +47,8 @@
         boot()
       }
     }
-    if (onLoaded) onSoftNavLoaded(onLoaded)
+    if (onBefore) onSoftNavPhase('before', onBefore)
+    if (onLoaded) onSoftNavPhase('loaded', onLoaded)
   }
 
   global.bindSoftNavContext = bindSoftNavContext

@@ -9,6 +9,9 @@
  *
  * DOM events: soft-nav-context:before | :context | :loaded | :failed
  *
+ * On successful navigation (SoftNavContext hooks SoftNav once):
+ *   soft-nav:before → context (parse doc) → soft-nav:loaded → soft-nav-context:loaded
+ *
  * Load after soft-nav.js, before feature scripts.
  */
 ;(function (global) {

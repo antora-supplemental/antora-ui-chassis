@@ -1,6 +1,6 @@
 {
   "name": "@antora-supplemental/soft-nav-context",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Antora extension: SoftNavContext store for in-component navigation and persistent chrome",
   "main": "lib/index.js",
   "exports": {
@@ -11,10 +11,15 @@
     "lib",
     "js",
     "partials",
+    "test",
     "README.adoc",
+    "ARCHITECTURE.adoc",
     "INTEGRATION.adoc",
     "NAMING.adoc"
   ],
+  "scripts": {
+    "test": "node --test test/*.test.js"
+  },
   "keywords": [
     "antora",
     "antora-extension",

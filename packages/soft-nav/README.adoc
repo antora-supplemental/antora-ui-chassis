@@ -27,10 +27,15 @@ Persistent chrome (search omnibox, dock) is **not** swapped — pair SoftNav wit
 
 == Consumer pattern
 
+Swapped regions (article, in-nav TOC helpers):
+
 ----
-function onSoftNavLoaded (fn) {
-  if (window.SoftNav && SoftNav.on) SoftNav.on('loaded', fn)
-  else document.addEventListener('soft-nav:loaded', function (e) { fn(e.detail || {}) })
-}
-onSoftNavLoaded(function () { /* rebind */ })
+bindSoftNavContext({
+  onBoot: function () { rebind(document) },
+  onLoaded: function (ctx) { rebind((ctx && ctx.articleHost) || document) },
+})
 ----
+
+Persistent chrome (search scope in navbar) also needs link:../soft-nav-context/ARCHITECTURE.adoc[SoftNavContext `onContext`] — SoftNav does not replace those nodes.
+
+Without `bind-soft-nav-context.js`, duplicate the SoftNav + DOM fallback once per script (discouraged for new extensions).

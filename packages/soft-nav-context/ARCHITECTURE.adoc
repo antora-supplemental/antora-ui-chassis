@@ -1,0 +1,75 @@
+= SoftNav, SoftNavContext, and extension lifecycle
+
+Three layers solve different problems. Extension authors usually touch only the bottom two.
+
+== Layer 1 — SoftNav (transport)
+
+*Package:* `antora-ui-chassis/packages/soft-nav` (copy `soft-nav.js` into supplemental UI).
+
+Responsibilities:
+
+* Intercept same-component in-article links, `fetch` the next HTML document
+* Swap registered DOM regions (`mast`, `nav`, `article` by default)
+* Emit navigation lifecycle: `before` → (fetch + apply) → `loaded` or `failed`
+
+Public surface:
+
+* `SoftNav.on('before'|'loaded'|'failed', handler)`
+* DOM: `soft-nav:before`, `soft-nav:loaded`, `soft-nav:failed` (`detail` includes `doc`, `url`, region hosts)
+
+SoftNav does **not** know about search scope, breadcrumbs, or Mermaid. It only moves HTML and tells subscribers that a swap finished.
+
+== Layer 2 — SoftNavContext (semantic page context)
+
+*Package / extension:* `@antora-supplemental/soft-nav-context`.
+
+Responsibilities:
+
+* Parse *page context* from each fetched document (`#soft-nav-page-context` JSON / `data-*`, or `[data-valentus-search-chat]` fallback)
+* Keep `SoftNavContext.context` current for **persistent chrome** (navbar omnibox, dock, scope labels) that SoftNav does not replace
+* Re-emit the same phases as SoftNav, plus an extra `context` phase when the parsed store changes
+
+Event order on successful in-component navigation:
+
+[source]
+----
+soft-nav:before          → SoftNavContext before (same nav ctx)
+soft-nav:loaded          → setContext(parseDocument(doc)) → soft-nav-context:context
+                         → SoftNavContext loaded (nav ctx with doc)
+soft-nav-context:loaded
+----
+
+On first full page load, `SoftNavContext.context` is seeded from the current document before any navigation.
+
+== Layer 3 — `bindSoftNavContext` (subscription helper, not a framework)
+
+*File:* `js/bind-soft-nav-context.js`.
+
+One place to register `onBoot`, `onBefore`, `onContext`, `onLoaded` without copying SoftNav vs DOM listener fallbacks in every extension.
+
+Typical split:
+
+* `onContext` — sync labels / attributes from `SoftNavContext.context` (cheap, no DOM walk of swapped article)
+* `onLoaded` — rebind features that need `detail.doc` (scope menu HTML, Mermaid, lightbox, nav-tree mark-by-path)
+
+This is **not** a reactive framework: no virtual DOM, no signal graph. It is a thin adapter so consumers do not each re-implement `SoftNav.on` + `soft-nav:loaded` + initial boot.
+
+== Without a framework, why not only `SoftNav.on('loaded')`?
+
+Honest answer: for scripts that only re-run inside the swapped article, `loaded` alone is enough. The bus adds value when:
+
+. **Persistent chrome** must track page metadata that lives in the swapped `article` partial, not in the navbar DOM
+. You want **`context` before or without** re-parsing `detail.doc` in every consumer
+. You want **one documented event order** and optional DOM events (`soft-nav-context:*`) for non-JS hooks
+
+If you skip SoftNavContext, every extension repeats “read `#soft-nav-page-context` or search-chat `data-*` from `detail.doc` on loaded” — workable, but that duplication is what this package removes.
+
+== Optional future: signal store
+
+A framework-style signal layer (shared store + derived selectors) is **optional** and not required for Phase 1. If added later, it should sit behind `SoftNavContext` and subscribe once to `context` / `loaded`, not replace SoftNav.
+
+== Related docs
+
+* link:INTEGRATION.adoc[INTEGRATION.adoc] — load order and extension pattern
+* link:../soft-nav/README.adoc[SoftNav README] — region API
+* link:upstream/lunr-extension-proposal.md[lunr upstream proposal] — facet filters vs scope UI

@@ -2,6 +2,7 @@
 
 Navigation context store for https://github.com/antora-supplemental/antora-ui-chassis/tree/main/packages/soft-nav[SoftNav] — keeps persistent chrome (search scope, dock) aligned with the current page.
 
+* Architecture: link:ARCHITECTURE.adoc[SoftNav vs SoftNavContext vs bindSoftNavContext]
 * Build: partial `soft-nav-page-context` → `#soft-nav-page-context` on each page
 * Runtime: `SoftNavContext.context` + `bindSoftNavContext()` for extensions
 * Theme CSS/JS hooks use the `valentus-` prefix (see link:NAMING.adoc[NAMING.adoc])
