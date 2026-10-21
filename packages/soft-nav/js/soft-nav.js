@@ -444,16 +444,17 @@
       }
       return
     }
-    if (!sameOrigin(a.href)) return
     var forestNav = navForestMenuLink(a) && siteForestEnabled()
-    if (!sameComponent(a.href) && !forestNav) {
+    var destHref = forestNav ? resolveForestNavHref(a) : a.href
+    if (!sameOrigin(destHref)) return
+    if (!sameComponent(destHref) && !forestNav) {
       if (a.closest('.nav-container') && typeof window.siteNavTreeSaveScroll === 'function') {
         window.siteNavTreeSaveScroll()
       }
       return
     }
     ev.preventDefault()
-    navigate(forestNav ? resolveForestNavHref(a) : a.href, true)
+    navigate(destHref, true)
   }, true)
 
   window.addEventListener('popstate', function () {

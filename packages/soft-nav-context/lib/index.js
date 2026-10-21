@@ -9,6 +9,19 @@ const UI_ROOT = path.join(__dirname, '..')
 /** Partials that may host SoftNav or late-loaded feature scripts. */
 const SCRIPT_PARTIAL_STEMS = ['footer-scripts', 'footer-content']
 
+function partialBody (uiCatalog, stem) {
+  const partial = uiCatalog.findByType('partial').find((f) => f.stem === stem)
+  if (!partial) return ''
+  return Buffer.isBuffer(partial.contents)
+    ? partial.contents.toString('utf8')
+    : String(partial.contents || '')
+}
+
+function footerAlreadyReferences (uiCatalog, relPath) {
+  const base = String(relPath).split('?')[0]
+  return SCRIPT_PARTIAL_STEMS.some((stem) => partialBody(uiCatalog, stem).includes(base))
+}
+
 function walkFiles (dir, base = dir) {
   if (!fs.existsSync(dir)) return []
   const out = []
@@ -63,6 +76,7 @@ function addOrReplaceAsset (uiCatalog, uiOutputDir, relPath, contents) {
  * @returns {boolean} true when a tag was inserted
  */
 function appendFooterScriptAfter (uiCatalog, src, anchorSubstrings) {
+  if (footerAlreadyReferences(uiCatalog, src)) return true
   const anchors = Array.isArray(anchorSubstrings) ? anchorSubstrings : [anchorSubstrings]
   const tag = `<script src="{{{uiRootPath}}}/${src}" defer></script>`
 

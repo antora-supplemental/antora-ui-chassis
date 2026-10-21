@@ -1,5 +1,10 @@
 = Changelog
 
+== 0.1.3 — 2026-10-21
+
+* **Single SoftNav script tag:** `appendFooterScriptAfter` checks both `footer-scripts` and `footer-content` before insert (fixes duplicate listeners when hubs reference soft-nav in `footer-content`).
+* **Forest gate:** `sameComponent` runs against the resolved nav destination (`resolveForestNavHref`), not live `a.href`.
+
 == 0.1.2 — 2026-10-21
 
 * **site-nav-tree forest:** nav-panel `.nav-link` clicks soft-navigate across Antora components when the sidebar has multiple depth-0 roots (`SoftNav.crossComponentForest`, default `'auto'`). Resolves click targets via `siteNavTreeResolveNavLink` when present.

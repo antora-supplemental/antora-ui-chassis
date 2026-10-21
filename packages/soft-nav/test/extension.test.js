@@ -44,4 +44,20 @@ describe('soft-nav extension injection', () => {
     const body = uiCatalog.findByType('partial')[0].contents.toString('utf8')
     assert.equal((body.match(/soft-nav\.js/g) || []).length, 1)
   })
+
+  it('does not inject when hub footer-content already references soft-nav', () => {
+    const uiCatalog = mockCatalog([
+      {
+        stem: 'footer-scripts',
+        body: '<script src="{{{uiRootPath}}}/js/site.js" defer></script>\n',
+      },
+      {
+        stem: 'footer-content',
+        body: '<script src="{{{uiRootPath}}}/js/soft-nav.js" defer></script>\n',
+      },
+    ])
+    assert.equal(appendFooterScriptAfter(uiCatalog, 'js/soft-nav.js', 'site.js'), true)
+    const scripts = uiCatalog.findByType('partial')[0].contents.toString('utf8')
+    assert.doesNotMatch(scripts, /soft-nav\.js/)
+  })
 })
