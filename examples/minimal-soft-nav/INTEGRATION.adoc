@@ -19,7 +19,7 @@ Pin (immutable):
 
 [source,text]
 ----
-github:antora-supplemental/antora-ui-chassis#chassis-v0.1.1&path:packages/chassis-compose
+github:antora-supplemental/antora-ui-chassis#chassis-v0.1.2&path:packages/chassis-compose
 ----
 
 == Supplemental UI you must own

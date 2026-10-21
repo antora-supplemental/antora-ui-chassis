@@ -25,7 +25,7 @@ antora:
 Git path pin:
 
 ```text
-github:antora-supplemental/antora-ui-chassis#chassis-v0.1.1&path:packages/chassis-compose
+github:antora-supplemental/antora-ui-chassis#chassis-v0.1.2&path:packages/chassis-compose
 ```
 
 Facto stack registers this member via `@antora-supplemental/facto-stack` (override key `softNavContext`).

@@ -27,7 +27,7 @@ antora:
 Git path pin (monorepo):
 
 ```text
-github:antora-supplemental/antora-ui-chassis#chassis-v0.1.1&path:packages/soft-nav-context
+github:antora-supplemental/antora-ui-chassis#chassis-v0.1.2&path:packages/soft-nav-context
 ```
 
 Or register `@antora-supplemental/chassis-compose` to pull it in with one require.
