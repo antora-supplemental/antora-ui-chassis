@@ -1,5 +1,10 @@
 = Changelog
 
+== 0.1.1 — 2026-10-21
+
+* Bundle `@antora-supplemental/soft-nav` build-time inject (footer after `site.js`; context scripts still after `soft-nav.js`).
+* Playbook override `softNav: false` or nested `{ enabled: false }`.
+
 == 0.1.0 — 2026-10-21
 
 * Initial meta extension: registers `@antora-supplemental/soft-nav-context` from the sibling package.

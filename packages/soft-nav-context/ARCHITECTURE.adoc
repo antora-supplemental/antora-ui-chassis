@@ -1,75 +1,88 @@
 = SoftNav, SoftNavContext, and extension lifecycle
 
-Three layers solve different problems. Extension authors usually touch only the bottom two.
+Three layers solve different problems. **Persistent chrome** should use layer 2 signals first; layer 3 is convenience for boot and `loaded`.
 
 == Layer 1 — SoftNav (transport)
 
-*Package:* `antora-ui-chassis/packages/soft-nav` (copy `soft-nav.js` into supplemental UI).
+*Package:* `antora-ui-chassis/packages/soft-nav` (Antora inject or copy `soft-nav.js`).
 
-Responsibilities:
+* Intercept same-component links, fetch HTML, swap regions (`mast`, `nav`, `article`)
+* Phases: `before` → fetch → `loaded` | `failed`
 
-* Intercept same-component in-article links, `fetch` the next HTML document
-* Swap registered DOM regions (`mast`, `nav`, `article` by default)
-* Emit navigation lifecycle: `before` → (fetch + apply) → `loaded` or `failed`
+SoftNav does **not** know about search scope or breadcrumbs.
 
-Public surface:
-
-* `SoftNav.on('before'|'loaded'|'failed', handler)`
-* DOM: `soft-nav:before`, `soft-nav:loaded`, `soft-nav:failed` (`detail` includes `doc`, `url`, region hosts)
-
-SoftNav does **not** know about search scope, breadcrumbs, or Mermaid. It only moves HTML and tells subscribers that a swap finished.
-
-== Layer 2 — SoftNavContext (semantic page context)
+== Layer 2 — SoftNavContext + SoftNavSignals (canonical chrome store)
 
 *Package / extension:* `@antora-supplemental/soft-nav-context`.
 
 Responsibilities:
 
-* Parse *page context* from each fetched document (`#soft-nav-page-context` JSON / `data-*`, or `[data-valentus-search-chat]` fallback)
-* Keep `SoftNavContext.context` current for **persistent chrome** (navbar omnibox, dock, scope labels) that SoftNav does not replace
-* Re-emit the same phases as SoftNav, plus an extra `context` phase when the parsed store changes
+* Parse page metadata from each document (`#soft-nav-page-context`, search-chat `data-*` fallback)
+* Hold `SoftNavContext.context` for navbar / dock / scope UI that SoftNav does not replace
+* **`SoftNavSignals`** — subscribe per field; one batched notification wave per context update
 
-Event order on successful in-component navigation:
+=== Signal API (extension authors — start here)
+
+Global: `SoftNavSignals` (same object as `SoftNavContext.signals`).
+
+[cols="1,2"]
+|===
+| Method | Purpose
+
+| `get(key)`
+| Current value for a derived key
+
+| `subscribe(key, fn)`
+| `fn(value, fullContext)` on subscribe (immediate) and whenever context changes after navigation
+
+| `subscribeContext(fn)` / `subscribe(fn)`
+| Shorthand for full context object (`key === 'context'`)
+
+| `keys()`
+| List of supported keys
+|===
+
+Derived keys (from parsed context):
+
+* `context` — full normalized object
+* `pageUrl`
+* `componentName`, `componentTitle`
+* `versionName`, `versionDisplay`
+* `scopeLabel` — human hint from component + version (e.g. for omnibox chrome; not the user's Lunr scope selection)
+
+On each successful in-component navigation:
 
 [source]
 ----
-soft-nav:before          → SoftNavContext before (same nav ctx)
-soft-nav:loaded          → setContext(parseDocument(doc)) → soft-nav-context:context
-                         → SoftNavContext loaded (nav ctx with doc)
-soft-nav-context:loaded
+soft-nav:before
+soft-nav:loaded → setContext(doc) → soft-nav-context:context (phase)
+                 → SoftNavSignals batch (all keys, stable order)
+                 → soft-nav-context:loaded (nav ctx with doc)
 ----
 
-On first full page load, `SoftNavContext.context` is seeded from the current document before any navigation.
+On first full page load, context and signals seed from the current document before any navigation.
 
-== Layer 3 — `bindSoftNavContext` (subscription helper, not a framework)
+Phase API (`SoftNavContext.on('before'|'context'|'loaded'|'failed')`) remains for transport-aligned work and DOM events (`soft-nav-context:*`).
+
+== Layer 3 — `bindSoftNavContext` (lifecycle convenience)
 
 *File:* `js/bind-soft-nav-context.js`.
 
-One place to register `onBoot`, `onBefore`, `onContext`, `onLoaded` without copying SoftNav vs DOM listener fallbacks in every extension.
+Maps `onContext` → `SoftNavSignals.subscribe('context', …)` when signals exist. Use for:
 
-Typical split:
+* `onBoot` — first paint when signals are not enough (article-only scripts)
+* `onBefore` / `onLoaded` — SoftNav transport (`detail.doc`, region hosts)
 
-* `onContext` — sync labels / attributes from `SoftNavContext.context` (cheap, no DOM walk of swapped article)
-* `onLoaded` — rebind features that need `detail.doc` (scope menu HTML, Mermaid, lightbox, nav-tree mark-by-path)
+Do **not** treat `onContext` alone as the primary API — prefer explicit `SoftNavSignals.subscribe('componentName', …)` (or `subscribeContext`) in feature code.
 
-This is **not** a reactive framework: no virtual DOM, no signal graph. It is a thin adapter so consumers do not each re-implement `SoftNav.on` + `soft-nav:loaded` + initial boot.
+== Without signals, why not only `SoftNav.on('loaded')`?
 
-== Without a framework, why not only `SoftNav.on('loaded')`?
+`loaded` is correct for *swapped article* work. Persistent chrome needs metadata from the fetched page **before** every consumer re-parses `#soft-nav-page-context` from `detail.doc`. Signals give one parse, one broadcast, derived fields for labels — not an interim pattern until a “real” framework.
 
-Honest answer: for scripts that only re-run inside the swapped article, `loaded` alone is enough. The bus adds value when:
-
-. **Persistent chrome** must track page metadata that lives in the swapped `article` partial, not in the navbar DOM
-. You want **`context` before or without** re-parsing `detail.doc` in every consumer
-. You want **one documented event order** and optional DOM events (`soft-nav-context:*`) for non-JS hooks
-
-If you skip SoftNavContext, every extension repeats “read `#soft-nav-page-context` or search-chat `data-*` from `detail.doc` on loaded” — workable, but that duplication is what this package removes.
-
-== Optional future: signal store
-
-A framework-style signal layer (shared store + derived selectors) is **optional** and not required for Phase 1. If added later, it should sit behind `SoftNavContext` and subscribe once to `context` / `loaded`, not replace SoftNav.
+A Preact/React island or article-only Mermaid rebinding still does not need signals. Navbar search scope, dock context, and path-aware chrome do.
 
 == Related docs
 
-* link:INTEGRATION.adoc[INTEGRATION.adoc] — load order and extension pattern
-* link:../soft-nav/README.adoc[SoftNav README] — region API
-* link:upstream/lunr-extension-proposal.md[lunr upstream proposal] — facet filters vs scope UI
+* link:INTEGRATION.adoc[INTEGRATION.adoc] — load order and signal examples
+* link:../soft-nav/README.adoc[SoftNav README]
+* link:upstream/lunr-extension-proposal.md[lunr upstream proposal]

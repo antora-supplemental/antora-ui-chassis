@@ -4,7 +4,9 @@ Chassis UI component: same-origin soft navigation for Antora hubs.
 
 == Include
 
-Copy `js/soft-nav.js` into the hub `supplemental-ui/js/` (or consume via chassis slots when the UI bundle supports it) and load it **before** consumer scripts:
+*Preferred:* register `@antora-supplemental/chassis-compose` (injects `soft-nav.js` before `soft-nav-context`) or require `@antora-supplemental/soft-nav` alone on the playbook.
+
+*Manual:* copy `js/soft-nav.js` into hub `supplemental-ui/js/` and load **before** consumer scripts:
 
 ----
 <script src="{{{uiRootPath}}}/js/soft-nav.js" defer></script>
@@ -36,6 +38,6 @@ bindSoftNavContext({
 })
 ----
 
-Persistent chrome (search scope in navbar) also needs link:../soft-nav-context/ARCHITECTURE.adoc[SoftNavContext `onContext`] — SoftNav does not replace those nodes.
+Persistent chrome (search scope in navbar) uses link:../soft-nav-context/ARCHITECTURE.adoc[SoftNavSignals] — SoftNav does not replace those nodes.
 
 Without `bind-soft-nav-context.js`, duplicate the SoftNav + DOM fallback once per script (discouraged for new extensions).

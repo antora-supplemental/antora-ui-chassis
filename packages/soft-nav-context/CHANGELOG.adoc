@@ -1,0 +1,11 @@
+= Changelog
+
+== 0.2.0 — 2026-10-21
+
+* **API:** `SoftNavSignals` / `SoftNavContext.signals` — canonical persistent-chrome API (`get`, `subscribe(key, fn)`, `subscribeContext`, derived keys: `pageUrl`, `componentName`, `componentTitle`, `versionName`, `versionDisplay`, `scopeLabel`, `context`).
+* **Breaking (author-facing):** extension authors should subscribe via signals instead of hand-rolling `SoftNavContext.on('context')` or `bindSoftNavContext({ onContext })` for chrome; `bindSoftNavContext` maps `onContext` to signals internally.
+* `SoftNavContext.subscribe` / `.signal(key)` retained as thin deprecated aliases.
+
+== 0.1.2 — 2026-10-21
+
+* Early subscribe experiment (superseded by 0.2.0 signals).

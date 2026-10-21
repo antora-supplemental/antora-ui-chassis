@@ -4,13 +4,10 @@
  * Persistent chrome (search scope, dock) stays in the DOM; this store updates
  * on each in-component navigation from the fetched page metadata.
  *
- * Public API (global SoftNavContext):
- *   .schema, .context, .on(phase, handler), .parseDocument(doc)
+ * Canonical chrome API: SoftNavContext.signals / global SoftNavSignals
+ *   .get(key), .subscribe(key, fn), .subscribeContext(fn)
  *
- * DOM events: soft-nav-context:before | :context | :loaded | :failed
- *
- * On successful navigation (SoftNavContext hooks SoftNav once):
- *   soft-nav:before → context (parse doc) → soft-nav:loaded → soft-nav-context:loaded
+ * Phases: SoftNavContext.on(phase, handler) — before | context | loaded | failed
  *
  * Load after soft-nav.js, before feature scripts.
  */
@@ -20,6 +17,18 @@
   var SCHEMA = 1
   var listeners = { before: [], context: [], loaded: [], failed: [] }
   var currentContext = null
+  var signalSubscribers = {}
+  var contextSubscribers = []
+
+  var SIGNAL_KEYS = [
+    'context',
+    'pageUrl',
+    'componentName',
+    'componentTitle',
+    'versionName',
+    'versionDisplay',
+    'scopeLabel',
+  ]
 
   function trim (s) {
     return String(s || '').trim()
@@ -31,6 +40,94 @@
     } catch (e) {
       return []
     }
+  }
+
+  function deriveScopeLabel (ctx) {
+    if (!ctx) return 'All docs'
+    var comp = ctx.component || {}
+    var ver = ctx.version || {}
+    var title = trim(comp.title || comp.name)
+    var display = trim(ver.display || ver.name)
+    if (display && title) return title + ' · ' + display
+    if (display) return display
+    return title || 'All docs'
+  }
+
+  function readSignal (key, ctx) {
+    if (!ctx) {
+      if (key === 'context') return null
+      return ''
+    }
+    if (key === 'context') return ctx
+    if (key === 'pageUrl') return trim(ctx.url)
+    if (key === 'componentName') return trim(ctx.component && ctx.component.name)
+    if (key === 'componentTitle') return trim(ctx.component && ctx.component.title)
+    if (key === 'versionName') return trim(ctx.version && ctx.version.name)
+    if (key === 'versionDisplay') return trim(ctx.version && ctx.version.display)
+    if (key === 'scopeLabel') return deriveScopeLabel(ctx)
+    return undefined
+  }
+
+  function notifySignalKey (key, ctx) {
+    var list = signalSubscribers[key]
+    if (!list || !list.length) return
+    var value = readSignal(key, ctx)
+    for (var i = 0; i < list.length; i++) {
+      try {
+        list[i](value, ctx)
+      } catch (err) {
+        console.warn('[soft-nav-context] signal listener error on ' + key, err)
+      }
+    }
+  }
+
+  function flushSignalBatch (ctx) {
+    for (var k = 0; k < SIGNAL_KEYS.length; k++) {
+      notifySignalKey(SIGNAL_KEYS[k], ctx)
+    }
+    for (var c = 0; c < contextSubscribers.length; c++) {
+      try {
+        contextSubscribers[c](ctx)
+      } catch (err) {
+        console.warn('[soft-nav-context] subscribeContext listener error', err)
+      }
+    }
+  }
+
+  var SoftNavSignals = {
+    keys: function () {
+      return SIGNAL_KEYS.slice()
+    },
+    get: function (key) {
+      if (SIGNAL_KEYS.indexOf(key) < 0) {
+        throw new Error('SoftNavSignals.get: unknown key ' + key)
+      }
+      return readSignal(key, currentContext)
+    },
+    subscribe: function (key, fn) {
+      if (typeof key === 'function') {
+        return SoftNavSignals.subscribeContext(key)
+      }
+      if (SIGNAL_KEYS.indexOf(key) < 0) {
+        throw new Error('SoftNavSignals.subscribe: unknown key ' + key)
+      }
+      if (!signalSubscribers[key]) signalSubscribers[key] = []
+      signalSubscribers[key].push(fn)
+      fn(readSignal(key, currentContext), currentContext)
+      return function unsubscribe () {
+        var list = signalSubscribers[key]
+        var idx = list.indexOf(fn)
+        if (idx >= 0) list.splice(idx, 1)
+      }
+    },
+    subscribeContext: function (fn) {
+      contextSubscribers.push(fn)
+      if (currentContext) fn(currentContext)
+      return function unsubscribe () {
+        var idx = contextSubscribers.indexOf(fn)
+        if (idx >= 0) contextSubscribers.splice(idx, 1)
+      }
+    },
   }
 
   function parseJsonScript (doc) {
@@ -130,10 +227,12 @@
   function setContext (next) {
     currentContext = next
     emit('context', next)
+    flushSignalBatch(next)
   }
 
   var SoftNavContext = {
     schema: SCHEMA,
+    signals: SoftNavSignals,
     get context () {
       return currentContext
     },
@@ -144,6 +243,38 @@
         var list = listeners[phase]
         var idx = list.indexOf(handler)
         if (idx >= 0) list.splice(idx, 1)
+      }
+    },
+    /** @deprecated Prefer SoftNavSignals.subscribeContext or .subscribe('context', fn) */
+    subscribe: function (fn) {
+      return SoftNavSignals.subscribeContext(fn)
+    },
+    /** @deprecated Prefer SoftNavSignals.get / .subscribe(key, fn) */
+    signal: function (key) {
+      var legacy = { url: 'pageUrl', title: 'title' }
+      var mapped = legacy[key] || key
+      if (mapped === 'title') {
+        return {
+          get value () {
+            return currentContext && currentContext.title
+          },
+          subscribe: function (fn) {
+            return SoftNavSignals.subscribe('context', function (ctx) {
+              fn(ctx && ctx.title)
+            })
+          },
+        }
+      }
+      if (SIGNAL_KEYS.indexOf(mapped) < 0) {
+        throw new Error('SoftNavContext.signal: unknown key ' + key)
+      }
+      return {
+        get value () {
+          return SoftNavSignals.get(mapped)
+        },
+        subscribe: function (fn) {
+          return SoftNavSignals.subscribe(mapped, fn)
+        },
       }
     },
     parseDocument: parseDocument,
@@ -181,5 +312,6 @@
 
   setContext(parseDocument(global.document, global.location.href))
   hookSoftNav()
+  global.SoftNavSignals = SoftNavSignals
   global.SoftNavContext = SoftNavContext
 })(typeof window !== 'undefined' ? window : globalThis)

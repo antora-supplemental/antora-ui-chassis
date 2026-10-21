@@ -2,7 +2,21 @@
 
 const { describe, it } = require('node:test')
 const assert = require('node:assert/strict')
-const { resolveSoftNavContextConfig } = require('../lib/index.js')
+const {
+  resolveSoftNavConfig,
+  resolveSoftNavContextConfig,
+} = require('../lib/resolve-config.js')
+
+describe('chassis-compose soft-nav config', () => {
+  it('passes through top-level options when softNav not nested', () => {
+    assert.deepEqual(resolveSoftNavConfig({ ui: false }), { ui: false })
+  })
+
+  it('disables soft-nav when nested or compose enabled is false', () => {
+    assert.equal(resolveSoftNavConfig({ softNav: false }), null)
+    assert.equal(resolveSoftNavConfig({ softNav: { enabled: false } }), null)
+  })
+})
 
 describe('chassis-compose soft-nav-context config', () => {
   it('passes through top-level child options (compose pack merge)', () => {
