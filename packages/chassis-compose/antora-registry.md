@@ -4,15 +4,15 @@ packageName: '@antora-supplemental/chassis-compose'
 purpose: pipeline
 layer: chassis
 pipeline: true
-description: Meta Antora extension — registers chassis build-time extensions (soft-nav-context)
+description: Meta Antora extension - registers ui-bus, soft-nav and page-state
 homepage: https://github.com/antora-supplemental/antora-ui-chassis/tree/main/packages/chassis-compose
 ---
 
 # Overview
 
-One playbook `require` wires chassis build-time extensions. Today the bundle registers `@antora-supplemental/soft-nav-context`.
+One playbook `require` wires chassis build-time extensions. It registers `@antora-supplemental/ui-bus`, `@antora-supplemental/soft-nav` and `@antora-supplemental/page-state`, in that order.
 
-Copy-only chassis assets (`soft-nav.js`, viewport helpers) stay manual — see the minimal example under `examples/minimal-soft-nav`.
+Copy-only chassis assets (viewport helpers) stay manual. See the minimal example under `examples/minimal-soft-nav`.
 
 ## Install
 
@@ -25,7 +25,7 @@ antora:
 Git path pin:
 
 ```text
-github:antora-supplemental/antora-ui-chassis#chassis-v0.1.2&path:packages/chassis-compose
+github:antora-supplemental/antora-ui-chassis#chassis-v0.2.0&path:packages/chassis-compose
 ```
 
-Facto stack registers this member via `@antora-supplemental/facto-stack` (override key `softNavContext`).
+Facto stack registers these members via `@antora-supplemental/facto-stack` (override keys `uiBus`, `softNav`, `pageState`).

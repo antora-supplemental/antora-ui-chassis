@@ -1,0 +1,5 @@
+= Changelog
+
+== 0.1.0
+
+* Renamed from `soft-nav-context`. Publishes `page.*` values on `UiBus.state`; `SoftNavContext`, `SoftNavSignals`, `bindSoftNavContext` and the `soft-nav-context:*` events are removed, with no aliases.

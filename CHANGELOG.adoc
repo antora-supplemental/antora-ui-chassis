@@ -1,5 +1,12 @@
 = Changelog
 
+== chassis-v0.2.0 - 2026-10-24
+
+* **New `ui-bus`:** a general event bus (`UiBus.events` for transient signals, `UiBus.state` for persistent values) with no feature knowledge. Every chassis package now talks through it.
+* **`soft-nav` 0.2.0:** publishes `nav:before`, `nav:loaded`, `nav:failed` on the bus. `SoftNav.on` and the `soft-nav:*` / `doc-nav:loaded` DOM events are removed.
+* **`page-state` 0.1.0:** replaces `soft-nav-context`; publishes `page.*` values. `SoftNavContext`, `SoftNavSignals` and `bindSoftNavContext` are removed.
+* **`chassis-compose` 0.2.0:** bundles all three. No compatibility aliases anywhere.
+
 == Unreleased
 
 * `soft-nav` Antora extension + `chassis-compose` **0.1.1** bundles runtime inject (meta tag `chassis-v0.1.1`).

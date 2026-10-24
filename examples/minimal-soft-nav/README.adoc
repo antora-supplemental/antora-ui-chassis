@@ -1,9 +1,6 @@
-= Minimal SoftNav + SoftNavContext (Default UI)
+= Minimal UiBus + SoftNav + page-state (Default UI)
 
-Smallest playbook that pairs Antora Default UI with:
-
-* Copied `soft-nav.js` (chassis transport)
-* `@antora-supplemental/chassis-compose` at git tag `chassis-v0.1.2` (registers `soft-nav-context`)
+Smallest playbook that pairs Antora Default UI with `@antora-supplemental/chassis-compose` at git tag `chassis-v0.2.0`. No supplemental UI files are needed.
 
 == Quick start
 
@@ -16,7 +13,5 @@ pnpm run build
 
 == What this proves
 
-* `chassis-compose` injects `soft-nav-page-context`, `soft-nav-context.js`, and `bind-soft-nav-context.js` after `soft-nav.js`.
-* Supplemental `article` partial includes `{{> soft-nav-page-context}}`.
-
-See link:INTEGRATION.adoc[INTEGRATION.adoc] and link:../../packages/soft-nav-context/INTEGRATION.adoc[package INTEGRATION.adoc].
+* `chassis-compose` injects `ui-bus.js`, `soft-nav.js` and `page-state.js` after `site.js`, in that order, and adds the `page-state-context` partial to the article.
+* In the browser console: `UiBus.state.get('page.url')` changes and `UiBus.events.on('nav:loaded', console.log)` fires as you click between pages.

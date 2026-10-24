@@ -1,0 +1,16 @@
+{
+  "name": "@antora-supplemental/ui-bus",
+  "version": "0.1.0",
+  "description": "General event bus for Antora UI extensions: UiBus.events and UiBus.state",
+  "main": "lib/index.js",
+  "exports": { ".": "./lib/index.js", "./lib": "./lib/index.js", "./js/ui-bus.js": "./js/ui-bus.js" },
+  "files": ["lib", "js", "test", "README.adoc", "CHANGELOG.adoc"],
+  "scripts": { "test": "node --test test/*.test.js" },
+  "keywords": ["antora", "antora-ui", "event-bus", "ui-bus"],
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/antora-supplemental/antora-ui-chassis.git",
+    "directory": "packages/ui-bus"
+  }
+}

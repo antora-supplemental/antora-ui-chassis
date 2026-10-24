@@ -1,0 +1,14 @@
+{
+  id: "ui-bus",
+  name: "UiBus",
+  version: "0.1.0",
+  type: "ui-chassis-component",
+  description: "General event bus: UiBus.events (transient signals) and UiBus.state (persistent values). No feature knowledge.",
+  layer: "chassis",
+  slots: {
+    footer: {
+      scripts: ["js/ui-bus.js"],
+      before: ["*"],
+    },
+  },
+}

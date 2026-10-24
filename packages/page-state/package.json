@@ -1,0 +1,15 @@
+{
+  "name": "@antora-supplemental/page-state",
+  "version": "0.1.0",
+  "description": "Antora extension: publishes the current page's component, version, url and title as UiBus state",
+  "main": "lib/index.js",
+  "exports": { ".": "./lib/index.js", "./lib": "./lib/index.js" },
+  "files": ["lib", "js", "partials", "test", "README.adoc", "CHANGELOG.adoc"],
+  "scripts": { "test": "node --test test/*.test.js" },
+  "keywords": ["antora", "antora-extension", "ui-bus", "page-state"],
+  "license": "MIT",
+  "repository": { "type": "git", "url": "git+https://github.com/antora-supplemental/antora-ui-chassis.git", "directory": "packages/page-state" },
+  "dependencies": {
+    "@antora-supplemental/ui-bus": "github:antora-supplemental/antora-ui-chassis#ui-bus-v0.1.0&path:packages/ui-bus"
+  }
+}

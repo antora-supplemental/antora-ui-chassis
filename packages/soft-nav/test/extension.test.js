@@ -18,7 +18,7 @@ function mockCatalog (partials) {
 }
 
 describe('soft-nav extension injection', () => {
-  it('inserts after site.js in footer-scripts', () => {
+  it('falls back to after site.js when ui-bus.js is absent', () => {
     const uiCatalog = mockCatalog([
       {
         stem: 'footer-scripts',
@@ -26,7 +26,7 @@ describe('soft-nav extension injection', () => {
       },
     ])
     assert.equal(
-      appendFooterScriptAfter(uiCatalog, 'js/soft-nav.js', 'site.js'),
+      appendFooterScriptAfter(uiCatalog, 'js/soft-nav.js', ['ui-bus.js']),
       true
     )
     const body = uiCatalog.findByType('partial')[0].contents.toString('utf8')
@@ -40,7 +40,7 @@ describe('soft-nav extension injection', () => {
         body: '<script src="{{{uiRootPath}}}/js/soft-nav.js" defer></script>\n',
       },
     ])
-    appendFooterScriptAfter(uiCatalog, 'js/soft-nav.js', 'site.js')
+    appendFooterScriptAfter(uiCatalog, 'js/soft-nav.js', ['ui-bus.js'])
     const body = uiCatalog.findByType('partial')[0].contents.toString('utf8')
     assert.equal((body.match(/soft-nav\.js/g) || []).length, 1)
   })
@@ -56,7 +56,7 @@ describe('soft-nav extension injection', () => {
         body: '<script src="{{{uiRootPath}}}/js/soft-nav.js" defer></script>\n',
       },
     ])
-    assert.equal(appendFooterScriptAfter(uiCatalog, 'js/soft-nav.js', 'site.js'), true)
+    assert.equal(appendFooterScriptAfter(uiCatalog, 'js/soft-nav.js', ['ui-bus.js']), true)
     const scripts = uiCatalog.findByType('partial')[0].contents.toString('utf8')
     assert.doesNotMatch(scripts, /soft-nav\.js/)
   })

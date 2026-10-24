@@ -1,5 +1,9 @@
 = Changelog
 
+== 0.2.0 - 2026-10-24
+
+* **Breaking:** lifecycle moves to the general bus: `UiBus.events.on('nav:before' | 'nav:loaded' | 'nav:failed', fn)`. `SoftNav.on` and the `soft-nav:*` / `doc-nav:loaded` DOM events are removed, with no aliases. The extension injects `ui-bus.js` ahead of `soft-nav.js`.
+
 == 0.1.3 — 2026-10-21
 
 * **Single SoftNav script tag:** `appendFooterScriptAfter` checks both `footer-scripts` and `footer-content` before insert (fixes duplicate listeners when hubs reference soft-nav in `footer-content`).

@@ -1,25 +1,26 @@
 = @antora-supplemental/chassis-compose
 :description: Meta Antora extension bundling chassis build-time extensions.
 
-One playbook `require` for chassis Antora extensions that inject UI at build time.
-
-Copy-only chassis packages (`soft-nav.js`, `content-viewport`, …) are *not* bundled — copy assets into `supplemental-ui/` or require the individual extension packages. Diagram lightbox lives in `@antora-supplemental/diagram-lightbox`, not chassis.
+One playbook `require` for the chassis Antora extensions that inject UI at build time. Copy-only chassis packages (`content-viewport` and similar) are not bundled.
 
 [source,yaml]
 ----
 antora:
   extensions:
     - require: '@antora-supplemental/chassis-compose'
-      # softNavContext: { ui: false }   # optional nested override
+      # softNav: false            # disable one member
+      # pageState: { ui: false }  # nested override
 ----
 
-Bundled today:
+Bundled, in load order:
 
-* `@antora-supplemental/soft-nav-context` — page context partial + runtime (after `soft-nav.js` when present)
+* `@antora-supplemental/ui-bus` - the general event bus (`UiBus.events`, `UiBus.state`), injected first
+* `@antora-supplemental/soft-nav` - soft navigation; publishes `nav:*` events on the bus
+* `@antora-supplemental/page-state` - publishes `page.*` values on the bus
 
-For only SoftNavContext, require `@antora-supplemental/soft-nav-context` directly.
+Each member can also be required on its own; `soft-nav` and `page-state` inject `ui-bus.js` themselves.
 
 == Releases
 
-Per-package git tags: `soft-nav-context-vX.Y.Z`, `chassis-compose-vX.Y.Z`.
+Per-package git tags: `ui-bus-vX.Y.Z`, `soft-nav-vX.Y.Z`, `page-state-vX.Y.Z`, `chassis-compose-vX.Y.Z`.
 Meta pin for compose consumers: `chassis-vX.Y.Z` (same commit as the compose package release).

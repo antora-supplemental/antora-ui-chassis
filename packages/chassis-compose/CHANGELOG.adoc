@@ -1,5 +1,9 @@
 = Changelog
 
+== 0.2.0 - 2026-10-24
+
+* **Breaking:** bundles `ui-bus`, `soft-nav` 0.2.0 and `page-state` (renamed from `soft-nav-context`). Override keys are now `uiBus`, `softNav`, `pageState`; `softNavContext` is gone.
+
 == 0.1.4 — 2026-10-21
 
 * **Dependency pin:** `@antora-supplemental/soft-nav` resolves to git tag `soft-nav-v0.1.3` (forest cross-component nav). v0.1.3 still pointed at `soft-nav-v0.1.1`, so hub builds injected pre-forest `soft-nav.js` and cross-component sidebar clicks hard-reloaded.

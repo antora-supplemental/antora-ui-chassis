@@ -2,34 +2,18 @@
 
 const { describe, it } = require('node:test')
 const assert = require('node:assert/strict')
-const {
-  resolveSoftNavConfig,
-  resolveSoftNavContextConfig,
-} = require('../lib/resolve-config.js')
+const { resolvePageStateConfig, resolveSoftNavConfig, resolveUiBusConfig } = require('../lib/resolve-config.js')
 
-describe('chassis-compose soft-nav config', () => {
-  it('passes through top-level options when softNav not nested', () => {
-    assert.deepEqual(resolveSoftNavConfig({ ui: false }), { ui: false })
+describe('chassis-compose member config', () => {
+  it('passes top-level options through, minus member keys', () => {
+    assert.deepEqual(resolvePageStateConfig({ ui: false, softNav: false }), { ui: false })
   })
-
-  it('disables soft-nav when nested or compose enabled is false', () => {
-    assert.equal(resolveSoftNavConfig({ softNav: false }), null)
+  it('uses a nested override', () => {
+    assert.deepEqual(resolveSoftNavConfig({ softNav: { ui: false } }), { ui: false })
+  })
+  it('disables members', () => {
+    assert.equal(resolveUiBusConfig({ enabled: false }), null)
+    assert.equal(resolvePageStateConfig({ pageState: false }), null)
     assert.equal(resolveSoftNavConfig({ softNav: { enabled: false } }), null)
-  })
-})
-
-describe('chassis-compose soft-nav-context config', () => {
-  it('passes through top-level child options (compose pack merge)', () => {
-    assert.deepEqual(resolveSoftNavContextConfig({ ui: false }), { ui: false })
-  })
-
-  it('merges nested softNavContext override', () => {
-    assert.deepEqual(resolveSoftNavContextConfig({ softNavContext: { ui: false } }), { ui: false })
-  })
-
-  it('disables child when compose or nested enabled is false', () => {
-    assert.equal(resolveSoftNavContextConfig({ enabled: false }), null)
-    assert.equal(resolveSoftNavContextConfig({ softNavContext: false }), null)
-    assert.equal(resolveSoftNavContextConfig({ softNavContext: { enabled: false } }), null)
   })
 })

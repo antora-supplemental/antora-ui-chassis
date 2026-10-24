@@ -1,0 +1,22 @@
+= page-state (`packages/page-state`)
+
+Publishes the current Antora page's context as xref:../ui-bus/README.adoc[UiBus] state, so persistent chrome (search scope, dock, context menus) can follow the page without knowing how navigation happens.
+
+It reads a small per-page `#page-state-context` script on first load and again after every `nav:loaded` event.
+
+[source,js]
+----
+UiBus.state.watch('page.component.name', (name) => setSearchScope(name))
+UiBus.state.get('page.scopeLabel') // "Tools · 1.0" or "All docs"
+----
+
+Values: `page.context`, `page.url`, `page.title`, `page.component.name`, `page.component.title`, `page.version.name`, `page.version.display`, `page.scopeLabel`.
+
+[source,yaml]
+----
+antora:
+  extensions:
+    - require: '@antora-supplemental/page-state'
+----
+
+Replaces `soft-nav-context` (`SoftNavContext`, `SoftNavSignals`, `bindSoftNavContext`), which are removed with no aliases.

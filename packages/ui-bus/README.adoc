@@ -1,0 +1,43 @@
+= UiBus (`packages/ui-bus`)
+
+A general event bus for Antora UI extensions. It has no knowledge of navigation, themes or any feature: extensions publish to it and subscribe to it without naming each other. It lives for the life of the document, across soft navigations.
+
+[source,js]
+----
+// Events: transient signals. If you were not listening, you missed it.
+UiBus.events.on('nav:loaded', ({ url }) => rebuildToc())
+UiBus.events.emit('nav:loaded', { url })
+
+// State: persistent values, readable at any time.
+UiBus.state.set('page.component.name', 'tools')
+UiBus.state.get('page.component.name')
+UiBus.state.watch('page.component.name', (name, prev) => setSearchScope(name)) // runs now, then on change
+----
+
+== Rules
+
+* Load `ui-bus.js` before every other extension script.
+* Names are owner-first: events `owner:thing` (`nav:loaded`), state `owner.thing` (`page.url`).
+* `state.set` notifies only when the value changes (`Object.is`).
+* Every `on`, `once` and `watch` returns an `off` function.
+
+== Alias it
+
+Once you know the shape, a local alias keeps code short. Keep the global name `UiBus` itself; only alias inside your own script.
+
+[source,js]
+----
+const Bus = window.UiBus
+Bus.events.on('nav:loaded', rebuildToc)
+Bus.state.watch('page.url', trackPageView)
+----
+
+== Well-known names
+
+[cols="1,3"]
+|===
+| Name | Published by
+
+| events `nav:before`, `nav:loaded`, `nav:failed` | `soft-nav`
+| state `page.context`, `page.url`, `page.title`, `page.component.name`, `page.component.title`, `page.version.name`, `page.version.display`, `page.scopeLabel` | `page-state`
+|===

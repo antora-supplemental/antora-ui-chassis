@@ -1,0 +1,9 @@
+{
+  id: "page-state",
+  name: "page-state",
+  version: "0.1.0",
+  type: "ui-chassis-component",
+  description: "Publishes page.* values (component, version, url, title, scope label) on UiBus.state.",
+  layer: "chassis",
+  slots: { footer: { scripts: ["js/page-state.js"], after: ["ui-bus", "soft-nav"] } },
+}

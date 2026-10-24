@@ -13,52 +13,33 @@
  * without resetting the independent nav scrollport.
  *
  * Public API:
- *   SoftNav.on('before'|'loaded'|'failed', handler) -> unsubscribe
  *   SoftNav.registerRegion({ id, extract(doc), apply(fresh, ctx) })
  *   SoftNav.navigate(url)
  *   SoftNav.transition = 'none' | 'crossfade'  (default: none — DeepWiki-like)
  *   SoftNav.replaceNav = false | true          (default: false — patch currents)
  *   SoftNav.crossComponentForest = true | false | 'auto'  (default: 'auto')
  *
- * DOM events (detail = ctx): soft-nav:before | soft-nav:loaded | soft-nav:failed
- * Compat: also fires doc-nav:loaded on successful swaps.
+ * Lifecycle is published on UiBus (load ui-bus.js first):
+ *   UiBus.events.on('nav:before' | 'nav:loaded' | 'nav:failed', fn)   detail = ctx
  */
 ;(function (global) {
   'use strict'
 
   var FADE_MS = 180
-  var listeners = { before: [], loaded: [], failed: [] }
   var regions = Object.create(null)
 
+  /** Publish lifecycle on the general bus as nav:before | nav:loaded | nav:failed. */
   function emit (event, detail) {
-    var list = listeners[event] || []
-    for (var i = 0; i < list.length; i++) {
-      try {
-        list[i](detail)
-      } catch (err) {
-        console.warn('[soft-nav] listener error on ' + event, err)
-      }
+    if (!global.UiBus) {
+      console.warn('[soft-nav] UiBus not loaded; load ui-bus.js before soft-nav.js')
+      return
     }
-    document.dispatchEvent(new CustomEvent('soft-nav:' + event, { detail: detail }))
-    if (event === 'loaded') {
-      document.dispatchEvent(new CustomEvent('doc-nav:loaded', { detail: detail }))
-    }
+    global.UiBus.events.emit('nav:' + event, detail)
   }
-
   var SoftNav = {
     transition: 'none',
     replaceNav: false,
     crossComponentForest: 'auto',
-    on: function (event, handler) {
-      if (!listeners[event]) listeners[event] = []
-      listeners[event].push(handler)
-      return function unsubscribe () {
-        var list = listeners[event]
-        if (!list) return
-        var i = list.indexOf(handler)
-        if (i >= 0) list.splice(i, 1)
-      }
-    },
     registerRegion: function (spec) {
       if (!spec || !spec.id || typeof spec.extract !== 'function' || typeof spec.apply !== 'function') {
         throw new Error('SoftNav.registerRegion requires { id, extract, apply }')

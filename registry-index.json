@@ -1,40 +1,74 @@
 {
   "schema": "1.0",
-  "generatedAt": "2026-10-21T00:00:00.000Z",
+  "generatedAt": "2026-10-24T00:00:00.000Z",
   "repository": "https://github.com/antora-supplemental/antora-ui-chassis",
   "source": "registry-index.json",
   "modules": [
     {
-      "id": "soft-nav-context",
-      "name": "SoftNavContext",
-      "version": "0.1.1",
+      "id": "ui-bus",
+      "name": "UiBus",
+      "version": "0.1.0",
       "type": "playbook-extension",
-      "description": "SoftNav companion — page context partial + runtime for persistent chrome (search scope, dock).",
+      "description": "General event bus for UI extensions: UiBus.events (transient signals) and UiBus.state (persistent values). No feature knowledge.",
       "repository": "https://github.com/antora-supplemental/antora-ui-chassis",
-      "manifestPath": "packages/soft-nav-context/package.json",
-      "modulePath": "packages/soft-nav-context",
-      "requires": ["soft-nav"],
+      "manifestPath": "packages/ui-bus/package.json",
+      "modulePath": "packages/ui-bus",
+      "requires": [],
       "recommends": [],
       "conflicts": [],
       "install": {
-        "gitPath": "github:antora-supplemental/antora-ui-chassis#chassis-v0.1.2&path:packages/soft-nav-context",
-        "productTopic": "soft-nav-context"
+        "gitPath": "github:antora-supplemental/antora-ui-chassis#chassis-v0.2.0&path:packages/ui-bus",
+        "productTopic": "ui-bus"
+      }
+    },
+    {
+      "id": "soft-nav",
+      "name": "SoftNav",
+      "version": "0.2.0",
+      "type": "playbook-extension",
+      "description": "Soft navigation; publishes nav:before, nav:loaded and nav:failed on UiBus.",
+      "repository": "https://github.com/antora-supplemental/antora-ui-chassis",
+      "manifestPath": "packages/soft-nav/package.json",
+      "modulePath": "packages/soft-nav",
+      "requires": ["ui-bus"],
+      "recommends": ["page-state"],
+      "conflicts": [],
+      "install": {
+        "gitPath": "github:antora-supplemental/antora-ui-chassis#chassis-v0.2.0&path:packages/soft-nav",
+        "productTopic": "soft-nav"
+      }
+    },
+    {
+      "id": "page-state",
+      "name": "page-state",
+      "version": "0.1.0",
+      "type": "playbook-extension",
+      "description": "Publishes the current page component, version, url and title as page.* values on UiBus.state.",
+      "repository": "https://github.com/antora-supplemental/antora-ui-chassis",
+      "manifestPath": "packages/page-state/package.json",
+      "modulePath": "packages/page-state",
+      "requires": ["ui-bus"],
+      "recommends": ["soft-nav"],
+      "conflicts": [],
+      "install": {
+        "gitPath": "github:antora-supplemental/antora-ui-chassis#chassis-v0.2.0&path:packages/page-state",
+        "productTopic": "page-state"
       }
     },
     {
       "id": "chassis-compose",
       "name": "Chassis compose",
-      "version": "0.1.0",
+      "version": "0.2.0",
       "type": "playbook-extension",
-      "description": "Meta extension bundling chassis build-time extensions (registers soft-nav-context).",
+      "description": "Meta extension bundling ui-bus, soft-nav and page-state.",
       "repository": "https://github.com/antora-supplemental/antora-ui-chassis",
       "manifestPath": "packages/chassis-compose/package.json",
       "modulePath": "packages/chassis-compose",
       "requires": [],
-      "recommends": ["soft-nav-context"],
+      "recommends": [],
       "conflicts": [],
       "install": {
-        "gitPath": "github:antora-supplemental/antora-ui-chassis#chassis-v0.1.2&path:packages/chassis-compose",
+        "gitPath": "github:antora-supplemental/antora-ui-chassis#chassis-v0.2.0&path:packages/chassis-compose",
         "productTopic": "chassis-compose"
       }
     }

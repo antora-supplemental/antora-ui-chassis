@@ -1,0 +1,5 @@
+= Changelog
+
+== 0.1.0
+
+* First release: `UiBus.events` (`on`, `once`, `off`, `emit`) and `UiBus.state` (`get`, `set`, `watch`, `keys`). Replaces the SoftNav-owned event bus and `SoftNavSignals`.

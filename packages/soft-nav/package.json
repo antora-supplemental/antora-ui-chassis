@@ -1,7 +1,7 @@
 {
   "name": "@antora-supplemental/soft-nav",
-  "version": "0.1.3",
-  "description": "Antora extension: inject SoftNav runtime (soft-nav.js) into the UI bundle",
+  "version": "0.2.0",
+  "description": "Antora extension: inject SoftNav runtime (soft-nav.js); publishes nav:* events on UiBus",
   "main": "lib/index.js",
   "exports": {
     ".": "./lib/index.js",
@@ -28,5 +28,8 @@
     "type": "git",
     "url": "git+https://github.com/antora-supplemental/antora-ui-chassis.git",
     "directory": "packages/soft-nav"
+  },
+  "dependencies": {
+    "@antora-supplemental/ui-bus": "github:antora-supplemental/antora-ui-chassis#ui-bus-v0.1.0&path:packages/ui-bus"
   }
 }

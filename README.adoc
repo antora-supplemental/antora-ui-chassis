@@ -40,11 +40,11 @@ See `docs/modules/ROOT/pages/extensions.adoc`.
 * `packages/soft-nav` — same-origin soft navigation bus (+ optional Antora inject extension)
 * `packages/soft-nav-context` — SoftNavContext navigation context (SoftNav companion for persistent chrome)
 * Diagram zoom / lightbox — use `@antora-supplemental/diagram-lightbox` (see removed `packages/diagram-zoom/README.adoc`)
-* `packages/chassis-compose` — meta Antora extension bundling build-time chassis extensions (`soft-nav`, `soft-nav-context`)
+* `packages/chassis-compose` — meta Antora extension bundling build-time chassis extensions (`ui-bus`, `soft-nav`, `page-state`)
 
 == Releases (git tags)
 
-Per-package tags: `soft-nav-context-vX.Y.Z`, `chassis-compose-vX.Y.Z`.
+Per-package tags: `ui-bus-vX.Y.Z`, `soft-nav-vX.Y.Z`, `page-state-vX.Y.Z`, `chassis-compose-vX.Y.Z`.
 Meta tag `chassis-vX.Y.Z` marks the commit Facto stack and other compose pins should use (same commit as the compose package release).
 
 == Consume from Valentus

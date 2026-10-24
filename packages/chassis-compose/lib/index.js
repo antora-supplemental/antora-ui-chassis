@@ -3,51 +3,38 @@
 /**
  * Meta Antora extension for chassis build-time extensions.
  *
- * Registers bundled members: soft-nav (runtime inject), soft-nav-context.
- * Copy-only UI packages (content-viewport, …) stay manual.
+ * Registers, in load order: ui-bus, soft-nav, page-state.
  *
- * Playbook:
  *   antora:
  *     extensions:
  *       - require: '@antora-supplemental/chassis-compose'
- *         # softNav: { ui: false }           # nested override (optional)
- *         # softNavContext: { ui: false }
+ *         # softNav: false            # disable one member
+ *         # pageState: { ui: false }  # nested override
  */
 
-const softNav = require('@antora-supplemental/soft-nav')
-const softNavContext = require('@antora-supplemental/soft-nav-context')
-const {
-  resolveSoftNavConfig,
-  resolveSoftNavContextConfig,
-} = require('./resolve-config.js')
+const { resolveChildConfig } = require('./resolve-config.js')
 
-const PACKAGE = '@antora-supplemental/chassis-compose'
-const SOFT_NAV = '@antora-supplemental/soft-nav'
-const SOFT_NAV_CONTEXT = '@antora-supplemental/soft-nav-context'
+const MEMBERS = [
+  ['uiBus', '@antora-supplemental/ui-bus'],
+  ['softNav', '@antora-supplemental/soft-nav'],
+  ['pageState', '@antora-supplemental/page-state'],
+]
 
 function register (context = {}) {
   const config = context.config || context || {}
-  const logger = this.getLogger(PACKAGE)
-
-  const softNavConfig = resolveSoftNavConfig(config)
-  if (softNavConfig === null) {
-    logger.info('Bundle: soft-nav disabled')
-  } else {
-    softNav.register.call(this, { config: softNavConfig })
-    logger.info('Bundle: %s enabled', SOFT_NAV)
+  const logger = this.getLogger('@antora-supplemental/chassis-compose')
+  for (const [key, id] of MEMBERS) {
+    const child = resolveChildConfig(config, key)
+    if (child === null) {
+      logger.info('Bundle: %s disabled', id)
+      continue
+    }
+    require(id).register.call(this, { config: child })
+    logger.info('Bundle: %s enabled', id)
   }
-
-  const childConfig = resolveSoftNavContextConfig(config)
-  if (childConfig === null) {
-    logger.info('Bundle: soft-nav-context disabled')
-    return
-  }
-
-  softNavContext.register.call(this, { config: childConfig })
-  logger.info('Bundle: %s enabled', SOFT_NAV_CONTEXT)
 }
 
 module.exports = register
 module.exports.register = register
-module.exports.resolveSoftNavConfig = resolveSoftNavConfig
-module.exports.resolveSoftNavContextConfig = resolveSoftNavContextConfig
+module.exports.MEMBERS = MEMBERS
+Object.assign(module.exports, require('./resolve-config.js'))

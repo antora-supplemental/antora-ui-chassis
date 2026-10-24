@@ -1,43 +1,41 @@
 = SoftNav
 
-Chassis UI component: same-origin soft navigation for Antora hubs.
+Chassis UI component: same-origin soft navigation for Antora hubs. It swaps the page regions and announces each navigation on xref:../ui-bus/README.adoc[UiBus]; it knows nothing about the widgets that react.
 
 == Include
 
-*Preferred:* register `@antora-supplemental/chassis-compose` (injects `soft-nav.js` before `soft-nav-context`) or require `@antora-supplemental/soft-nav` alone on the playbook.
+*Preferred:* register `@antora-supplemental/chassis-compose`, or require `@antora-supplemental/soft-nav` alone. Either injects `ui-bus.js` and then `soft-nav.js`.
 
-*Manual:* copy `js/soft-nav.js` into hub `supplemental-ui/js/` and load **before** consumer scripts:
+*Manual:* copy `ui-bus.js` and `soft-nav.js` into hub `supplemental-ui/js/` and load them first, in this order:
 
 ----
+<script src="{{{uiRootPath}}}/js/ui-bus.js" defer></script>
 <script src="{{{uiRootPath}}}/js/soft-nav.js" defer></script>
 <script src="{{{uiRootPath}}}/js/site-nav-tree-current.js" defer></script>
 ----
 
+== Events it publishes
+
+[source,js]
+----
+UiBus.events.on('nav:before', (ctx) => {})  // { url, push }
+UiBus.events.on('nav:loaded', (ctx) => {})  // { url, doc, articleHost }
+UiBus.events.on('nav:failed', (ctx) => {})  // { url, error }; a hard load follows
+----
+
 == API
 
-* `SoftNav.on('before'|'loaded'|'failed', handler)` — returns unsubscribe
 * `SoftNav.registerRegion({ id, extract(doc), apply(fresh, ctx) })`
 * `SoftNav.navigate(url)`
-* `SoftNav.transition` — `'crossfade'` (default) or `'none'`
+* `SoftNav.transition`: `'none'` (default) or `'crossfade'`
 
-DOM events: `soft-nav:before`, `soft-nav:loaded`, `soft-nav:failed`.
-Compat: also fires `doc-nav:loaded` on success.
-
-Built-in regions: `mast`, `nav`, `article`. SoftNav does **not** hard-call nav-tree / mermaid / math — those subscribe to `loaded`.
-
-Persistent chrome (search omnibox, dock) is **not** swapped — pair SoftNav with link:../soft-nav-context/README.adoc[SoftNavContext] so scope/context tracks each navigation.
+Built-in regions: `mast`, `nav`, `article`. Persistent chrome (search, dock) is not swapped; it follows the page through `page-state` values on the bus.
 
 == Consumer pattern
 
-Swapped regions (article, in-nav TOC helpers):
-
+[source,js]
 ----
-bindSoftNavContext({
-  onBoot: function () { rebind(document) },
-  onLoaded: function (ctx) { rebind((ctx && ctx.articleHost) || document) },
-})
+function rebind (root) { /* render math, diagrams, ... inside root */ }
+rebind(document)
+UiBus.events.on('nav:loaded', (ctx) => rebind(ctx.articleHost || document))
 ----
-
-Persistent chrome (search scope in navbar) uses link:../soft-nav-context/ARCHITECTURE.adoc[SoftNavSignals] — SoftNav does not replace those nodes.
-
-Without `bind-soft-nav-context.js`, duplicate the SoftNav + DOM fallback once per script (discouraged for new extensions).
