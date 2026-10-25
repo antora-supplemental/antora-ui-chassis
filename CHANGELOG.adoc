@@ -1,5 +1,11 @@
 = Changelog
 
+== Unreleased
+
+* **`color-scheme`: the `--cs-*` token contract is documented** (header of `color-scheme.css`, README): core `--cs-canvas`, `-elevated`, `-ink`, `-ink-muted`, `-border`, `-accent`; `--cs-accent-hover`, `-accent-soft`, `-hover`; `--cs-code-bg`, `-code-fg`; `--cs-admonition-note|tip|important|warning|caution`. The six `--valentus-*` core names stay in the contract (paints alias them).
+* **`color-scheme`: `scripts/validate-paint.mjs`**, a paint-selector allowlist validator for the registry and paint CI. Errors on layout classes outside the allowlist, `@import` and external `url()`; literal colors outside token blocks are warnings (`--strict` makes them errors). `--extra=` admits a paint's declared layout prefixes.
+* **`default-paint`: sets the full `--cs-*` contract** from its `--dp-*` palette (adds `--dp-admonition-*` per scheme), so contract layouts such as Valentus Layout render with Default UI colors.
+
 == color-scheme-v0.2.0, default-paint-v0.1.1 - 2026-10-25
 
 * **`color-scheme` 0.2.0 — live paint (opt-in `live_paint`):** a built site can switch its paint at view time from `?paint=<id>`, a `cs-paint` cookie, `ColorScheme.setPaint(id)` or a `postMessage` from an allow-listed origin. Only ids declared in the playbook `paints` map load; the query string never supplies a URL. The paint is in place before first paint; light/dark stays independent. Announced on `UiBus.state` `color-scheme.paint` and as a `color-scheme:paint` DOM event.

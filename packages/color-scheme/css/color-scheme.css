@@ -8,10 +8,18 @@
  *   [data-color-scheme-mode]          stored choice: system | light | dark
  *   [data-dm-navbar]                  from <meta name="dm-navbar">, for paint
  *
- * Token names paint packs define for both schemes (consumers always write
- * var(--name, fallback), e.g. var(--valentus-ink, CanvasText)):
- *   --valentus-canvas --valentus-elevated --valentus-ink --valentus-ink-muted
- *   --valentus-border --valentus-accent
+ * Token contract. A paint defines these on :root (light) and html.dark-theme
+ * (dark); layouts and extensions read them as var(--name, fallback) with a
+ * system-color fallback (Canvas, CanvasText, GrayText, LinkText, transparent),
+ * so a layout renders without any paint:
+ *   core      --cs-canvas --cs-elevated --cs-ink --cs-ink-muted --cs-border
+ *             --cs-accent
+ *   accents   --cs-accent-hover --cs-accent-soft --cs-hover
+ *   code      --cs-code-bg --cs-code-fg   (listing/pre blocks)
+ *   callouts  --cs-admonition-note -tip -important -warning -caution
+ * The six core tokens are also published as --valentus-canvas, -elevated,
+ * -ink, -ink-muted, -border, -accent (paints alias them to --cs-*); existing
+ * extensions read those names, and they remain part of the contract.
  *
  * Scheme switch transition contract: the runtime uses View Transitions when the
  * browser has them (html.color-scheme-vt while one runs), otherwise it sets

@@ -7,9 +7,9 @@
  *    looks like stock Default UI; dark values are ported from antora-dark-mode.
  *    Override any --dp-* token (or the chassis token names below) in your own
  *    supplemental CSS to re-tint.
- * 2. The chassis token contract (--valentus-canvas, -elevated, -ink, -ink-muted,
- *    -border, -accent; see color-scheme.css) is defined from --dp-* so
- *    chassis-aware extensions follow this palette.
+ * 2. The full chassis token contract (--cs-*, plus the six --valentus-* core
+ *    names; see color-scheme.css) is defined from --dp-* so contract layouts
+ *    (e.g. Valentus Layout) and chassis-aware extensions follow this palette.
  * 3. Default UI selectors read the tokens.
  */
 :root {
@@ -40,6 +40,29 @@
   --dp-footer-ink: #5d5d5d;
   --dp-footer-link: #191919;
   --dp-nav-icon: #222;
+  --dp-admonition-note: #217ee7;
+  --dp-admonition-tip: #41af46;
+  --dp-admonition-important: #d32f2f;
+  --dp-admonition-warning: #e18114;
+  --dp-admonition-caution: #a0439c;
+
+  /* Neutral --cs-* contract (see color-scheme.css), from --dp-*. */
+  --cs-canvas: var(--dp-canvas);
+  --cs-elevated: var(--dp-panel);
+  --cs-ink: var(--dp-ink);
+  --cs-ink-muted: var(--dp-ink-muted);
+  --cs-border: var(--dp-border);
+  --cs-accent: var(--dp-link);
+  --cs-accent-hover: var(--dp-link-hover);
+  --cs-accent-soft: color-mix(in srgb, var(--dp-link) 10%, transparent);
+  --cs-hover: var(--dp-menu-hover);
+  --cs-code-bg: var(--dp-pre-bg);
+  --cs-code-fg: var(--dp-ink);
+  --cs-admonition-note: var(--dp-admonition-note);
+  --cs-admonition-tip: var(--dp-admonition-tip);
+  --cs-admonition-important: var(--dp-admonition-important);
+  --cs-admonition-warning: var(--dp-admonition-warning);
+  --cs-admonition-caution: var(--dp-admonition-caution);
 
   --valentus-canvas: var(--dp-canvas);
   --valentus-elevated: var(--dp-panel);
@@ -77,6 +100,11 @@ html.dark-theme {
   --dp-footer-ink: #a6a7ab;
   --dp-footer-link: #f1f3f5;
   --dp-nav-icon: #c1c2c5;
+  --dp-admonition-note: #4dabf7;
+  --dp-admonition-tip: #69db7c;
+  --dp-admonition-important: #ff8787;
+  --dp-admonition-warning: #ffa94d;
+  --dp-admonition-caution: #da77f2;
 }
 
 /* Surfaces and text */

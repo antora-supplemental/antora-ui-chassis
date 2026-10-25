@@ -126,6 +126,14 @@ background: var(--valentus-canvas, Canvas);
 
 so a region yanked out of the stack still paints something readable.
 
+== Token contract and paint validation
+
+Layouts and paints meet at the `--cs-*` contract: core `--cs-canvas`, `-elevated`, `-ink`, `-ink-muted`, `-border`, `-accent`; `--cs-accent-hover`, `-accent-soft`, `-hover`; `--cs-code-bg`, `-code-fg`; `--cs-admonition-note`, `-tip`, `-important`, `-warning`, `-caution`. Paints set them on `:root` and `html.dark-theme`; layouts read `var(--cs-*, system color)`. The six `--valentus-*` core names are aliases that stay in the contract.
+
+Any contract layout works with any contract paint: Valentus Layout with `default-paint`, or the Default UI with Valentus Paint.
+
+The registry checks a paint with `packages/color-scheme/scripts/validate-paint.mjs <css> --extra=<declared prefixes>`: layout classes outside the allowlist, `@import` and external `url()` fail; literal colors outside token blocks warn (`--strict` fails).
+
 == Live paint and registry previews
 
 `color-scheme` 0.2.0 can swap the paint of a built site at view time (`live_paint`, off by default). Options and API: `packages/color-scheme/README.adoc`.
