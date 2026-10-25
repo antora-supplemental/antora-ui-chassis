@@ -2,6 +2,7 @@
 
 == Unreleased
 
+* **`default-paint`: light-mode contrast fix.** Four highlight.js token colors and `--dp-ink-faint` missed WCAG AA on light panels; new `--dp-syntax-*` tokens and a darker `--dp-ink-faint` bring axe color-contrast to 0 in light and dark for every layout on this paint (Default UI, Valentus Layout). Dark unchanged.
 * **`color-scheme`: the `--cs-*` token contract is documented** (header of `color-scheme.css`, README): core `--cs-canvas`, `-elevated`, `-ink`, `-ink-muted`, `-border`, `-accent`; `--cs-accent-hover`, `-accent-soft`, `-hover`; `--cs-code-bg`, `-code-fg`; `--cs-admonition-note|tip|important|warning|caution`. The six `--valentus-*` core names stay in the contract (paints alias them).
 * **`color-scheme`: `scripts/validate-paint.mjs`**, a paint-selector allowlist validator for the registry and paint CI. Errors on layout classes outside the allowlist, `@import` and external `url()`; literal colors outside token blocks are warnings (`--strict` makes them errors). `--extra=` admits a paint's declared layout prefixes.
 * **`default-paint`: sets the full `--cs-*` contract** from its `--dp-*` palette (adds `--dp-admonition-*` per scheme), so contract layouts such as Valentus Layout render with Default UI colors.

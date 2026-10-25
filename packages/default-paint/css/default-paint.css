@@ -18,7 +18,7 @@
   --dp-doc-ink: #333;
   --dp-heading: #191919;
   --dp-ink-muted: #5d5d5d;
-  --dp-ink-faint: #8e8e8e;
+  --dp-ink-faint: #6b6b6b;
   --dp-panel: #fafafa;
   --dp-panel-strong: #f0f0f0;
   --dp-border: #e1e1e1;
@@ -45,6 +45,12 @@
   --dp-admonition-important: #d32f2f;
   --dp-admonition-warning: #e18114;
   --dp-admonition-caution: #a0439c;
+  /* Light syntax tokens: the Default UI highlight.js theme, with the three
+     colors that miss WCAG AA (4.5:1) on --dp-pre-bg darkened. */
+  --dp-syntax-comment: #6a6a5a;
+  --dp-syntax-meta: #6b6b6b;
+  --dp-syntax-builtin: #00739a;
+  --dp-syntax-link: #007a1f;
 
   /* Neutral --cs-* contract (see color-scheme.css), from --dp-*. */
   --cs-canvas: var(--dp-canvas);
@@ -200,7 +206,12 @@ html.dark-theme .nav-panel-explore .context .version::after { filter: invert(1);
 }
 html.dark-theme .doc pre, html.dark-theme .doc pre.highlight > code { color: #e9ecef; }
 html.dark-theme .doc .source-toolbox { color: var(--dp-ink-faint); }
-/* highlight.js tokens (dark only; light keeps the Default UI's theme) */
+/* highlight.js tokens. Light keeps the Default UI's theme except the colors
+   below, which miss 4.5:1 on the light code panel; html.dark-theme rules win. */
+.doc .hljs-comment, .doc .hljs-quote { color: var(--dp-syntax-comment); }
+.doc .hljs-meta { color: var(--dp-syntax-meta); }
+.doc .hljs-built_in, .doc .hljs-builtin-name { color: var(--dp-syntax-builtin); }
+.doc .hljs-link, .doc .hljs-regexp { color: var(--dp-syntax-link); }
 html.dark-theme .doc .hljs { background: var(--dp-pre-bg); color: #e9ecef; }
 html.dark-theme .doc .hljs-keyword, html.dark-theme .doc .hljs-selector-tag, html.dark-theme .doc .hljs-section { color: #d19df0; }
 html.dark-theme .doc .hljs-string, html.dark-theme .doc .hljs-title, html.dark-theme .doc .hljs-name, html.dark-theme .doc .hljs-type,
