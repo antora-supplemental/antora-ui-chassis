@@ -1,5 +1,9 @@
 = Changelog
 
+== color-scheme-v0.1.1 - 2026-10-25
+
+* *color-scheme:* playbook options were ignored (`register` declared zero parameters); fixed.
+
 == color-scheme-v0.1.0 - 2026-10-25
 
 * **`color-scheme` 0.1.0:** now a published Antora extension (`@antora-supplemental/color-scheme`) and the replacement for `antora-dark-mode`. It merges the old mechanism (no-FOUC head hook, saved choice under the same `antora-theme-mode` keys, system preference with override expiry, View Transition switch, accessible toggle binding) and adds the `ColorScheme` API, `UiBus.state` publishing and toggle re-binding after soft navigation.

@@ -1,5 +1,11 @@
 = Changelog
 
+== 0.1.1 - 2026-10-25
+
+=== Fixed
+
+* Playbook options (`toggle`, `navbar`, `enabled`) were ignored: `register` declared zero parameters, so Antora passed no `{ config }`. It now declares one.
+
 == 0.1.0 - 2026-10-25
 
 * First release as an Antora extension. Merges the mechanism of `antora-dark-mode` 1.4.6: inlined no-FOUC head hook, `antora-theme-mode` persistence (legacy `antora-theme` migrated), system preference with override expiry, View Transition switch, `#theme-toggle` binding or auto-creation with `aria-label`, `title` and `aria-pressed`.
