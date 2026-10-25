@@ -1,0 +1,46 @@
+= Color scheme (`packages/color-scheme`)
+
+The unstyled light/dark mechanism for Antora UIs. It sets no colors: paint supplies the palettes, the body kit places and dresses the toggle. It replaces `antora-dark-mode`.
+
+== Install
+
+[source,yaml]
+----
+antora:
+  extensions:
+    - require: '@antora-supplemental/color-scheme'
+      toggle: auto    # auto (default) creates #theme-toggle in .navbar-end when the body kit placed none; placed = bind only
+      navbar: light   # optional, writes <meta name="dm-navbar"> for paint (html[data-dm-navbar])
+----
+
+[source,json]
+----
+"@antora-supplemental/color-scheme": "github:antora-supplemental/antora-ui-chassis#color-scheme-v0.1.0&path:packages/color-scheme"
+----
+
+The extension inlines the head hook right after `site.css` (first paint already has the right scheme), links `css/color-scheme.css`, and loads `js/color-scheme.js` after `ui-bus.js` / `site.js`.
+
+== Hooks
+
+* `html.dark-theme`, `html[data-theme="light"|"dark"]`: resolved scheme.
+* `html[data-color-scheme-mode]`: stored choice, `system`, `light` or `dark`.
+* `html[data-dm-navbar]`: from `<meta name="dm-navbar">`.
+* Saved choice: `localStorage` `antora-theme-mode`, with `antora-theme-system-snapshot` (same keys as `antora-dark-mode`).
+
+Style with tokens and a fallback: `color: var(--valentus-ink, CanvasText)`.
+
+== API
+
+[source,js]
+----
+ColorScheme.mode()                // 'system' | 'light' | 'dark'
+ColorScheme.isDark()
+ColorScheme.set('dark')           // or 'light', 'system'; animated unless reduced motion
+ColorScheme.toggle()
+const off = ColorScheme.subscribe(({ mode, dark }) => {})
+UiBus.state.watch('color-scheme.dark', (dark) => {})   // when UiBus is loaded
+----
+
+== Toggle
+
+Place `<button id="theme-toggle" class="...your classes...">` anywhere in the header. Chassis binds it, fills the icon and keeps `aria-label`, `title` and `aria-pressed` current. Style `.theme-toggle` and `.theme-icon` in paint or the body kit.

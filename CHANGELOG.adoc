@@ -1,5 +1,11 @@
 = Changelog
 
+== color-scheme-v0.1.0 - 2026-10-25
+
+* **`color-scheme` 0.1.0:** now a published Antora extension (`@antora-supplemental/color-scheme`) and the replacement for `antora-dark-mode`. It merges the old mechanism (no-FOUC head hook, saved choice under the same `antora-theme-mode` keys, system preference with override expiry, View Transition switch, accessible toggle binding) and adds the `ColorScheme` API, `UiBus.state` publishing and toggle re-binding after soft navigation.
+* **Breaking:** `css/color-scheme.css` carries no colors any more; paint defines both palettes. Transition classes are `color-scheme-animating` / `color-scheme-vt`.
+* Docs: `color-scheme.adoc` has the parity table against `antora-dark-mode` and the layer each feature moved to.
+
 == chassis-v0.2.0 - 2026-10-24
 
 * **New `ui-bus`:** a general event bus (`UiBus.events` for transient signals, `UiBus.state` for persistent values) with no feature knowledge. Every chassis package now talks through it.

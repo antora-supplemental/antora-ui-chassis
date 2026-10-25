@@ -1,31 +1,64 @@
-/* Chassis foundations: color-scheme bus + primer tokens.
-   Paint packs override --valentus-* on :root / [data-theme].
-   Consumers (components, body, bolt-ons) must use var(--valentus-*, fallback). */
+/* @antora-supplemental/color-scheme: unstyled light/dark mechanism.
+ *
+ * Chassis owns the hooks, not the colors. This file sets no color values.
+ *
+ * Hooks set on <html> by js/color-scheme-head.js and js/color-scheme.js:
+ *   .dark-theme                       resolved scheme is dark
+ *   [data-theme="light"|"dark"]       resolved scheme
+ *   [data-color-scheme-mode]          stored choice: system | light | dark
+ *   [data-dm-navbar]                  from <meta name="dm-navbar">, for paint
+ *
+ * Token names paint packs define for both schemes (consumers always write
+ * var(--name, fallback), e.g. var(--valentus-ink, CanvasText)):
+ *   --valentus-canvas --valentus-elevated --valentus-ink --valentus-ink-muted
+ *   --valentus-border --valentus-accent
+ *
+ * Scheme switch transition contract: the runtime uses View Transitions when the
+ * browser has them (html.color-scheme-vt while one runs), otherwise it sets
+ * html.color-scheme-animating for ~300ms. Extensions follow tokens or
+ * html.dark-theme and never animate the switch themselves.
+ */
 :root {
   color-scheme: light dark;
-
-  /* Primer palette — legible unbranded defaults; paint replaces these */
-  --valentus-canvas: #f3f5f8;
-  --valentus-elevated: #ffffff;
-  --valentus-ink: #141820;
-  --valentus-ink-muted: #5a6270;
-  --valentus-border: #d9dee7;
-  --valentus-accent: #0f766e;
-  --valentus-doc-max: 42rem;
-  --valentus-toc-width: 12rem;
-}
-
-html.dark-theme,
-html[data-theme="dark"] {
-  color-scheme: dark;
-  --valentus-canvas: #111315;
-  --valentus-elevated: #1a1d22;
-  --valentus-ink: #e8ecf2;
-  --valentus-ink-muted: #9aa3b2;
-  --valentus-border: #2e3440;
-  --valentus-accent: #2dd4bf;
 }
 
 html[data-theme="light"] {
   color-scheme: light;
+}
+
+html[data-theme="dark"] {
+  color-scheme: dark;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  html.color-scheme-animating,
+  html.color-scheme-animating *,
+  html.color-scheme-animating *::before,
+  html.color-scheme-animating *::after {
+    transition:
+      background-color 0.28s ease,
+      color 0.28s ease,
+      border-color 0.28s ease,
+      fill 0.28s ease,
+      stroke 0.28s ease,
+      box-shadow 0.28s ease,
+      filter 0.28s ease,
+      opacity 0.28s ease !important;
+  }
+
+  html.color-scheme-vt,
+  html.color-scheme-vt *,
+  html.color-scheme-vt *::before,
+  html.color-scheme-vt *::after,
+  html:active-view-transition,
+  html:active-view-transition *,
+  html:active-view-transition *::before,
+  html:active-view-transition *::after {
+    transition: none !important;
+  }
+
+  ::view-transition-old(root),
+  ::view-transition-new(root) {
+    animation-duration: 0.28s;
+  }
 }

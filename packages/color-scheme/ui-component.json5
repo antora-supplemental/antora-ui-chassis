@@ -1,11 +1,19 @@
-﻿{
+{
   id: "color-scheme",
-  name: "Color scheme hooks",
+  name: "Color scheme",
   version: "0.1.0",
   type: "ui-chassis-component",
-  description: "Unthemed light/dark hooks and color-scheme; palettes are paint.",
+  description: "Unstyled light/dark mechanism: no-FOUC head hook, saved choice, system preference, toggle behavior and a11y. No colors; palettes are paint, toggle placement is the body kit.",
   layer: "chassis",
   slots: {
-    head: { stylesheets: ["css/color-scheme.css"] },
+    head: {
+      stylesheets: ["css/color-scheme.css"],
+      inlineScripts: ["js/color-scheme-head.js"],
+      after: ["css/site.css"],
+    },
+    footer: {
+      scripts: ["js/color-scheme.js"],
+      after: ["js/ui-bus.js"],
+    },
   },
 }

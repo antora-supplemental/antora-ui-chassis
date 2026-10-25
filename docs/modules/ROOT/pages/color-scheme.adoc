@@ -1,25 +1,122 @@
 = Color scheme and retiring antora-dark-mode
 
+== Status
+
+*Done (2026-10-25).* `antora-dark-mode` is merged into `@antora-supplemental/color-scheme` 0.1.0 (tag `color-scheme-v0.1.0`) and deprecated.
+Valentus places the toggle and owns its palettes; it no longer copies dark-mode files.
+
 == Split of responsibility
 
-* *Chassis* (`packages/color-scheme`) — `color-scheme`, `html.dark-theme` / `data-theme` hooks, no brand palette.
-* *Body kit* — where the toggle control lives in the chrome.
-* *Paint* — actual light/dark token values (`--valentus-canvas`, `--valentus-ink`, …).
+* *Chassis* (`packages/color-scheme`) — the mechanism, with no colors: no-FOUC head hook, saved choice, `prefers-color-scheme` handling, `html.dark-theme` / `data-theme` / `data-color-scheme-mode` hooks, token names, the switch transition, toggle behavior and a11y.
+* *Body kit* — where the toggle sits and how it looks (Valentus places `#theme-toggle` in its header).
+* *Paint* — actual light/dark token values (`--valentus-canvas`, `--valentus-ink`, …) and every other colored rule.
+
+See the package README for install, hooks and the `ColorScheme` API.
+
+== Parity with antora-dark-mode 1.4.6
+
+`color-scheme` replaces `antora-dark-mode`. Every row must be equal or better before the old package is retired.
+"Layer" says where the old behavior now lives: *chassis* (this package, no colors), *body kit* (Valentus places and dresses the toggle), *paint* (palette colors).
+
+[cols="3,2,4,1",options="header"]
+|===
+| Old antora-dark-mode behavior | Layer | color-scheme | Verdict
+
+| FOUC: inline head script adds `html.dark-theme` before first paint
+| chassis
+| Head hook inlined by the extension right after `site.css`; also sets `data-theme` and `data-color-scheme-mode`; storage access wrapped in `try` (private mode, blocked storage)
+| better
+
+| Saved choice in `localStorage` `antora-theme-mode` (`system`/`light`/`dark`)
+| chassis
+| Same key, same values, so users keep their choice
+| equal
+
+| Legacy key `antora-theme` migrated to `antora-theme-mode`
+| chassis
+| Same migration (head hook reads it, runtime migrates it)
+| equal
+
+| No saved choice: follow `prefers-color-scheme`, live on OS change
+| chassis
+| Same
+| equal
+
+| Explicit choice expires when the OS preference changes after it was made (`antora-theme-system-snapshot`, checked on change, `visibilitychange`, `focus`)
+| chassis
+| Same key and checks
+| equal
+
+| Animated switch: View Transitions, else `html.valentus-theme-animating` for 300 ms; `html.valentus-theme-vt` mutes other transitions; skipped under reduced motion
+| chassis
+| Same behavior; classes are now `color-scheme-animating` / `color-scheme-vt`; transition CSS (no colors) ships in `css/color-scheme.css`
+| equal (renamed)
+
+| Toggle: bind `#theme-toggle` if present, else create one at the start of `.navbar .navbar-end`
+| chassis (behavior), body kit (placement)
+| Same; `toggle: placed` turns off auto-creation for body kits that place their own
+| better
+
+| Toggle classes per header (`valentus-header-icon-btn`, `adt-header-icon-btn`)
+| body kit
+| Valentus puts its classes on the button it places; chassis only adds `theme-toggle`
+| moved
+
+| `aria-label` "Switch to light mode" / "Switch to dark mode"; icons `aria-hidden`, `focusable="false"`
+| chassis
+| Same labels, plus `title`, `aria-pressed` and `type="button"`
+| better
+
+| Keyboard: native `<button>`; old code called `blur()` after click
+| chassis
+| Native button; focus is kept, so keyboard users see where they are
+| better
+
+| `site.keys.dark_mode_navbar` -> `<meta name="dm-navbar">` -> `html[data-dm-navbar]`
+| chassis (hook), paint (colors)
+| Head hook copies the meta to `data-dm-navbar`; the extension writes the meta from its `navbar` option, or the body kit writes it
+| equal
+
+| Default UI dark palette and toggle look (`css/site-extra.css`)
+| paint
+| Valentus owns it as `css/site-paint.css`. No default (non-Valentus) paint package exists yet
+| gap for non-Valentus sites
+
+| Soft-nav page swaps
+| chassis
+| `<html>` hooks persist; the toggle re-binds on `UiBus` `nav:loaded` if the header was swapped. Old code had no handling
+| better
+
+| Programmatic access
+| chassis
+| `ColorScheme.mode/isDark/set/toggle/subscribe`; `UiBus.state` `color-scheme.mode`, `color-scheme.dark`. Old code had none
+| better
+
+| Install as UI bundle overlay / supplemental-ui / ui-module
+| chassis
+| Antora extension that works with any UI bundle. A site that only swaps the UI bundle must now add one playbook `require`
+| different
+
+| VCS icons and themed-SVG upgrade bundled in the old overlay
+| (not dark mode)
+| `vcs-icons` ui-module (Valentus) and `@dev-centr/themed-svg`
+| out of scope
+|===
 
 == Retirement of antora-dark-mode
 
-The separate `antora-dark-mode` extension should become unnecessary once:
+`antora-dark-mode` is deprecated. Its README carries a migration section:
 
-. Chassis ships the scheme hooks every body kit consumes.
-. The body kit (Valentus / Default UI) places the toggle.
-. Paint supplies both palettes.
+. Remove the `antora-dark-mode` UI bundle, supplemental files or ui-module.
+. Add `require: '@antora-supplemental/color-scheme'` to the playbook.
+. Keep or add paint that defines both palettes on `html.dark-theme` (Valentus does).
+. Rename `valentus-theme-animating` / `valentus-theme-vt` in custom CSS to `color-scheme-animating` / `color-scheme-vt`.
 
-Until then, keep the extension only as a bridge for sites that have not adopted chassis + body toggle yet.
-Do not reinvent dark mode as a permanent bolt-on if chassis already owns the contract.
+Saved user choices carry over because the storage keys are unchanged.
 
 == CSS short-circuit fallbacks
 
-Foundations (`packages/color-scheme`) *define* `--valentus-*` primer tokens.
+Chassis names the `--valentus-*` tokens; paint defines them for both schemes.
 Every consumer (chassis components, body kit, paint users, bolt-ons) styles with:
 
 ----

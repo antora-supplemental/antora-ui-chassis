@@ -1,6 +1,6 @@
 {
   "schema": "1.0",
-  "generatedAt": "2026-10-24T00:00:00.000Z",
+  "generatedAt": "2026-10-25T00:00:00.000Z",
   "repository": "https://github.com/antora-supplemental/antora-ui-chassis",
   "source": "registry-index.json",
   "modules": [
@@ -19,6 +19,24 @@
       "install": {
         "gitPath": "github:antora-supplemental/antora-ui-chassis#chassis-v0.2.0&path:packages/ui-bus",
         "productTopic": "ui-bus"
+      }
+    },
+    {
+      "id": "color-scheme",
+      "name": "Color scheme",
+      "version": "0.1.0",
+      "type": "playbook-extension",
+      "layer": "chassis",
+      "description": "Unstyled light/dark mechanism: no-FOUC head hook, saved choice, system preference, accessible toggle. No colors; replaces antora-dark-mode.",
+      "repository": "https://github.com/antora-supplemental/antora-ui-chassis",
+      "manifestPath": "packages/color-scheme/package.json",
+      "modulePath": "packages/color-scheme",
+      "requires": [],
+      "recommends": ["ui-bus"],
+      "conflicts": [],
+      "install": {
+        "gitPath": "github:antora-supplemental/antora-ui-chassis#color-scheme-v0.1.0&path:packages/color-scheme",
+        "productTopic": "color-scheme"
       }
     },
     {

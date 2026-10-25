@@ -1,0 +1,8 @@
+= Changelog
+
+== 0.1.0 - 2026-10-25
+
+* First release as an Antora extension. Merges the mechanism of `antora-dark-mode` 1.4.6: inlined no-FOUC head hook, `antora-theme-mode` persistence (legacy `antora-theme` migrated), system preference with override expiry, View Transition switch, `#theme-toggle` binding or auto-creation with `aria-label`, `title` and `aria-pressed`.
+* `ColorScheme` API (`mode`, `isDark`, `set`, `toggle`, `subscribe`); publishes `color-scheme.mode` / `color-scheme.dark` on `UiBus.state` when present; re-binds the toggle on `nav:loaded`.
+* `css/color-scheme.css` no longer carries primer colors: hooks and the switch transition only. Paint supplies both palettes.
+* Transition classes are `color-scheme-animating` / `color-scheme-vt` (were `valentus-theme-animating` / `valentus-theme-vt`).
