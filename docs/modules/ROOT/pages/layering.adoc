@@ -34,4 +34,4 @@ image::layer-paint-trim.png[Paint and trim,width=420]
 == Theme signal
 
 Chassis publishes the mode bus. Paint and extensions subscribe.
-See xref:color-scheme.adoc[].
+See xref:color-scheme.adoc[] and, for stock Default UI sites, xref:default-paint.adoc[].

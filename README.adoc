@@ -37,6 +37,7 @@ See `docs/modules/ROOT/pages/extensions.adoc`.
 
 * `packages/content-viewport` — article measure + wide-table wrapper scroll
 * `packages/color-scheme` — unthemed dark/light hooks (no brand colors)
+* `packages/default-paint` — *paint layer, not chassis:* light/dark palette for the stock Antora Default UI, read by `color-scheme` hooks. Housed here so it versions with `color-scheme`
 * `packages/soft-nav` — same-origin soft navigation bus (+ optional Antora inject extension)
 * `packages/soft-nav-context` — SoftNavContext navigation context (SoftNav companion for persistent chrome)
 * Diagram zoom / lightbox — use `@antora-supplemental/diagram-lightbox` (see removed `packages/diagram-zoom/README.adoc`)
@@ -44,7 +45,7 @@ See `docs/modules/ROOT/pages/extensions.adoc`.
 
 == Releases (git tags)
 
-Per-package tags: `ui-bus-vX.Y.Z`, `soft-nav-vX.Y.Z`, `page-state-vX.Y.Z`, `chassis-compose-vX.Y.Z`.
+Per-package tags: `ui-bus-vX.Y.Z`, `color-scheme-vX.Y.Z`, `default-paint-vX.Y.Z`, `soft-nav-vX.Y.Z`, `page-state-vX.Y.Z`, `chassis-compose-vX.Y.Z`.
 Meta tag `chassis-vX.Y.Z` marks the commit Facto stack and other compose pins should use (same commit as the compose package release).
 
 == Consume from Valentus

@@ -1,0 +1,20 @@
+{
+  "name": "@antora-supplemental/default-paint",
+  "version": "0.1.0",
+  "description": "PAINT layer: light and dark palette for the Antora Default UI, driven by the chassis color-scheme mechanism. Colors only.",
+  "main": "lib/index.js",
+  "exports": {
+    ".": "./lib/index.js",
+    "./lib": "./lib/index.js",
+    "./css/default-paint.css": "./css/default-paint.css"
+  },
+  "files": ["lib", "css", "test", "ui-component.json5", "README.adoc", "CHANGELOG.adoc"],
+  "scripts": { "test": "node --test test/*.test.js" },
+  "keywords": ["antora", "antora-ui", "antora-extension", "paint", "palette", "dark-mode", "color-scheme", "antora-ui-default"],
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/antora-supplemental/antora-ui-chassis.git",
+    "directory": "packages/default-paint"
+  }
+}

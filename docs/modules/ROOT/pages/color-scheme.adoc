@@ -79,8 +79,8 @@ See the package README for install, hooks and the `ColorScheme` API.
 
 | Default UI dark palette and toggle look (`css/site-extra.css`)
 | paint
-| Valentus owns it as `css/site-paint.css`. No default (non-Valentus) paint package exists yet
-| gap for non-Valentus sites
+| Valentus owns it as `css/site-paint.css`. Default UI sites use the sibling paint package `@antora-supplemental/default-paint` (xref:default-paint.adoc[]), same palette as tokens
+| equal
 
 | Soft-nav page swaps
 | chassis
@@ -109,7 +109,7 @@ See the package README for install, hooks and the `ColorScheme` API.
 
 . Remove the `antora-dark-mode` UI bundle, supplemental files or ui-module.
 . Add `require: '@antora-supplemental/color-scheme'` to the playbook.
-. Keep or add paint that defines both palettes on `html.dark-theme` (Valentus does).
+. Keep or add paint that defines both palettes on `html.dark-theme`: Valentus ships its own; on the Default UI add `require: '@antora-supplemental/default-paint'`.
 . Rename `valentus-theme-animating` / `valentus-theme-vt` in custom CSS to `color-scheme-animating` / `color-scheme-vt`.
 
 Saved user choices carry over because the storage keys are unchanged.

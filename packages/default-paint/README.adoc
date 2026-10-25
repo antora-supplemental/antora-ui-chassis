@@ -1,0 +1,76 @@
+= @antora-supplemental/default-paint
+:toc: macro
+
+*Layer: paint.* Light and dark colors for sites that use the stock https://gitlab.com/antora/antora-ui-default[Antora Default UI].
+Colors only — no layout, no behavior. The light/dark mechanism (no-FOUC hook, saved choice, system preference, toggle) is the chassis package link:../color-scheme/README.adoc[`@antora-supplemental/color-scheme`], which you register too.
+
+toc::[]
+
+== Why a separate package
+
+Chassis packages are unstyled by contract. This package lives in the same monorepo so it versions next to `color-scheme`, but it is a sibling labelled `layer: paint` (manifest, registry and package name), never a dependency of a chassis package.
+Themes with their own paint (Valentus `css/site-paint.css`) do not use it.
+
+== Install
+
+[source,json]
+----
+"@antora-supplemental/color-scheme": "github:antora-supplemental/antora-ui-chassis#color-scheme-v0.1.2&path:packages/color-scheme",
+"@antora-supplemental/default-paint": "github:antora-supplemental/antora-ui-chassis#default-paint-v0.1.0&path:packages/default-paint"
+----
+
+[source,yaml]
+----
+ui:
+  bundle:
+    url: https://gitlab.com/antora/antora-ui-default/-/jobs/artifacts/HEAD/raw/build/ui-bundle.zip?job=bundle-stable
+antora:
+  extensions:
+    - require: '@antora-supplemental/color-scheme'   # mechanism + toggle (auto-placed in .navbar-end)
+    - require: '@antora-supplemental/default-paint'  # colors
+----
+
+The extension adds `css/default-paint.css` to the UI and links it last in `head-styles`, after `site.css` and `color-scheme.css`. Option: `enabled: false`.
+
+Without the extension (UI bundle overlay), copy `css/default-paint.css` into your supplemental UI and link it after `site.css`.
+
+== What it paints
+
+Surfaces and text, links, navbar and dropdowns, nav tree and component/version explorer, toolbar and breadcrumbs, TOC, headings, sidebar/example/quote/verse blocks, admonition content, inline code, listings and highlight.js tokens (dark), tables and stripes, `@asciidoctor/tabs`, Lunr search results, footer, and the `#theme-toggle` look in the Default UI navbar.
+
+Light values are the Default UI's own colors, so light mode looks like stock Default UI. Dark values come from `antora-dark-mode` 1.4.6.
+
+== Tokens
+
+Every color is a `--dp-*` custom property set on `:root` (light) and `html.dark-theme` (dark). Re-tint by overriding tokens in your own CSS loaded later:
+
+[source,css]
+----
+:root { --dp-link: #8a3ffc; }
+html.dark-theme { --dp-link: #be95ff; --dp-canvas: #101014; }
+----
+
+[cols="1,1,1,2",options="header"]
+|===
+| Token | Light | Dark | Used for
+| `--dp-canvas` | `#fff` | `#1a1b1e` | page background
+| `--dp-ink` / `--dp-doc-ink` | `#222` / `#333` | `#c1c2c5` | body and article text
+| `--dp-heading` | `#191919` | `#fff` | headings, current nav item
+| `--dp-ink-muted` / `--dp-ink-faint` | `#5d5d5d` / `#8e8e8e` | `#a6a7ab` / `#909296` | toolbar, TOC, block titles
+| `--dp-panel` / `--dp-panel-strong` | `#fafafa` / `#f0f0f0` | `#25262b` / `#1f2125` | nav, toolbar, quotes, stripes
+| `--dp-border` / `--dp-border-strong` | `#e1e1e1` / `#c1c1c1` | `#373a40` / `#495057` | rules, tables, kbd
+| `--dp-link` / `--dp-link-hover` | `#1565c0` / `#104d92` | `#4dabf7` / `#74c0fc` | links, active TOC
+| `--dp-navbar` / `--dp-navbar-ink` / `--dp-navbar-hover` | `#191919` / `#fff` / `#333` | `#141517` / `#f1f3f5` / `#1f2125` | top bar
+| `--dp-menu` / `--dp-menu-hover` | `#fff` / `#f5f5f5` | `#25262b` / `#1f2125` | dropdowns, mobile menu, search results
+| `--dp-code-bg` / `--dp-code-ink` | `#fafafa` / `#222` | `#2c2e33` / `#ff8787` | inline code
+| `--dp-pre-bg` | `#fafafa` | `#141517` | listing and literal blocks
+| `--dp-sidebar-bg` / `--dp-example-bg` / `--dp-admonition-bg` | `#e1e1e1` / `#fff` / `#fafafa` | `#25262b` / `#1f2125` / `#25262b` | blocks
+| `--dp-footer` / `--dp-footer-ink` / `--dp-footer-link` | `#fafafa` / `#5d5d5d` / `#191919` | `#141517` / `#a6a7ab` / `#f1f3f5` | footer
+| `--dp-nav-icon` | `#222` | `#c1c2c5` | nav and toolbar glyphs (dark: masked)
+|===
+
+It also defines the chassis token contract from the palette (`--valentus-canvas`, `--valentus-elevated`, `--valentus-ink`, `--valentus-ink-muted`, `--valentus-border`, `--valentus-accent`), so chassis-aware extensions follow it.
+
+== Verified
+
+Default UI (`bundle-stable`) + `color-scheme` 0.1.2 + this package, Chromium, eight page types (home, guide, admonitions, blocks, code, tables, lists, typography): light mode renders and audits identically to the stock Default UI; dark mode has zero axe `color-contrast` findings, and no axe rule fires that does not also fire on the unpainted build.

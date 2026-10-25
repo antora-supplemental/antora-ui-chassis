@@ -1,5 +1,9 @@
 = Changelog
 
+== default-paint-v0.1.0 - 2026-10-25
+
+* **New `default-paint` 0.1.0 (paint layer, not chassis):** light and dark palette for the stock Antora Default UI, as an Antora extension that links `css/default-paint.css` after `color-scheme.css`. Light keeps the Default UI's colors; dark is ported from `antora-dark-mode`. Closes the "no default paint" gap left by `color-scheme` 0.1.0. Registry entry `layer: paint`.
+
 == color-scheme-v0.1.2 - 2026-10-25
 
 * *color-scheme:* fix 0.1.1 crash; `register({ config })` so options are read and `this` is the generator context. Do not pin 0.1.1.

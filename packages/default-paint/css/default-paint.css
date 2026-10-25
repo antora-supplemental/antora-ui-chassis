@@ -1,0 +1,237 @@
+/* @antora-supplemental/default-paint: PAINT layer for the Antora Default UI.
+ *
+ * Colors only. No layout, no behavior. Pairs with the chassis mechanism
+ * @antora-supplemental/color-scheme, which sets html.dark-theme / data-theme.
+ *
+ * 1. Scheme tokens. Light values are the Default UI's own colors, so light mode
+ *    looks like stock Default UI; dark values are ported from antora-dark-mode.
+ *    Override any --dp-* token (or the chassis token names below) in your own
+ *    supplemental CSS to re-tint.
+ * 2. The chassis token contract (--valentus-canvas, -elevated, -ink, -ink-muted,
+ *    -border, -accent; see color-scheme.css) is defined from --dp-* so
+ *    chassis-aware extensions follow this palette.
+ * 3. Default UI selectors read the tokens.
+ */
+:root {
+  --dp-canvas: #fff;
+  --dp-ink: #222;
+  --dp-doc-ink: #333;
+  --dp-heading: #191919;
+  --dp-ink-muted: #5d5d5d;
+  --dp-ink-faint: #8e8e8e;
+  --dp-panel: #fafafa;
+  --dp-panel-strong: #f0f0f0;
+  --dp-border: #e1e1e1;
+  --dp-border-strong: #c1c1c1;
+  --dp-link: #1565c0;
+  --dp-link-hover: #104d92;
+  --dp-navbar: #191919;
+  --dp-navbar-ink: #fff;
+  --dp-navbar-hover: #333;
+  --dp-menu: #fff;
+  --dp-menu-hover: #f5f5f5;
+  --dp-code-bg: #fafafa;
+  --dp-code-ink: #222;
+  --dp-pre-bg: #fafafa;
+  --dp-sidebar-bg: #e1e1e1;
+  --dp-example-bg: #fff;
+  --dp-admonition-bg: #fafafa;
+  --dp-footer: #fafafa;
+  --dp-footer-ink: #5d5d5d;
+  --dp-footer-link: #191919;
+  --dp-nav-icon: #222;
+
+  --valentus-canvas: var(--dp-canvas);
+  --valentus-elevated: var(--dp-panel);
+  --valentus-ink: var(--dp-ink);
+  --valentus-ink-muted: var(--dp-ink-muted);
+  --valentus-border: var(--dp-border);
+  --valentus-accent: var(--dp-link);
+}
+
+html.dark-theme {
+  --dp-canvas: #1a1b1e;
+  --dp-ink: #c1c2c5;
+  --dp-doc-ink: #c1c2c5;
+  --dp-heading: #fff;
+  --dp-ink-muted: #a6a7ab;
+  --dp-ink-faint: #909296;
+  --dp-panel: #25262b;
+  --dp-panel-strong: #1f2125;
+  --dp-border: #373a40;
+  --dp-border-strong: #495057;
+  --dp-link: #4dabf7;
+  --dp-link-hover: #74c0fc;
+  --dp-navbar: #141517;
+  --dp-navbar-ink: #f1f3f5;
+  --dp-navbar-hover: #1f2125;
+  --dp-menu: #25262b;
+  --dp-menu-hover: #1f2125;
+  --dp-code-bg: #2c2e33;
+  --dp-code-ink: #ff8787;
+  --dp-pre-bg: #141517;
+  --dp-sidebar-bg: #25262b;
+  --dp-example-bg: #1f2125;
+  --dp-admonition-bg: #25262b;
+  --dp-footer: #141517;
+  --dp-footer-ink: #a6a7ab;
+  --dp-footer-link: #f1f3f5;
+  --dp-nav-icon: #c1c2c5;
+}
+
+/* Surfaces and text */
+html,
+body {
+  background-color: var(--dp-canvas);
+  color: var(--dp-ink);
+}
+
+.doc { color: var(--dp-doc-ink); }
+.doc h1, .doc h2, .doc h3, .doc h4, .doc h5, .doc h6 { color: var(--dp-heading); }
+.doc h1.sect0 { background: var(--dp-panel-strong); }
+.doc h2:not(.discrete), .doc hr { border-color: var(--dp-border); }
+.doc a { color: var(--dp-link); }
+.doc a:hover { color: var(--dp-link-hover); }
+
+/* Navbar (Default UI top bar is dark in both schemes) */
+.navbar { background: var(--dp-navbar); color: var(--dp-navbar-ink); }
+html.dark-theme .navbar a,
+html.dark-theme .navbar .navbar-item,
+html.dark-theme .navbar .navbar-link { color: var(--dp-navbar-ink); }
+@media screen and (min-width: 1024px) {
+  .navbar-end > .navbar-item:hover,
+  .navbar-end > a.navbar-item:hover,
+  .navbar-end .navbar-link:hover { background: var(--dp-navbar-hover); }
+}
+.navbar-dropdown { background: var(--dp-menu); border-color: var(--dp-border); }
+.navbar-dropdown a.navbar-item:hover,
+.navbar-menu a.navbar-item:hover,
+.navbar-menu .navbar-link:hover { background: var(--dp-menu-hover); }
+@media screen and (max-width: 1023.5px) {
+  .navbar-menu { background: var(--dp-menu); }
+  html.dark-theme .navbar-menu .navbar-item,
+  html.dark-theme .navbar-menu .navbar-link { color: var(--dp-ink); }
+}
+html.dark-theme .navbar .button { background: var(--dp-code-bg); border-color: var(--dp-border); color: var(--dp-navbar-ink); }
+
+/* Nav, explore panel, toolbar, TOC */
+.nav, .nav-panel-menu, .nav-panel-explore, .toolbar { background-color: var(--dp-panel); }
+.toolbar { color: var(--dp-ink-muted); box-shadow: 0 1px 0 var(--dp-border); }
+.toolbar .edit-this-page a { color: var(--dp-ink-faint); }
+.nav-menu h3.title { color: var(--dp-ink-muted); }
+html.dark-theme .nav-menu, html.dark-theme .nav-link, html.dark-theme .nav-text { color: var(--dp-ink); }
+html.dark-theme .nav .nav-item.is-current-page > .nav-link { color: var(--dp-heading); }
+.nav-panel-explore .context { color: var(--dp-ink-muted); box-shadow: 0 -1px 0 var(--dp-border); }
+.nav-panel-explore .components { background: var(--dp-panel-strong); box-shadow: inset 0 1px 5px var(--dp-border); }
+html.dark-theme .nav-panel-explore .component .version a { background: var(--dp-border-strong); color: var(--dp-heading); }
+html.dark-theme .nav-panel-explore .component .is-current a { background: var(--dp-link); color: #141517; }
+.toc-menu { color: var(--dp-ink-muted); }
+.toc .toc-menu h3 { color: var(--dp-heading); }
+.toc .toc-menu a { border-left-color: var(--dp-border); }
+.toc .toc-menu a:hover { color: var(--dp-link); }
+.toc .toc-menu a.is-active { border-left-color: var(--dp-link); color: var(--dp-heading); }
+
+/* Dark icons: recolor the Default UI's dark SVG glyphs with masks */
+html.dark-theme .nav-toggle,
+html.dark-theme .home-link,
+html.dark-theme .nav-item-toggle,
+html.dark-theme .nav-menu-toggle {
+  background-image: none !important;
+  background-color: var(--dp-nav-icon);
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-position: center;
+  mask-position: center;
+}
+html.dark-theme .nav-toggle { -webkit-mask-image: url(../img/menu.svg); mask-image: url(../img/menu.svg); -webkit-mask-size: 49%; mask-size: 49%; }
+html.dark-theme .home-link { -webkit-mask-image: url(../img/home-o.svg); mask-image: url(../img/home-o.svg); }
+html.dark-theme .nav-item-toggle { -webkit-mask-image: url(../img/caret.svg); mask-image: url(../img/caret.svg); -webkit-mask-size: 50%; mask-size: 50%; }
+html.dark-theme .nav-menu-toggle { -webkit-mask-image: url(../img/octicons-16.svg#view-unfold); mask-image: url(../img/octicons-16.svg#view-unfold); -webkit-mask-size: 100%; mask-size: 100%; }
+html.dark-theme .nav-panel-explore .context .version::after { filter: invert(1); }
+
+/* Blocks */
+.doc .sidebarblock { background: var(--dp-sidebar-bg); }
+.doc .exampleblock > .content, .doc details.result > .content { background: var(--dp-example-bg); border-color: var(--dp-ink-muted); }
+.doc .quoteblock, .doc .verseblock { background: var(--dp-panel); border-left-color: var(--dp-ink-muted); color: var(--dp-ink-muted); }
+.doc .quoteblock .attribution { color: var(--dp-ink-faint); }
+.doc .admonitionblock .title, .doc .exampleblock .title, .doc .imageblock .title, .doc .listingblock .title,
+.doc .literalblock .title, .doc .openblock .title, .doc .videoblock .title, .doc table.tableblock caption,
+.doc details.result > summary { color: var(--dp-ink-muted); }
+.doc .admonitionblock td.content { background: var(--dp-admonition-bg); }
+.doc kbd { background: var(--dp-panel); border-color: var(--dp-border-strong); color: var(--dp-ink); box-shadow: 0 1px 0 var(--dp-border-strong); }
+
+/* Code */
+.doc p code, .doc thead code, .doc .colist > table code, .doc td code, .doc li code, .doc dt code, .doc dd code {
+  background: var(--dp-code-bg);
+  color: var(--dp-code-ink);
+}
+.doc pre code, .doc .listingblock pre code { background: transparent; color: inherit; }
+.doc .listingblock pre:not(.highlight), .doc .literalblock pre, .doc pre.highlight > code {
+  background: var(--dp-pre-bg);
+  box-shadow: inset 0 0 1.75px var(--dp-border);
+}
+html.dark-theme .doc pre, html.dark-theme .doc pre.highlight > code { color: #e9ecef; }
+html.dark-theme .doc .source-toolbox { color: var(--dp-ink-faint); }
+/* highlight.js tokens (dark only; light keeps the Default UI's theme) */
+html.dark-theme .doc .hljs { background: var(--dp-pre-bg); color: #e9ecef; }
+html.dark-theme .doc .hljs-keyword, html.dark-theme .doc .hljs-selector-tag, html.dark-theme .doc .hljs-section { color: #d19df0; }
+html.dark-theme .doc .hljs-string, html.dark-theme .doc .hljs-title, html.dark-theme .doc .hljs-name, html.dark-theme .doc .hljs-type,
+html.dark-theme .doc .hljs-attribute, html.dark-theme .doc .hljs-symbol, html.dark-theme .doc .hljs-bullet, html.dark-theme .doc .hljs-addition,
+html.dark-theme .doc .hljs-variable, html.dark-theme .doc .hljs-template-tag, html.dark-theme .doc .hljs-template-variable { color: #98c379; }
+html.dark-theme .doc .hljs-comment, html.dark-theme .doc .hljs-quote, html.dark-theme .doc .hljs-deletion, html.dark-theme .doc .hljs-meta { color: #8b929e; }
+html.dark-theme .doc .hljs-number, html.dark-theme .doc .hljs-regexp, html.dark-theme .doc .hljs-literal, html.dark-theme .doc .hljs-link { color: #d19a66; }
+html.dark-theme .doc .hljs-built_in, html.dark-theme .doc .hljs-builtin-name { color: #e6c07b; }
+html.dark-theme .doc .hljs-function, html.dark-theme .doc .hljs-attr, html.dark-theme .doc .hljs-tag { color: #61afef; }
+html.dark-theme .doc .hljs-subst, html.dark-theme .doc .hljs-params { color: #e9ecef; }
+html.dark-theme .doc .hljs-class .hljs-title, html.dark-theme .doc .hljs-title.class_ { color: #e6c07b; }
+
+/* Tables */
+.doc table.tableblock, .doc table.tableblock > * > tr > * { border-color: var(--dp-border); }
+.doc table.stripes-all > tbody > tr, .doc table.stripes-even > tbody > tr:nth-of-type(2n),
+.doc table.stripes-hover > tbody > tr:hover, .doc table.stripes-odd > tbody > tr:nth-of-type(odd) { background: var(--dp-panel); }
+.doc table.tableblock > tfoot { background: linear-gradient(180deg, var(--dp-panel-strong) 0, var(--dp-canvas)); }
+
+/* Tabs (@asciidoctor/tabs) */
+html.dark-theme .doc .tabs .tablist > ul li { background: var(--dp-panel); border-color: var(--dp-border); color: var(--dp-ink); }
+html.dark-theme .doc .tabs .tablist > ul li.is-selected { background: var(--dp-pre-bg); color: var(--dp-heading); }
+html.dark-theme .doc .tabs .tabpanel { background: var(--dp-canvas); border-color: var(--dp-border); }
+
+/* Lunr search (@antora/lunr-extension) */
+html.dark-theme #search-input { background: var(--dp-panel); border-color: var(--dp-border); color: var(--dp-ink); }
+html.dark-theme .search-result-dataset { background: var(--dp-menu); border-color: var(--dp-border); color: var(--dp-ink); }
+html.dark-theme .search-result-component-header { color: var(--dp-heading); border-color: var(--dp-border); }
+html.dark-theme .search-result-document-title { color: var(--dp-heading); }
+html.dark-theme .search-result-document-hit > a { color: var(--dp-ink); }
+html.dark-theme .search-result-document-hit > a:hover { background: var(--dp-menu-hover); }
+html.dark-theme .search-result-highlight { color: var(--dp-link); }
+
+/* Footer */
+.footer { background: var(--dp-footer); color: var(--dp-footer-ink); }
+.footer a { color: var(--dp-footer-link); }
+
+/* Toggle look (chassis places/binds #theme-toggle; this only paints it) */
+.navbar .theme-toggle {
+  background: none;
+  border: 0;
+  color: inherit;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 0.75rem;
+  height: 100%;
+  min-height: 2.5rem;
+}
+.navbar .theme-toggle:hover { background: var(--dp-navbar-hover); }
+.navbar .theme-toggle:focus-visible { outline: 2px solid var(--dp-link); outline-offset: -2px; }
+.theme-toggle .theme-icon {
+  width: 18px;
+  height: 18px;
+  display: block;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+html[data-dm-navbar="light"]:not(.dark-theme) .navbar .theme-toggle { color: #1a1a1a; }

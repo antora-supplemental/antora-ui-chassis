@@ -32,11 +32,33 @@
       "manifestPath": "packages/color-scheme/package.json",
       "modulePath": "packages/color-scheme",
       "requires": [],
-      "recommends": ["ui-bus"],
+      "recommends": [
+        "ui-bus"
+      ],
       "conflicts": [],
       "install": {
         "gitPath": "github:antora-supplemental/antora-ui-chassis#color-scheme-v0.1.2&path:packages/color-scheme",
         "productTopic": "color-scheme"
+      }
+    },
+    {
+      "id": "default-paint",
+      "name": "Default UI paint",
+      "version": "0.1.0",
+      "type": "playbook-extension",
+      "layer": "paint",
+      "description": "Paint layer: light and dark palette for the Antora Default UI (surfaces, text, links, nav, toolbar, code, admonitions). Colors only; pair with color-scheme.",
+      "repository": "https://github.com/antora-supplemental/antora-ui-chassis",
+      "manifestPath": "packages/default-paint/package.json",
+      "modulePath": "packages/default-paint",
+      "requires": [
+        "color-scheme"
+      ],
+      "recommends": [],
+      "conflicts": [],
+      "install": {
+        "gitPath": "github:antora-supplemental/antora-ui-chassis#default-paint-v0.1.0&path:packages/default-paint",
+        "productTopic": "default-paint"
       }
     },
     {
@@ -48,8 +70,12 @@
       "repository": "https://github.com/antora-supplemental/antora-ui-chassis",
       "manifestPath": "packages/soft-nav/package.json",
       "modulePath": "packages/soft-nav",
-      "requires": ["ui-bus"],
-      "recommends": ["page-state"],
+      "requires": [
+        "ui-bus"
+      ],
+      "recommends": [
+        "page-state"
+      ],
       "conflicts": [],
       "install": {
         "gitPath": "github:antora-supplemental/antora-ui-chassis#chassis-v0.2.0&path:packages/soft-nav",
@@ -65,8 +91,12 @@
       "repository": "https://github.com/antora-supplemental/antora-ui-chassis",
       "manifestPath": "packages/page-state/package.json",
       "modulePath": "packages/page-state",
-      "requires": ["ui-bus"],
-      "recommends": ["soft-nav"],
+      "requires": [
+        "ui-bus"
+      ],
+      "recommends": [
+        "soft-nav"
+      ],
       "conflicts": [],
       "install": {
         "gitPath": "github:antora-supplemental/antora-ui-chassis#chassis-v0.2.0&path:packages/page-state",

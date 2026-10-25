@@ -8,6 +8,8 @@
     'soft-nav',
     'page-state',
     'chassis-compose',
+    'color-scheme',
+    'default-paint',
   ],
-  productTopics: ['ui-bus', 'soft-nav', 'page-state', 'chassis-compose'],
+  productTopics: ['ui-bus', 'soft-nav', 'page-state', 'chassis-compose', 'color-scheme', 'default-paint'],
 }
