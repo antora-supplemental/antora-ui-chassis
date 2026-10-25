@@ -1,5 +1,9 @@
 = Changelog
 
+== color-scheme-v0.1.2 - 2026-10-25
+
+* *color-scheme:* fix 0.1.1 crash; `register({ config })` so options are read and `this` is the generator context. Do not pin 0.1.1.
+
 == color-scheme-v0.1.1 - 2026-10-25
 
 * *color-scheme:* playbook options were ignored (`register` declared zero parameters); fixed.

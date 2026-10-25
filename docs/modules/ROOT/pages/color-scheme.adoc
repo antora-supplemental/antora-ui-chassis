@@ -2,7 +2,7 @@
 
 == Status
 
-*Done (2026-10-25).* `antora-dark-mode` is merged into `@antora-supplemental/color-scheme` 0.1.1 (tag `color-scheme-v0.1.1`) and deprecated.
+*Done (2026-10-25).* `antora-dark-mode` is merged into `@antora-supplemental/color-scheme` 0.1.2 (tag `color-scheme-v0.1.2`) and deprecated.
 Valentus places the toggle and owns its palettes; it no longer copies dark-mode files.
 
 == Split of responsibility

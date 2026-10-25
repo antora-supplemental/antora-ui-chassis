@@ -1,6 +1,12 @@
 = Changelog
 
-== 0.1.1 - 2026-10-25
+== 0.1.2 - 2026-10-25
+
+=== Fixed
+
+* 0.1.1 crashed Antora (`this` undefined): a named single parameter makes Antora call `register(context)` unbound. `register` now destructures `({ config })`, which Antora calls with `this` bound and options passed.
+
+== 0.1.1 - 2026-10-25 (broken; do not pin)
 
 === Fixed
 

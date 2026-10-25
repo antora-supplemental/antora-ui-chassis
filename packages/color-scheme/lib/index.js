@@ -104,9 +104,10 @@ function ensureColorScheme (uiCatalog, uiOutputDir, config = {}) {
   return injectHead(uiCatalog, config) && injectFooter(uiCatalog, config)
 }
 
-// Antora passes ({ config, playbook, ... }) when register declares exactly one parameter.
-function register (vars) {
-  const config = (vars && vars.config) || {}
+// Antora binds `this` to the generator context and passes ({ config, ... }) only when
+// register destructures its single parameter (no default value, or length becomes 0).
+function register ({ config }) {
+  config = config || {}
   const logger = this.getLogger(PACKAGE_ID)
   this.on('uiLoaded', ({ playbook, uiCatalog }) => {
     if (config.enabled === false) return

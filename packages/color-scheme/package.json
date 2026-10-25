@@ -1,6 +1,6 @@
 {
   "name": "@antora-supplemental/color-scheme",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Unstyled light/dark mechanism for Antora UIs: no-FOUC head hook, saved choice, system preference, accessible toggle. Palettes belong to paint.",
   "main": "lib/index.js",
   "exports": {

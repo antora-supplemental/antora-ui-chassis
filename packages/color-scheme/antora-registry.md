@@ -19,4 +19,4 @@ antora:
     - require: '@antora-supplemental/color-scheme'
 ```
 
-Git path pin: `github:antora-supplemental/antora-ui-chassis#color-scheme-v0.1.1&path:packages/color-scheme`
+Git path pin: `github:antora-supplemental/antora-ui-chassis#color-scheme-v0.1.2&path:packages/color-scheme`
