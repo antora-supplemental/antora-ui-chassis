@@ -1,5 +1,13 @@
 = Changelog
 
+== 0.2.0 - 2026-10-25
+
+=== Added
+
+* Live paint, opt-in with `live_paint.enabled: true`. A second inline head script picks the paint before first paint: `?paint=<id>` beats the `cs-paint` cookie (`Path=/`, `SameSite=Lax`, one year); `?paint=reset` clears it. Only ids from the playbook `paints` map load (lowercase letters and digits; hrefs validated at build time). Built-in paint links matching a map entry are switched off with `media="not all"` while another paint is active, including links parsed after the hook.
+* `ColorScheme.setPaint(id)`, `getPaint()`, `paints()`. Changes go to `UiBus.state` `color-scheme.paint` and a `color-scheme:paint` CustomEvent on `document`.
+* `postMessage` control for embedding pages listed in `allow_origins`: `color-scheme:paint`, `color-scheme:mode`, `color-scheme:hello`; replies `color-scheme:state` and announces `color-scheme:ready` to the parent.
+
 == 0.1.2 - 2026-10-25
 
 === Fixed

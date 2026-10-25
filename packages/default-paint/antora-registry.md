@@ -20,4 +20,4 @@ antora:
     - require: '@antora-supplemental/default-paint'
 ```
 
-Git path pin: `github:antora-supplemental/antora-ui-chassis#default-paint-v0.1.0&path:packages/default-paint`
+Git path pin: `github:antora-supplemental/antora-ui-chassis#default-paint-v0.1.1&path:packages/default-paint`

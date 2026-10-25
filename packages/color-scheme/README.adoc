@@ -15,7 +15,7 @@ antora:
 
 [source,json]
 ----
-"@antora-supplemental/color-scheme": "github:antora-supplemental/antora-ui-chassis#color-scheme-v0.1.2&path:packages/color-scheme"
+"@antora-supplemental/color-scheme": "github:antora-supplemental/antora-ui-chassis#color-scheme-v0.2.0&path:packages/color-scheme"
 ----
 
 The extension inlines the head hook right after `site.css` (first paint already has the right scheme), links `css/color-scheme.css`, and loads `js/color-scheme.js` after `ui-bus.js` / `site.js`.
@@ -44,3 +44,46 @@ UiBus.state.watch('color-scheme.dark', (dark) => {})   // when UiBus is loaded
 == Toggle
 
 Place `<button id="theme-toggle" class="...your classes...">` anywhere in the header. Chassis binds it, fills the icon and keeps `aria-label`, `title` and `aria-pressed` current. Style `.theme-toggle` and `.theme-icon` in paint or the body kit.
+
+== Live paint (opt-in)
+
+Lets a built site switch paint at view time, so one prebuilt page can show several paints (registry previews, paint pickers). Off by default.
+
+[source,yaml]
+----
+    - require: '@antora-supplemental/color-scheme'
+      live_paint:
+        enabled: true
+        param: paint          # ?paint=<id>; ?paint=reset clears the saved choice
+        cookie: cs-paint      # SameSite=Lax, Path=cookie_path (default /), one year
+        paints:               # the only paints that can load
+          default: css/default-paint.css                      # UI path, relative to the UI root
+          valentus: https://cdn.example.org/valentus/4.0.0/site-paint.css
+        allow_origins: [https://registry.antora-supplemental.org]   # postMessage senders
+----
+
+* Antora camelCases playbook keys, so paint ids must be lowercase letters and digits (`myteal`, not `my-teal`). Bad ids, `javascript:`/`data:` hrefs, quotes and malformed origins fail the build.
+* Order: query, then cookie, then the site's built-in paint. An unknown id is ignored (an unknown cookie is cleared). The query never carries a URL.
+* A built-in paint `<link>` whose file matches a map entry is the *base*: it is disabled while another paint is active and reused when its own id is chosen.
+* The paint picks the palette; light/dark is still chosen by `ColorScheme`. Every paint must define both schemes.
+* `html[data-color-scheme-paint]` names the active live paint.
+
+[source,js]
+----
+ColorScheme.paints()             // ['default', 'valentus']
+ColorScheme.getPaint()           // null = built-in
+ColorScheme.setPaint('valentus') // false for ids not in the map; null or 'reset' = built-in
+document.addEventListener('color-scheme:paint', (e) => e.detail.paint)
+UiBus.state.watch('color-scheme.paint', (id) => {})
+----
+
+From an allow-listed parent:
+
+[source,js]
+----
+frame.contentWindow.postMessage({ type: 'color-scheme:paint', id: 'valentus' }, siteOrigin)
+frame.contentWindow.postMessage({ type: 'color-scheme:mode', mode: 'dark' }, siteOrigin)
+// replies { type: 'color-scheme:state', paint, paints, mode, dark }; on load the frame posts color-scheme:ready
+----
+
+In a cross-site iframe browsers usually drop the cookie, so pass `?paint=<id>` in the `src` or use `postMessage`.

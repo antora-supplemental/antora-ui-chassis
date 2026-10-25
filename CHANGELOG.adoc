@@ -1,5 +1,10 @@
 = Changelog
 
+== color-scheme-v0.2.0, default-paint-v0.1.1 - 2026-10-25
+
+* **`color-scheme` 0.2.0 — live paint (opt-in `live_paint`):** a built site can switch its paint at view time from `?paint=<id>`, a `cs-paint` cookie, `ColorScheme.setPaint(id)` or a `postMessage` from an allow-listed origin. Only ids declared in the playbook `paints` map load; the query string never supplies a URL. The paint is in place before first paint; light/dark stays independent. Announced on `UiBus.state` `color-scheme.paint` and as a `color-scheme:paint` DOM event.
+* **`default-paint` 0.1.1:** fix: the stylesheet was skipped when the live-paint config mentioned `css/default-paint.css`.
+
 == default-paint-v0.1.0 - 2026-10-25
 
 * **New `default-paint` 0.1.0 (paint layer, not chassis):** light and dark palette for the stock Antora Default UI, as an Antora extension that links `css/default-paint.css` after `color-scheme.css`. Light keeps the Default UI's colors; dark is ported from `antora-dark-mode`. Closes the "no default paint" gap left by `color-scheme` 0.1.0. Registry entry `layer: paint`.

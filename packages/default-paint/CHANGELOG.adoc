@@ -1,5 +1,11 @@
 = Changelog
 
+== 0.1.1 - 2026-10-25
+
+=== Fixed
+
+* The stylesheet was not linked when another head partial merely mentioned `css/default-paint.css` (for example the `color-scheme` 0.2.0 live-paint config). The duplicate check now looks for the exact `<link>` tag.
+
 == 0.1.0 - 2026-10-25
 
 * First release. Paint layer for the Antora Default UI: `--dp-*` tokens for light (the Default UI's own colors) and dark (ported from `antora-dark-mode` 1.4.6 `site-extra.css`), covering surfaces, text, links, navbar, nav and explore panel, toolbar, TOC, blocks, admonitions, code and highlight.js, tables, tabs, Lunr search, footer and the toggle look.

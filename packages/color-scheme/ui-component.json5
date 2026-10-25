@@ -1,7 +1,7 @@
 {
   id: "color-scheme",
   name: "Color scheme",
-  version: "0.1.0",
+  version: "0.2.0",
   type: "ui-chassis-component",
   description: "Unstyled light/dark mechanism: no-FOUC head hook, saved choice, system preference, toggle behavior and a11y. No colors; palettes are paint, toggle placement is the body kit.",
   layer: "chassis",

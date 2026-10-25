@@ -143,6 +143,50 @@
 
   window.ColorScheme = { mode: mode, isDark: isDark, set: set, toggle: toggle, subscribe: subscribe }
 
+  /* Live paint (livePaint.enabled): the head hook ColorSchemePaint picks the
+     palette; light/dark stays with this runtime. Changes are announced on
+     UiBus.state 'color-scheme.paint' when present and always as a
+     'color-scheme:paint' CustomEvent on document. An embedding page in
+     livePaint.allowOrigins may post { type: 'color-scheme:paint', id } or
+     { type: 'color-scheme:mode', mode } and receives
+     { type: 'color-scheme:state', paint, paints, mode, dark } back. */
+  var livePaint = window.ColorSchemePaint
+  if (livePaint) {
+    var announcePaint = function () {
+      var id = livePaint.get()
+      if (window.UiBus && window.UiBus.state) window.UiBus.state.set('color-scheme.paint', id)
+      document.dispatchEvent(new CustomEvent('color-scheme:paint', { detail: { paint: id } }))
+    }
+    window.ColorScheme.getPaint = function () { return livePaint.get() }
+    window.ColorScheme.paints = function () { return livePaint.ids() }
+    window.ColorScheme.setPaint = function (id) {
+      var before = livePaint.get()
+      var ok = livePaint.set(id)
+      if (ok && livePaint.get() !== before) announcePaint()
+      return ok
+    }
+    var reply = function (target, origin) {
+      if (target && target.postMessage) {
+        target.postMessage({ type: 'color-scheme:state', paint: livePaint.get(), paints: livePaint.ids(), mode: mode(), dark: isDark() }, origin)
+      }
+    }
+    window.addEventListener('message', function (e) {
+      if (livePaint.allowOrigins.indexOf(e.origin) < 0) return
+      var d = e.data
+      if (!d || typeof d !== 'object') return
+      if (d.type === 'color-scheme:paint') window.ColorScheme.setPaint(d.id === undefined ? null : d.id)
+      else if (d.type === 'color-scheme:mode' && (d.mode === 'light' || d.mode === 'dark' || d.mode === 'system')) set(d.mode, { animate: false })
+      else if (d.type !== 'color-scheme:hello') return
+      reply(e.source, e.origin)
+    })
+    if (window.parent !== window) {
+      livePaint.allowOrigins.forEach(function (o) {
+        try { window.parent.postMessage({ type: 'color-scheme:ready', paint: livePaint.get(), paints: livePaint.ids() }, o) } catch (err) {}
+      })
+    }
+    announcePaint()
+  }
+
   /* Toggle. The body kit places <button id="theme-toggle"> where it wants it;
      with data-color-scheme-toggle="auto" on this script (the default) a button
      is created at the start of .navbar .navbar-end when none was placed. */

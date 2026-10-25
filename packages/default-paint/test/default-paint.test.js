@@ -58,3 +58,13 @@ describe('palette', () => {
     assert.doesNotMatch(css.replace(/\/\*[\s\S]*?\*\//g, '').replace(/\.theme-toggle[^{]*\{[^}]*\}/g, ''), /(^|[;{\s])(width|margin|position|top|left|display|grid|flex)\s*:/m)
   })
 })
+
+describe('coexistence with color-scheme live paint', () => {
+  it('still links the stylesheet when another partial merely mentions css/default-paint.css', () => {
+    const { ensureDefaultPaint } = require('../lib/index.js')
+    const files = [{ type: 'partial', stem: 'head-styles', contents: Buffer.from('<link rel="stylesheet" href="{{{uiRootPath}}}/css/site.css">\n<script>window.__colorSchemeLivePaint = {"paints":{"default":"css/default-paint.css"}}</script>') }]
+    const cat = { findByType: (t) => files.filter((f) => f.type === t), addFile: (f) => files.push(f) }
+    assert.ok(ensureDefaultPaint(cat, '_'))
+    assert.match(files[0].contents.toString(), /<link rel="stylesheet" href="\{\{\{uiRootPath\}\}\}\/css\/default-paint\.css">\n?$/)
+  })
+})

@@ -125,3 +125,20 @@ background: var(--valentus-canvas, Canvas);
 ----
 
 so a region yanked out of the stack still paints something readable.
+
+== Live paint and registry previews
+
+`color-scheme` 0.2.0 can swap the paint of a built site at view time (`live_paint`, off by default). Options and API: `packages/color-scheme/README.adoc`.
+
+Security: only ids from the playbook `paints` map load, hrefs are validated at build time, and `postMessage` is accepted only from `allow_origins`. A page URL can pick a paint but never name a stylesheet.
+
+=== Recipe: "this paint on this layout" demo site
+
+. Build one demo site per layout (Default UI, Valentus Layout, ...) from the same demo content, with `color-scheme` and `live_paint.enabled: true`. List every registry paint in `paints`, pinned to a released URL (`https://cdn.jsdelivr.net/gh/<org>/<repo>@<tag>/<path>.css`) or copied into the UI as `css/<id>.css`.
+. Set `allow_origins` to the registry origin and publish each demo statically (GitHub Pages).
+. The registry embeds `<iframe src="https://demos.example.org/<layout>/index.html?paint=<id>">` and switches with `postMessage({ type: 'color-scheme:paint', id }, demoOrigin)` and `{ type: 'color-scheme:mode', mode: 'dark' }`; it listens for `color-scheme:ready` / `color-scheme:state`.
+. Adding a paint means one map entry and one rebuild of the demo sites, not a build per pairing.
+
+Only paints that style through the shared token contract and standard Antora/Asciidoctor classes look right on every layout; check paint CSS against a selector allowlist before listing it.
+
+Verified 2026-10-25 on the Default UI with `default`, a recoloured variant and the current Valentus `site-paint.css`: the chosen paint is active at the first animation frame, `?paint=` beats the cookie, `reset` and raw URLs behave as above, an allow-listed iframe parent switches paint and mode, and a non-listed origin is ignored. axe shows no new violations for `default` or the variant; the pre-split Valentus paint adds contrast failures on this layout because it does not follow the contract yet.

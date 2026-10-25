@@ -43,7 +43,7 @@ function addOrReplaceAsset (uiCatalog, uiOutputDir, relPath, contents) {
 function ensureDefaultPaint (uiCatalog, uiOutputDir) {
   addOrReplaceAsset(uiCatalog, uiOutputDir, ASSET, fs.readFileSync(path.join(ROOT, ASSET)))
   const partials = uiCatalog.findByType('partial')
-  if (partials.some((f) => ['head-styles', 'head-meta'].includes(f.stem) && bodyOf(f).includes(ASSET))) return true
+  if (partials.some((f) => ['head-styles', 'head-meta'].includes(f.stem) && bodyOf(f).includes(LINK))) return true
   const target = partials.find((f) => f.stem === 'head-styles') || partials.find((f) => f.stem === 'head-meta')
   if (!target) return false
   target.contents = Buffer.from(`${bodyOf(target).replace(/\s*$/, '')}\n${LINK}\n`)
