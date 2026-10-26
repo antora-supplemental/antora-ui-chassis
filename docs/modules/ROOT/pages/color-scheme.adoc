@@ -39,7 +39,7 @@ The chassis never replaces icons or buttons it was given.
 | query | `?scheme=<id>`, `?scheme=auto`, `?scheme=reset`; `?paint=<id>`, `?paint=reset` (live paint); `?cs-preview=<id>&cs-preview-mode=light|dark` (preview only, no writes)
 |===
 
-An off-slot scheme (one not in the current light or dark slot) turns light/dark automation off for the session. The navbar button then reports `aria-pressed="mixed"` and its label says so; the footer switch shows a note. Choosing Light, Dark, Auto or a slot scheme turns automation back on.
+Choosing a `light`, `dark` or `both` scheme only puts it in a slot; automation stays on. Only a scheme with slot `none` (not made for light/dark) turns light/dark automation off for the session. The navbar button then reports `aria-pressed="mixed"` and its label says so; the footer switch shows a note. Choosing Light, Dark, Auto or a slot scheme turns automation back on.
 
 == Parity with antora-dark-mode 1.4.6
 

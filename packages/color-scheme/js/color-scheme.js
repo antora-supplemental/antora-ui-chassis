@@ -8,9 +8,10 @@
  * Schemes of the active paint (the picker works on these):
  *   ColorScheme.getScheme()      active scheme id (also html[data-scheme])
  *   ColorScheme.schemes()        [{ id, label, slots, base }] for every scheme the paint provides
- *   ColorScheme.setScheme(id)    one that fits the current light/dark slot goes into that
- *                                slot; any other is an off-slot pick for this session
- *                                (light/dark automation off). null or 'auto' turns
+ *   ColorScheme.setScheme(id)    a light/dark/both scheme goes into the current mode's
+ *                                slot, else the slot it declares (automation stays on);
+ *                                only a slot-none scheme is an off-slot pick for this
+ *                                session (light/dark automation off). null or 'auto' turns
  *                                automation back on; 'reset' also restores the site's slots.
  *   ColorScheme.assign(slot, id) put a scheme in the 'light' or 'dark' slot; false when it does not fit
  *   ColorScheme.slots()          { light, dark }

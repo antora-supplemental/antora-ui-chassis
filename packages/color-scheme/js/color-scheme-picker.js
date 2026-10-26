@@ -40,10 +40,11 @@
     var where = []
     if (slots.light === key) where.push('light')
     if (slots.dark === key) where.push('dark')
+    var none = !fitsLight && !fitsDark
     var status = off && off.id === id ? 'In use for this visit (automatic light/dark is off)'
       : where.length ? 'Current ' + where.join(' and ') + ' scheme'
-        : fitsLight || fitsDark ? 'Fits: ' + [fitsLight && 'light', fitsDark && 'dark'].filter(Boolean).join(', ')
-          : 'Not a light or dark scheme on this site'
+        : !none ? 'Fits: ' + [fitsLight && 'light', fitsDark && 'dark'].filter(Boolean).join(', ') + ' (automatic light/dark stays on)'
+          : 'Not made for light/dark: using it turns off automatic light/dark for this visit'
     li.appendChild(el('p', { class: 'cs-picker-status' }, status))
     var shots = el('div', { class: 'cs-picker-previews' })
     var modes = fitsLight && fitsDark ? ['light', 'dark'] : fitsLight ? ['light'] : fitsDark ? ['dark'] : [info.base]
@@ -63,7 +64,7 @@
     }
     if (fitsLight) btn('Use for light', function () { assign('light', key) }, slots.light === key)
     if (fitsDark) btn('Use for dark', function () { assign('dark', key) }, slots.dark === key)
-    btn('Use for this visit only (turns off automatic light/dark)', function () { choose(id) }, !!(off && off.id === id))
+    if (none) btn('Use for this visit (turns off automatic light/dark)', function () { choose(id) }, !!(off && off.id === id))
     li.appendChild(row)
     return li
   }

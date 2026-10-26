@@ -37,23 +37,26 @@ const pickerPage = (c) => c.files.find((f) => /color-schemes\.html$/.test(f.out?
 
 describe('paint schemes', () => {
   it('reads the @color-schemes manifest of the linked paint', () => {
-    assert.deepEqual(Object.keys(paintSchemes(build(FOUR)).schemes), ['light', 'dark', 'pink', 'midnight'])
+    assert.deepEqual(Object.keys(paintSchemes(build(FOUR)).schemes), ['light', 'dark', 'pink', 'midnight', 'neon'])
     const s = paintSchemes(build(FOUR)).schemes
     assert.deepEqual(s.pink, { label: 'Pink', slots: ['light'], base: 'light' })
     assert.deepEqual(s.midnight, { label: 'Midnight', slots: ['dark'], base: 'dark' })
     assert.deepEqual(s.dark, { label: 'Dark', slots: ['dark'], base: 'dark' })
+    assert.deepEqual(s.neon, { label: 'Neon', slots: [], base: 'dark' }, 'slots: none')
   })
   it('a paint without a manifest has light and dark; the site can add, relabel or drop schemes', () => {
     assert.deepEqual(Object.keys(paintSchemes(build(null)).schemes), ['light', 'dark'])
     const s = paintSchemes(build(TWO), { schemes: { sepia: { label: 'Sepia', base: 'light' }, light: { label: 'Clair' } } }).schemes
     assert.equal(s.light.label, 'Clair')
     assert.deepEqual(s.sepia.slots, ['light'])
-    assert.deepEqual(Object.keys(paintSchemes(build(FOUR), { schemes: { pink: false } }).schemes), ['light', 'dark', 'midnight'])
+    assert.deepEqual(Object.keys(paintSchemes(build(FOUR), { schemes: { pink: false } }).schemes), ['light', 'dark', 'midnight', 'neon'])
   })
   it('rejects bad manifests and scheme ids', () => {
     assert.throws(() => parseManifest('/* @color-schemes { nope */'), /invalid @color-schemes/)
     assert.throws(() => paintSchemes(build(null), { schemes: { 'my-scheme': {} } }), /invalid scheme id/)
     assert.throws(() => paintSchemes(build(null), { schemes: { x: { slots: ['sepia'] } } }), /slots/)
+    assert.deepEqual(paintSchemes(build(null), { schemes: { x: { slots: 'both' } } }).schemes.x.slots, ['light', 'dark'])
+    assert.throws(() => paintSchemes(build(null), { schemes: { light: { slots: 'none' } } }), /must fit/)
     assert.throws(() => paintSchemes(build(null), { schemes: { dark: false } }), /must provide a 'dark'/)
   })
   it('slots pick from the paint schemes and must fit unless slot_policy is any', () => {
@@ -61,6 +64,7 @@ describe('paint schemes', () => {
     assert.deepEqual(schemesConfig(schemes, { slots: { light: 'pink' } }).slots, { light: 'pink', dark: 'dark' })
     assert.throws(() => schemesConfig(schemes, { slots: { light: 'midnight' } }), /does not declare the light slot/)
     assert.equal(schemesConfig(schemes, { slots: { light: 'midnight' }, slotPolicy: 'any' }).slots.light, 'midnight')
+    assert.throws(() => schemesConfig(schemes, { slots: { dark: 'neon' }, slotPolicy: 'any' }), /slot none/)
     assert.throws(() => schemesConfig(schemes, { slots: { dark: 'valentus' } }), /not a scheme of the active paint/)
   })
 })

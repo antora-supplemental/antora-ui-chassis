@@ -20,7 +20,7 @@
  *         schemes:              # optional: add or relabel schemes (normally the paint's manifest)
  *           pink: { label: Pink, slots: [light] }
  *         slots: { light: light, dark: dark }   # default slot schemes
- *         slot_policy: declared # or any: every scheme fits both slots
+ *         slot_policy: declared # or any: a light, dark or both scheme fits either slot (never a none scheme)
  *         picker: auto          # true | false | { enabled, placement: footer|none, label, preview_page }
  *         scheme_param: scheme  # ?scheme=<id>; ?scheme=reset clears
  *         scheme_cookie: cs-scheme
@@ -114,9 +114,12 @@ function livePaintConfig (config = {}) {
        "pink": { "label": "Pink", "slots": ["light"] } }
      *\/
 
-   Each scheme: label, slots (light and/or dark: which slot it may fill) and
-   base (light or dark: the light/dark state it is drawn on; defaults to its
-   only slot, else light). The site's color-scheme `schemes` option adds or
+   Each scheme: label, slots ("light", "dark", "both" or a list of those: the
+   light/dark slots it is a candidate for; "none" or [] for a scheme not made
+   for the light/dark system) and base (light or dark: the light/dark state it
+   is drawn on; defaults to its only slot, else light). Choosing a slot scheme
+   puts it in a slot and keeps light/dark automation on; only a "none" scheme
+   turns automation off, for the session. The site's color-scheme `schemes` option adds or
    overrides entries (for a paint without a manifest, or to relabel). */
 const MANIFEST = /\/\*!?\s*@color-schemes\b([\s\S]*?)\*\//
 
@@ -134,8 +137,11 @@ function normalizeScheme (id, e, where) {
   if (!PAINT_ID.test(id) || RESERVED.includes(id)) throw new Error(`color-scheme: invalid scheme id '${id}' in ${where} (lowercase letters and digits, starting with a letter; not ${RESERVED.join('/')})`)
   e = e && typeof e === 'object' ? e : {}
   const implicit = SLOTS.includes(id) ? [id] : SLOTS.slice()
-  const slots = e.slots === undefined ? (e.base && !SLOTS.includes(id) ? [e.base] : implicit) : [].concat(e.slots).map(String)
-  for (const sl of slots) if (!SLOTS.includes(sl)) throw new Error(`color-scheme: scheme '${id}' in ${where}: slots must be light and/or dark, got '${sl}'`)
+  let slots = e.slots === undefined ? (e.base && !SLOTS.includes(id) ? [e.base] : implicit) : [].concat(e.slots).map(String)
+  if (slots.length === 1 && slots[0] === 'both') slots = SLOTS.slice()
+  else if (slots.length === 1 && slots[0] === 'none') slots = []
+  for (const sl of slots) if (!SLOTS.includes(sl)) throw new Error(`color-scheme: scheme '${id}' in ${where}: slots must be light, dark, both or none, got '${sl}'`)
+  if (SLOTS.includes(id) && !slots.includes(id)) throw new Error(`color-scheme: scheme '${id}' in ${where} must fit the ${id} slot`)
   if (e.base !== undefined && !SLOTS.includes(e.base)) throw new Error(`color-scheme: scheme '${id}' in ${where}: base must be light or dark`)
   const base = e.base || (SLOTS.includes(id) ? id : slots.length === 1 ? slots[0] : 'light')
   const label = e.label === undefined ? id.charAt(0).toUpperCase() + id.slice(1) : String(e.label).slice(0, 80)
@@ -183,6 +189,7 @@ function schemesConfig (schemes, config = {}) {
     const v = config.slots && config.slots[sl]
     if (v === undefined || v === null) continue
     if (!schemes[v]) throw new Error(`color-scheme: slots.${sl} '${v}' is not a scheme of the active paint (${Object.keys(schemes).join(', ')})`)
+    if (!schemes[v].slots.length) throw new Error(`color-scheme: scheme '${v}' has slot none (not made for light/dark), so it cannot be the ${sl} slot`)
     if (slotPolicy !== 'any' && !schemes[v].slots.includes(sl)) throw new Error(`color-scheme: scheme '${v}' does not declare the ${sl} slot (declares ${schemes[v].slots.join(', ') || 'none'}); set slot_policy: any to allow it`)
     slots[sl] = v
   }
@@ -334,7 +341,7 @@ ${pickerHead(uiCatalog)}
 <main class="cs-picker">
 <p><a href="${esc(previewHref)}">Back to the docs</a></p>
 <h1>${esc(picker.label)}</h1>
-<p>These are the color schemes this site's paint provides. Light and dark mode switch between the scheme in the light slot and the scheme in the dark slot. Put a scheme in a slot to use it with automatic light/dark. Picking a scheme for this visit only turns automatic light/dark off until you pick Automatic or a slot scheme.</p>
+<p>These are the color schemes this site's paint provides. Light and dark mode switch between the scheme in the light slot and the scheme in the dark slot. Choosing a light or dark scheme puts it in its slot and keeps automatic light/dark on. Schemes not made for light/dark can be used for this visit only, which turns automatic light/dark off until you pick Automatic or a slot scheme.</p>
 <div class="cs-picker-top">
 ${ldm ? '<div data-light-dark-mode-switch class="light-dark-switch"></div>' : ''}
 <button type="button" id="cs-picker-reset">Automatic, site defaults</button>

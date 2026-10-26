@@ -1,11 +1,13 @@
 /* Scheme demo paint (test fixture). Layered on default-paint: adds two schemes
-   on top of its light and dark. pink is drawn on light, midnight on dark. */
+   on top of its light and dark. pink is drawn on light, midnight on dark; neon has slot none (not made
+   for light/dark), so choosing it turns light/dark automation off. */
 /* @color-schemes
 {
   "light": { "label": "Light" },
   "dark": { "label": "Dark" },
   "pink": { "label": "Pink", "slots": ["light"] },
-  "midnight": { "label": "Midnight", "slots": ["dark"] }
+  "midnight": { "label": "Midnight", "slots": ["dark"] },
+  "neon": { "label": "Neon", "slots": "none", "base": "dark" }
 }
 */
 html[data-scheme="pink"] {
@@ -65,4 +67,33 @@ html.dark-theme[data-scheme="midnight"] {
   --dp-footer-ink: #a9b4d6;
   --dp-footer-link: #eef2ff;
   --dp-nav-icon: #d6def5;
+}
+html[data-scheme="neon"] {
+  --dp-canvas: #0b0420;
+  --dp-ink: #f4f0ff;
+  --dp-doc-ink: #ece6ff;
+  --dp-heading: #7dfcff;
+  --dp-ink-muted: #c9bdf0;
+  --dp-ink-faint: #b7a9e8;
+  --dp-panel: #170a3a;
+  --dp-panel-strong: #22104f;
+  --dp-border: #3b2380;
+  --dp-border-strong: #8a5cff;
+  --dp-link: #ff7ad9;
+  --dp-link-hover: #ffb0ea;
+  --dp-navbar: #170a3a;
+  --dp-navbar-ink: #7dfcff;
+  --dp-navbar-hover: #22104f;
+  --dp-menu: #0b0420;
+  --dp-menu-hover: #22104f;
+  --dp-code-bg: #22104f;
+  --dp-code-ink: #f4f0ff;
+  --dp-pre-bg: #170a3a;
+  --dp-sidebar-bg: #170a3a;
+  --dp-example-bg: #0b0420;
+  --dp-admonition-bg: #170a3a;
+  --dp-footer: #170a3a;
+  --dp-footer-ink: #c9bdf0;
+  --dp-footer-link: #7dfcff;
+  --dp-nav-icon: #7dfcff;
 }

@@ -1,5 +1,18 @@
 = Changelog
 
+== 0.5.0 - 2026-10-25
+
+=== Breaking
+
+* A scheme marked `light`, `dark` or `both` is only a candidate for the light/dark slots. Choosing it (picker, `setScheme`, `?scheme=`) puts it in the current mode's slot, or in the slot it declares when it does not fit the current one, and never turns light/dark automation off. This holds under `slot_policy: any` too.
+* Only a scheme with slot `none` (`"slots": "none"` or `[]`: not made for light/dark) is an off-slot pick that turns automation off for the session. A `none` scheme can never fill a slot (`assign`, site `slots`, saved slot cookie); a session cookie naming a slot scheme is ignored.
+
+=== Added
+
+* `slots` accepts `"both"` and `"none"`. `ColorSchemes.isNone(id)`. `light` and `dark` must fit their own slot.
+* Picker: "Use for this visit" shows only on `none` schemes; slot schemes say automatic light/dark stays on. Page intro updated.
+* Fixture paint: `neon` (slot `none`, drawn on dark) demonstrates the disable; `pink` stays `light`.
+
 == 0.4.0 - 2026-10-25
 
 === Breaking

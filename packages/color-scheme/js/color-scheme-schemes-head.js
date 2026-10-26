@@ -10,17 +10,20 @@
 
    Config comes from window.__colorSchemes (written by the extension):
      { param, cookie, cookiePath, slotPolicy,
-       schemes: { id: { label, slots: ['light','dark'], base } },
+       schemes: { id: { label, slots: ['light','dark'] | [] (none), base } },
        slots: { light: id, dark: id } }
 
    Two light/dark slots each hold a scheme. The active scheme is the slot
-   scheme for the resolved light/dark state, unless the visitor picked an
-   off-slot scheme for this session: then that scheme is pinned and light/dark
-   automation is off until they choose a slot scheme or "auto". A scheme fits
-   the slots it declares; slot_policy 'any' lets any scheme go in either slot.
+   scheme for the resolved light/dark state. A scheme marked light, dark or
+   both is a slot candidate: choosing it assigns it to a slot (the current
+   mode's slot when it fits, else the slot it declares) and never turns light/
+   dark automation off. Only a scheme with slot none (not made for light/dark)
+   is an off-slot pick: it is pinned for this session and automation is off
+   until the visitor chooses "auto" or any slot scheme. slot_policy 'any' lets
+   a light, dark or both scheme go in either slot; a none scheme never does.
 
    Storage: cookie <cookie>-slots "light.dark" (one year) and session cookie
-   <cookie> for an off-slot pick.
+   <cookie> for a none-scheme pick.
    Query: ?<param>=<id> chooses like setScheme; ?<param>=reset clears both;
    ?cs-preview=<id>[&cs-preview-mode=light|dark] shows a scheme without saving
    (used by the picker page previews). */
@@ -43,7 +46,8 @@
 
   function has (id) { return typeof id === 'string' && id !== 'reset' && id !== 'auto' && Object.prototype.hasOwnProperty.call(schemes, id) }
   function declared (id) { return (schemes[id] && schemes[id].slots) || [] }
-  function fits (id, slot) { return has(id) && (slot === 'light' || slot === 'dark') && (anySlot || declared(id).indexOf(slot) >= 0) }
+  function slotScheme (id) { return has(id) && declared(id).length > 0 }
+  function fits (id, slot) { return slotScheme(id) && (slot === 'light' || slot === 'dark') && (anySlot || declared(id).indexOf(slot) >= 0) }
   function readCookie (name) {
     var m = ('; ' + document.cookie).match(new RegExp('; ' + name.replace(/[^\w-]/g, '') + '=([^;]*)'))
     return m ? decodeURIComponent(m[1]) : null
@@ -64,8 +68,9 @@
     else html.removeAttribute('data-color-scheme-off-slot')
   }
 
-  /** null/'auto' = automation on with the current slots; a scheme that fits the
-      current light/dark slot goes into that slot; any other is an off-slot pick. */
+  /** null/'auto' = automation on with the current slots. A slot scheme goes into
+      the current mode's slot when it fits, else into the slot it declares;
+      automation stays on. Only a none scheme is an off-slot pick. */
   function choose (id) {
     if (id === null || id === undefined || id === 'auto') {
       session = null
@@ -75,11 +80,14 @@
     }
     if (!has(id)) return false
     var slot = dark ? 'dark' : 'light'
+    if (!fits(id, slot)) slot = slot === 'dark' ? 'light' : 'dark'
     if (fits(id, slot)) {
       session = null
       writeCookie(cookieName, null)
       slots[slot] = id
       saveSlots()
+    } else if (slotScheme(id)) {
+      return false
     } else {
       session = id
       writeCookie(cookieName, id)
@@ -118,7 +126,7 @@
     if (fits(parts[1], 'dark')) slots.dark = parts[1]
   } else if (saved) writeCookie(slotsCookie, null)
   var s = readCookie(cookieName)
-  if (has(s)) session = s
+  if (has(s) && !slotScheme(s)) session = s
   else if (s) writeCookie(cookieName, null)
   if (pv !== null && has(pv)) {
     preview = true
@@ -142,10 +150,12 @@
     set: function (id) { return id === 'reset' ? (reset(), true) : choose(id) },
     assign: assign,
     fits: fits,
-    slotsOf: function (id) { return anySlot ? ['light', 'dark'] : declared(id).slice() },
+    slotsOf: function (id) { return slotScheme(id) ? (anySlot ? ['light', 'dark'] : declared(id).slice()) : [] },
+    /** True for a scheme with slot none: choosing it turns light/dark automation off for the session. */
+    isNone: function (id) { return has(id) && !slotScheme(id) },
     slots: function () { return { light: slots.light, dark: slots.dark } },
     info: info,
-    /** Off-slot scheme pinned for this session, or null while automation is on. */
+    /** Slot-none scheme pinned for this session, or null while automation is on. */
     offSlot: function () { return session ? { id: session, base: info(session).base } : null },
     preview: function () { return preview ? (pvMode || null) : false },
     /** Called by the light/dark layer whenever the resolved light/dark state changes. */

@@ -17,7 +17,7 @@ antora:
 
 [source,json]
 ----
-"@antora-supplemental/color-scheme": "github:antora-supplemental/antora-ui-chassis#color-scheme-v0.4.0&path:packages/color-scheme"
+"@antora-supplemental/color-scheme": "github:antora-supplemental/antora-ui-chassis#color-scheme-v0.5.0&path:packages/color-scheme"
 ----
 
 The extension links `css/color-scheme.css` after `site.css`. When the active paint declares more than two schemes (or the site sets slots or forces the picker) it also inlines the schemes head hook and loads `js/color-scheme.js`; `live_paint` adds the paint head hook.
@@ -69,7 +69,7 @@ html[data-scheme="sepia"] { ... }          /* drawn on light */
 html.dark-theme[data-scheme="midnight"] { ... }
 ----
 
-* `slots` lists the slots a scheme fits (`light`, `dark`; default both, `light` and `dark` fit their own). `base` is the light/dark state it is drawn on (default: `dark` when it fits only dark, else `light`).
+* `slots` says which light/dark slots a scheme is a candidate for: `"light"`, `"dark"`, `"both"` (or a list), or `"none"` (`[]`) for a scheme not made for the light/dark system. Default both; `light` and `dark` fit their own. `base` is the light/dark state it is drawn on (default: `dark` when it fits only dark, else `light`).
 * The active paint is the last stylesheet in `head-styles` with a manifest. A paint without one provides `light` and `dark` only. `default-paint` and Valentus Paint declare exactly those two.
 * The runtime sets `html[data-scheme="<id>"]`; the scheme's CSS keys off that, and light/dark still sets `html.dark-theme`.
 
@@ -80,7 +80,7 @@ html.dark-theme[data-scheme="midnight"] { ... }
         schemes:                # optional: add, relabel or drop (false) paint schemes
           sepia: { label: Old paper }
         slots: { light: sepia, dark: dark }   # site defaults; must be schemes of the active paint
-        slot_policy: declared   # declared (default): a scheme goes only in slots it lists; any: every slot
+        slot_policy: declared   # declared (default): a scheme goes only in slots it lists; any: a light/dark/both scheme fits either slot (none never)
         picker: auto            # auto (default): on when the paint has more than 2 schemes; true | false
         # picker: { enabled: true, placement: footer, label: Color schemes, preview_page: index.html }
         #   placement: footer (link in the footer) | none (build the page, place the link yourself)
@@ -94,13 +94,13 @@ With only `light` and `dark` and the default slots, nothing is added: no head ho
 
 A visitor can reassign the slots (saved in the `cs-scheme-slots` cookie for a year).
 
-* Choosing a scheme that fits the current slot puts it in that slot.
-* Choosing any other scheme is an *off-slot pick*: it is pinned for the session (session cookie `cs-scheme`, gone when the browser closes) and light/dark automation turns off, pinned to the scheme's `base`. The toggle shows that state (navbar `aria-pressed="mixed"`, footer note).
-* Choosing a slot scheme, Light, Dark or Auto, or `?scheme=auto`, turns automation back on. `?scheme=reset` also restores the site's default slots.
+* A `light`, `dark` or `both` scheme is only a slot candidate. Choosing it puts it in the current mode's slot when it fits (a `both` scheme always does), else in the slot it declares (picking Midnight in light mode makes it the dark scheme). Light/dark automation is never turned off by it, under either `slot_policy`.
+* Only a scheme with slot `none` is an *off-slot pick*: it is pinned for the session (session cookie `cs-scheme`, gone when the browser closes) and light/dark automation turns off, pinned to the scheme's `base`. The toggle shows that state (navbar `aria-pressed="mixed"`, footer note). A `none` scheme can never fill a slot.
+* Choosing any slot scheme, Light, Dark or Auto, or `?scheme=auto`, turns automation back on. `?scheme=reset` also restores the site's default slots.
 
 === Picker page
 
-When the picker is on, the build adds `color-schemes.html`: one card per scheme of the active paint with a live preview (an iframe of `preview_page` with `?cs-preview=<id>&cs-preview-mode=light|dark`, which never writes cookies), and buttons "Use for light", "Use for dark" and "Use for this visit only (turns off automatic light/dark)". A banner offers "Turn automatic light/dark back on" while an off-slot scheme is pinned. The picker lists schemes, never paints.
+When the picker is on, the build adds `color-schemes.html`: one card per scheme of the active paint with a live preview (an iframe of `preview_page` with `?cs-preview=<id>&cs-preview-mode=light|dark`, which never writes cookies), and buttons "Use for light" and "Use for dark" for slot schemes, and "Use for this visit (turns off automatic light/dark)" only for `none` schemes. A banner offers "Turn automatic light/dark back on" while a `none` scheme is pinned. The picker lists schemes, never paints.
 
 The footer link is the `color-scheme-picker-link` partial. Override order: a partial of that name in your supplemental UI, then in the theme, then the chassis default. `placement: footer` includes it in `footer-content` unless a partial already does; `placement: none` leaves it to you.
 
@@ -111,7 +111,7 @@ ColorScheme.getScheme()          // active scheme id (also html[data-scheme])
 ColorScheme.setScheme('sepia')   // false for unknown ids; null or 'auto' = automation on; 'reset' = default slots
 ColorScheme.assign('dark', 'midnight')   // false when the scheme does not fit the slot
 ColorScheme.slots()              // { light, dark }
-ColorScheme.offSlot()            // { id, base } while an off-slot scheme is pinned
+ColorScheme.offSlot()            // { id, base } while a slot-none scheme is pinned
 document.addEventListener('color-scheme:scheme', (e) => e.detail.scheme)
 UiBus.state.watch('color-scheme.scheme', (id) => {})
 ----
