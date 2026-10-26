@@ -1,5 +1,18 @@
 = Changelog
 
+== 0.5.2 - 2026-10-25
+
+=== Changed
+
+* The picker page has three sections, Light mode, Dark mode and Neither, each a horizontal row of one card per scheme (thumbnail and name) instead of button stacks. Picking a card in Light mode or Dark mode sets that slot; Neither holds `none` schemes, used for the visit only, with a note that automatic light/dark turns off. The selected card is filled. Each row is a `radiogroup` with arrow-key, Home and End navigation; empty sections are hidden.
+* The reset button is now *Reset to defaults*: it clears the visitor's slots and session scheme, restores the site's default slots and turns automatic light/dark back on.
+
+=== Added
+
+* `picker.labels`: overridable text for every picker string (`intro`, `reset`, `back`, `light`, `lightNote`, `dark`, `darkNote`, `none`, `noneNote`, `sessionOn`), for translation.
+* The footer "Color schemes" link has a chain-link icon (inline SVG in `currentColor`, text-sized, `aria-hidden`) from the new `color-scheme-picker-link-icon` partial, overridable site, then theme, then chassis.
+* Fixture paint: `slate` (slots `both`), so the fixture has six schemes.
+
 == 0.5.1 - 2026-10-25
 
 === Fixed

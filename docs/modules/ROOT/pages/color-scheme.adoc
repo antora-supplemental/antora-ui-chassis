@@ -34,7 +34,7 @@ The chassis never replaces icons or buttons it was given.
 | color-scheme `schemes` | add, relabel or drop (`false`) paint schemes
 | color-scheme `slots` | `{ light: <scheme>, dark: <scheme> }` (default `light`, `dark`)
 | color-scheme `slot_policy` | `declared` (default) or `any`
-| color-scheme `picker` | `auto` (default, on when the paint has more than 2 schemes), `true`, `false`, or `{ enabled, placement: footer|none, label, preview_page }`
+| color-scheme `picker` | `auto` (default, on when the paint has more than 2 schemes), `true`, `false`, or `{ enabled, placement: footer|none, label, preview_page, labels }`. The picker page has Light mode, Dark mode and Neither sections of scheme cards and a *Reset to defaults* button; `labels` overrides every string on it. The footer link carries a chain-link icon (`color-scheme-picker-link-icon` partial, overridable like the link)
 | color-scheme `live_paint.paints.<id>` | preview only: href, or `{ href, label }`
 | query | `?scheme=<id>`, `?scheme=auto`, `?scheme=reset`; `?paint=<id>`, `?paint=reset` (live paint); `?cs-preview=<id>&cs-preview-mode=light|dark` (preview only, no writes)
 |===

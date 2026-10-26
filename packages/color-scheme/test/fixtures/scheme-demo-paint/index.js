@@ -10,7 +10,7 @@
  *       - '@antora-supplemental/default-paint'
  *       - require: ./node_modules/@antora-supplemental/color-scheme/test/fixtures/scheme-demo-paint/index.js
  *
- * Its stylesheet declares light, dark, pink (light slot) and midnight (dark
+ * Its stylesheet declares light, dark, pink (light slot), slate (both slots) and midnight (dark
  * slot) in an @color-schemes manifest, so color-scheme adds the picker and its
  * footer link. Not a supported paint.
  */

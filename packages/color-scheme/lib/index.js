@@ -22,7 +22,7 @@
  *           pink: { label: Pink, slots: [light] }
  *         slots: { light: light, dark: dark }   # default slot schemes
  *         slot_policy: declared # or any: a light, dark or both scheme fits either slot (never a none scheme)
- *         picker: auto          # true | false | { enabled, placement: footer|none, label, preview_page }
+ *         picker: auto          # true | false | { enabled, placement: footer|none, label, preview_page, labels: { reset, light, dark, none, noneNote, ... } }
  *         scheme_param: scheme  # ?scheme=<id>; ?scheme=reset clears
  *         scheme_cookie: cs-scheme
  *         live_paint:           # optional preview/demo feature: swap the whole paint (no picker UI)
@@ -209,7 +209,14 @@ function pickerConfig (config = {}, schemeCount = 2) {
   const placement = p.placement === undefined ? 'footer' : String(p.placement)
   if (!['footer', 'none'].includes(placement)) throw new Error("color-scheme picker.placement must be 'footer' or 'none'")
   const label = p.label === undefined ? 'Color schemes' : String(p.label).replace(/[<>&"]/g, '').slice(0, 60)
-  return { placement, label, previewPage: p.previewPage ? String(p.previewPage).replace(/^\/+/, '') : null }
+  if (p.labels !== undefined && (typeof p.labels !== 'object' || p.labels === null || Array.isArray(p.labels))) throw new Error('color-scheme picker.labels must be a map of label keys to strings')
+  const labels = { ...PICKER_LABELS }
+  for (const [k, v] of Object.entries(p.labels || {})) {
+    if (!(k in PICKER_LABELS)) throw new Error(`color-scheme picker.labels: unknown key '${k}' (one of ${Object.keys(PICKER_LABELS).join(', ')})`)
+    if (typeof v !== 'string') throw new Error(`color-scheme picker.labels.${k} must be a string`)
+    labels[k] = v.slice(0, 300)
+  }
+  return { placement, label, labels, previewPage: p.previewPage ? String(p.previewPage).replace(/^\/+/, '') : null }
 }
 
 function headBlock (config) {
@@ -294,12 +301,18 @@ function ensureColorScheme (uiCatalog, uiOutputDir, config = {}) {
    placing it to the layout. */
 const PICKER_PAGE = 'color-schemes.html'
 
+const PICKER_LINK_ICON = '<svg class="color-scheme-picker-link-icon" aria-hidden="true" focusable="false" width="1em" height="1em" style="vertical-align:-0.125em;margin-right:0.3em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>'
+
 function addPickerLink (uiCatalog, picker, pageUrl) {
   const partials = uiCatalog.findByType('partial')
   if (!partials.some((f) => f.stem === 'color-scheme-picker-link')) {
     const href = pageUrl ? `{{{siteRootPath}}}${pageUrl}` : `{{{uiRootPath}}}/${PICKER_PAGE}`
-    const body = `<a class="color-scheme-picker-link" href="${href}">${picker.label}</a>\n`
+    const body = `<a class="color-scheme-picker-link" href="${href}">{{> color-scheme-picker-link-icon}}${picker.label}</a>\n`
     uiCatalog.addFile({ type: 'partial', stem: 'color-scheme-picker-link', path: 'partials/color-scheme-picker-link.hbs', contents: Buffer.from(body) })
+  }
+  /* Chain-link glyph, its own partial so a site (supplemental UI) or theme can replace just the icon. */
+  if (!partials.some((f) => f.stem === 'color-scheme-picker-link-icon')) {
+    uiCatalog.addFile({ type: 'partial', stem: 'color-scheme-picker-link-icon', path: 'partials/color-scheme-picker-link-icon.hbs', contents: Buffer.from(PICKER_LINK_ICON) })
   }
   if (picker.placement !== 'footer') return true
   if (partials.some((f) => /\{\{>\s*color-scheme-picker-link\b/.test(bodyOf(f)))) return true
@@ -327,22 +340,34 @@ function pickerScripts (uiCatalog) {
   return (text.match(re) || []).map((m) => m.split('{{{uiRootPath}}}').join('.')).join('\n')
 }
 
-const INTRO = "These are the color schemes this site's paint provides. Light and dark mode switch between the scheme in the light slot and the scheme in the dark slot. Choosing a light or dark scheme puts it in its slot and keeps automatic light/dark on. Schemes not made for light/dark can be used for this visit only, which turns automatic light/dark off until you pick Automatic or a slot scheme."
+const PICKER_LABELS = {
+  intro: "These are the color schemes this site's paint provides. Light and dark mode each use the scheme you pick for them, and the site switches between them automatically.",
+  reset: 'Reset to defaults',
+  back: 'Back to the docs',
+  light: 'Light mode',
+  lightNote: '',
+  dark: 'Dark mode',
+  darkNote: '',
+  none: 'Neither',
+  noneNote: 'Not made for light or dark mode. Picking one uses it for this visit only and turns automatic light/dark off.',
+  sessionOn: '"{scheme}" is on for this visit, so automatic light/dark is off.',
+}
 
 /** The picker body: shared by the in-layout page and the standalone fallback. */
-function pickerBody (uiCatalog, previewHref, heading, standalone) {
+function pickerBody (uiCatalog, previewHref, heading, standalone, labels = PICKER_LABELS) {
   /* In the site layout the UI's own light/dark toggle (navbar or footer) is on the page. */
   const ldm = standalone && uiCatalog.findByType('partial').some((f) => bodyOf(f).includes('js/light-dark-mode.js'))
   return `<div class="cs-picker">
 ${heading}
-<p>${INTRO}</p>
+<p>${esc(labels.intro)}</p>
 <div class="cs-picker-top">
 ${ldm ? '<div data-light-dark-mode-switch class="light-dark-switch"></div>' : ''}
-<button type="button" id="cs-picker-reset" class="cs-picker-button">Automatic, site defaults</button>
-<a class="cs-picker-back" href="${esc(previewHref)}">Back to the docs</a>
+<button type="button" id="cs-picker-reset" class="cs-picker-button">${esc(labels.reset)}</button>
+<a class="cs-picker-back" href="${esc(previewHref)}">${esc(labels.back)}</a>
 </div>
 <div id="cs-picker-banner" class="cs-picker-banner" role="status" hidden></div>
-<ul id="cs-picker-list" class="cs-picker-list" data-preview="${esc(previewHref)}"></ul>
+<div id="cs-picker-list" class="cs-picker-sections" data-preview="${esc(previewHref)}"></div>
+<script type="application/json" id="cs-picker-labels">${JSON.stringify(labels).replace(/</g, '\\u003c')}</script>
 </div>`
 }
 
@@ -359,7 +384,7 @@ ${pickerHead(uiCatalog)}
 </head>
 <body class="cs-picker-page">
 <main>
-${pickerBody(uiCatalog, previewHref, `<h1>${esc(picker.label)}</h1>`, true)}
+${pickerBody(uiCatalog, previewHref, `<h1>${esc(picker.label)}</h1>`, true, picker.labels)}
 </main>
 ${pickerScripts(uiCatalog)}
 <script src="./js/color-scheme-picker.js" defer></script>
@@ -411,7 +436,7 @@ function addPickerSitePage (uiCatalog, contentCatalog, uiOutputDir, picker, star
   file.title = picker.label
   addPickerAssets(uiCatalog, uiOutputDir)
   file.contents = Buffer.from(`<link rel="stylesheet" href="${ui}/css/color-scheme-picker.css">
-${pickerBody(uiCatalog, previewHref, '', false)}
+${pickerBody(uiCatalog, previewHref, '', false, picker.labels)}
 <script src="${ui}/js/color-scheme-picker.js" defer></script>
 `)
   return file.pub.url
@@ -518,3 +543,4 @@ module.exports.insertFooterTag = insertFooterTag
 module.exports.bodyOf = bodyOf
 module.exports.HEAD_STEMS = HEAD_STEMS
 module.exports.FOOT_STEMS = FOOT_STEMS
+module.exports.PICKER_LABELS = PICKER_LABELS

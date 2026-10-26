@@ -17,7 +17,7 @@ antora:
 
 [source,json]
 ----
-"@antora-supplemental/color-scheme": "github:antora-supplemental/antora-ui-chassis#color-scheme-v0.5.1&path:packages/color-scheme"
+"@antora-supplemental/color-scheme": "github:antora-supplemental/antora-ui-chassis#color-scheme-v0.5.2&path:packages/color-scheme"
 ----
 
 The extension links `css/color-scheme.css` after `site.css`. When the active paint declares more than two schemes (or the site sets slots or forces the picker) it also inlines the schemes head hook and loads `js/color-scheme.js`; `live_paint` adds the paint head hook.
@@ -82,7 +82,7 @@ html.dark-theme[data-scheme="midnight"] { ... }
         slots: { light: sepia, dark: dark }   # site defaults; must be schemes of the active paint
         slot_policy: declared   # declared (default): a scheme goes only in slots it lists; any: a light/dark/both scheme fits either slot (none never)
         picker: auto            # auto (default): on when the paint has more than 2 schemes; true | false
-        # picker: { enabled: true, placement: footer, label: Color schemes, preview_page: index.html }
+        # picker: { enabled: true, placement: footer, label: Color schemes, preview_page: index.html, labels: { reset: Reset to defaults } }
         #   placement: footer (link in the footer) | none (build the page, place the link yourself)
         scheme_param: scheme    # ?scheme=<id>; ?scheme=auto turns automation on; ?scheme=reset restores default slots
         scheme_cookie: cs-scheme
@@ -100,9 +100,17 @@ A visitor can reassign the slots (saved in the `cs-scheme-slots` cookie for a ye
 
 === Picker page
 
-When the picker is on, the build adds a `color-schemes.html` page to the start page's component version, rendered in the UI's default layout (site header, nav, footer and light/dark toggle; it falls back to a standalone `_/color-schemes.html` only without a start page). Cards and buttons are styled with the `--cs-*` tokens, so they follow the paint and scheme; the scheme in a slot shows a filled button. One card per scheme of the active paint with a live preview (an iframe of `preview_page` with `?cs-preview=<id>&cs-preview-mode=light|dark`, which never writes cookies), and buttons "Use for light" and "Use for dark" for slot schemes, and "Use for this visit (turns off automatic light/dark)" only for `none` schemes. A banner offers "Turn automatic light/dark back on" while a `none` scheme is pinned. The picker lists schemes, never paints.
+When the picker is on, the build adds a `color-schemes.html` page to the start page's component version, rendered in the UI's default layout (site header, nav, footer and light/dark toggle; it falls back to a standalone `_/color-schemes.html` only without a start page). The page lists schemes, never paints, in up to three sections, each a horizontal row of cards (live thumbnail and name) that is a `radiogroup` (arrow keys, Home and End move and select; the selected card is filled):
 
-The footer link is the `color-scheme-picker-link` partial. Override order: a partial of that name in your supplemental UI, then in the theme, then the chassis default. `placement: footer` includes it in `footer-content` unless a partial already does; `placement: none` leaves it to you.
+* *Light mode*: `light` and every scheme that fits the light slot. Picking one sets the light slot.
+* *Dark mode*: `dark` and every scheme that fits the dark slot. A `both` scheme appears in both rows.
+* *Neither*: `none` schemes. Picking one uses it for this visit only and turns automatic light/dark off.
+
+Empty sections are hidden. Thumbnails are iframes of `preview_page` with `?cs-preview=<id>&cs-preview-mode=light|dark`, which never write cookies. *Reset to defaults* clears the visitor's slots and session scheme, restores the site's default slots and turns automatic light/dark back on.
+
+All page text comes from `picker.labels` (for translation), each key optional, plain strings up to 300 characters: `intro`, `reset` (default "Reset to defaults"), `back`, `light`, `lightNote`, `dark`, `darkNote`, `none`, `noneNote`, `sessionOn` (`{scheme}` is replaced by the scheme's label). Unknown keys fail the build.
+
+The footer link is the `color-scheme-picker-link` partial, with a chain-link icon from the `color-scheme-picker-link-icon` partial (inline SVG in `currentColor`, 1em, `aria-hidden`; the link text is the accessible name). Override order for either partial: your supplemental UI, then the theme, then the chassis default. An empty `color-scheme-picker-link-icon` partial removes the icon. `placement: footer` includes it in `footer-content` unless a partial already does; `placement: none` leaves it to you.
 
 [source,js]
 ----

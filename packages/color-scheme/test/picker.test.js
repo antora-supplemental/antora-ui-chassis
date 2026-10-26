@@ -4,7 +4,7 @@ const { describe, it } = require('node:test')
 const assert = require('node:assert/strict')
 const fs = require('node:fs')
 const path = require('node:path')
-const { pickerConfig, ensureColorScheme, schemesListener, paintSchemes, parseManifest, schemesConfig, PICKER_PAGE } = require('../lib/index.js')
+const { pickerConfig, ensureColorScheme, schemesListener, paintSchemes, parseManifest, schemesConfig, PICKER_PAGE, PICKER_LABELS } = require('../lib/index.js')
 
 const FIXTURE = path.join(__dirname, 'fixtures', 'scheme-demo-paint')
 const TWO = '/* @color-schemes\n{ "light": { "label": "Light" }, "dark": { "label": "Dark" } }\n*/\n:root { --x: 1 }'
@@ -37,11 +37,12 @@ const pickerPage = (c) => c.files.find((f) => /color-schemes\.html$/.test(f.out?
 
 describe('paint schemes', () => {
   it('reads the @color-schemes manifest of the linked paint', () => {
-    assert.deepEqual(Object.keys(paintSchemes(build(FOUR)).schemes), ['light', 'dark', 'pink', 'midnight', 'neon'])
+    assert.deepEqual(Object.keys(paintSchemes(build(FOUR)).schemes), ['light', 'dark', 'pink', 'midnight', 'slate', 'neon'])
     const s = paintSchemes(build(FOUR)).schemes
     assert.deepEqual(s.pink, { label: 'Pink', slots: ['light'], base: 'light' })
     assert.deepEqual(s.midnight, { label: 'Midnight', slots: ['dark'], base: 'dark' })
     assert.deepEqual(s.dark, { label: 'Dark', slots: ['dark'], base: 'dark' })
+    assert.deepEqual(s.slate, { label: 'Slate', slots: ['light', 'dark'], base: 'light' }, 'slots: both')
     assert.deepEqual(s.neon, { label: 'Neon', slots: [], base: 'dark' }, 'slots: none')
   })
   it('a paint without a manifest has light and dark; the site can add, relabel or drop schemes', () => {
@@ -49,7 +50,7 @@ describe('paint schemes', () => {
     const s = paintSchemes(build(TWO), { schemes: { sepia: { label: 'Sepia', base: 'light' }, light: { label: 'Clair' } } }).schemes
     assert.equal(s.light.label, 'Clair')
     assert.deepEqual(s.sepia.slots, ['light'])
-    assert.deepEqual(Object.keys(paintSchemes(build(FOUR), { schemes: { pink: false } }).schemes), ['light', 'dark', 'midnight', 'neon'])
+    assert.deepEqual(Object.keys(paintSchemes(build(FOUR), { schemes: { pink: false } }).schemes), ['light', 'dark', 'midnight', 'slate', 'neon'])
   })
   it('rejects bad manifests and scheme ids', () => {
     assert.throws(() => parseManifest('/* @color-schemes { nope */'), /invalid @color-schemes/)
@@ -72,7 +73,7 @@ describe('paint schemes', () => {
 describe('picker options', () => {
   it('auto (default): on only when the active paint has more than two schemes', () => {
     assert.equal(pickerConfig({}, 2), null)
-    assert.deepEqual(pickerConfig({}, 3), { placement: 'footer', label: 'Color schemes', previewPage: null })
+    assert.deepEqual(pickerConfig({}, 3), { placement: 'footer', label: 'Color schemes', labels: PICKER_LABELS, previewPage: null })
   })
   it('can be forced on, turned off or moved', () => {
     assert.ok(pickerConfig({ picker: true }, 2))
@@ -81,6 +82,11 @@ describe('picker options', () => {
     assert.equal(pickerConfig({ picker: { placement: 'none' } }, 4).placement, 'none')
     assert.throws(() => pickerConfig({ picker: { placement: 'navbar' } }, 4))
     assert.throws(() => pickerConfig({ picker: { enabled: 'yes' } }, 4))
+    assert.equal(pickerConfig({ picker: { labels: { reset: 'Standard wiederherstellen' } } }, 4).labels.reset, 'Standard wiederherstellen')
+    assert.equal(pickerConfig({ picker: { labels: { reset: 'x' } } }, 4).labels.light, 'Light mode')
+    assert.throws(() => pickerConfig({ picker: { labels: { nope: 'x' } } }, 4), /unknown key/)
+    assert.throws(() => pickerConfig({ picker: { labels: { reset: 1 } } }, 4), /must be a string/)
+    assert.throws(() => pickerConfig({ picker: { labels: 'x' } }, 4))
   })
 })
 
@@ -109,7 +115,10 @@ describe('build output', () => {
     assert.match(head, /"pink":\{"label":"Pink","slots":\["light"\],"base":"light"\}/)
     const foot = c.partial('footer-scripts')
     assert.ok(foot.indexOf('js/color-scheme.js') < foot.indexOf('js/light-dark-mode.js'))
-    assert.match(c.partial('color-scheme-picker-link'), /class="color-scheme-picker-link" href="\{\{\{uiRootPath\}\}\}\/color-schemes\.html">Color schemes</)
+    assert.match(c.partial('color-scheme-picker-link'), /class="color-scheme-picker-link" href="\{\{\{uiRootPath\}\}\}\/color-schemes\.html">\{\{> color-scheme-picker-link-icon\}\}Color schemes</)
+    const icon = c.partial('color-scheme-picker-link-icon')
+    assert.match(icon, /^<svg class="color-scheme-picker-link-icon" aria-hidden="true" focusable="false" width="1em" height="1em"/)
+    assert.match(icon, /stroke="currentColor"/)
     assert.match(c.partial('footer-content'), /\{\{> color-scheme-picker-link\}\}\n<\/footer>/)
   })
   it('runs once when both color-scheme and light-dark-mode register the listener', () => {
@@ -122,12 +131,17 @@ describe('build output', () => {
     assert.equal(c.partial('color-scheme-picker-link'), '<a class="mine">Themes</a>')
     assert.doesNotMatch(c.partial('footer-content'), /picker-link/)
   })
+  it('a site or theme partial replaces just the link icon', () => {
+    const c = build(FOUR, {}, { 'color-scheme-picker-link-icon': '<i class="my-icon"></i>' })
+    assert.equal(c.partial('color-scheme-picker-link-icon'), '<i class="my-icon"></i>')
+    assert.match(c.partial('color-scheme-picker-link'), /\{\{> color-scheme-picker-link-icon\}\}/)
+  })
   it('placement none: partial only, nothing in the footer', () => {
     const c = build(FOUR, { picker: { placement: 'none' } })
     assert.ok(c.partial('color-scheme-picker-link'))
     assert.doesNotMatch(c.partial('footer-content'), /picker-link/)
   })
-  it('with a content catalog the picker is a site page in the default layout; only none schemes get a visit-only button', () => {
+  it('with a content catalog the picker is a site page in the default layout; sections are radio groups; reset label', () => {
     const c = catalog({ 'head-styles': '<link rel="stylesheet" href="{{{uiRootPath}}}/css/paint.css">', 'footer-content': '<footer class="footer">\n</footer>', 'footer-scripts': '<script src="{{{uiRootPath}}}/js/light-dark-mode.js"></script>' }, { 'css/paint.css': FOUR })
     ensureColorScheme(c, '_', {})
     const added = []
@@ -145,7 +159,11 @@ describe('build output', () => {
     assert.match(c.partial('color-scheme-picker-link'), /href="\{\{\{siteRootPath\}\}\}\/docs\/1\.0\/color-schemes\.html"/)
     assert.equal(pickerPage(c), undefined, 'no standalone page')
     const js = fs.readFileSync(path.join(__dirname, '..', 'js', 'color-scheme-picker.js'), 'utf8')
-    assert.match(js, /if \(none\) btn\('Use for this visit/)
+    assert.match(html, /<button type="button" id="cs-picker-reset" class="cs-picker-button">Reset to defaults<\/button>/)
+    assert.match(html, /<script type="application\/json" id="cs-picker-labels">\{"intro"/)
+    assert.match(js, /role: 'radiogroup'/)
+    assert.match(js, /role: 'radio'/)
+    assert.match(js, /P\.isNone\(id\)/)
   })
   it('the picker page reuses the UI stylesheets and hooks with relative paths and previews the start page', () => {
     const html = pickerPage(build(FOUR)).contents.toString()

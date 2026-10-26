@@ -1,5 +1,5 @@
-/* Scheme demo paint (test fixture). Layered on default-paint: adds two schemes
-   on top of its light and dark. pink is drawn on light, midnight on dark; neon has slot none (not made
+/* Scheme demo paint (test fixture). Layered on default-paint: adds four schemes
+   on top of its light and dark. pink is drawn on light, midnight on dark, slate fits both (its own light and dark tokens); neon has slot none (not made
    for light/dark), so choosing it turns light/dark automation off. */
 /* @color-schemes
 {
@@ -7,6 +7,7 @@
   "dark": { "label": "Dark" },
   "pink": { "label": "Pink", "slots": ["light"] },
   "midnight": { "label": "Midnight", "slots": ["dark"] },
+  "slate": { "label": "Slate", "slots": "both" },
   "neon": { "label": "Neon", "slots": "none", "base": "dark" }
 }
 */
@@ -96,4 +97,65 @@ html[data-scheme="neon"] {
   --dp-footer-ink: #c9bdf0;
   --dp-footer-link: #7dfcff;
   --dp-nav-icon: #7dfcff;
+}
+
+/* slate: slots both, a light and a dark token set. */
+html[data-scheme="slate"] {
+  --dp-canvas: #f7fbfd;
+  --dp-ink: #1d2428;
+  --dp-doc-ink: #283136;
+  --dp-heading: #152025;
+  --dp-ink-muted: #4d5c63;
+  --dp-ink-faint: #52636b;
+  --dp-panel: #ebf4f9;
+  --dp-panel-strong: #dcebf2;
+  --dp-border: #c9dee8;
+  --dp-border-strong: #9ab9c9;
+  --dp-link: #336e8b;
+  --dp-link-hover: #26546b;
+  --dp-navbar: #26546b;
+  --dp-navbar-ink: #fff;
+  --dp-navbar-hover: #2f6681;
+  --dp-menu: #f7fbfd;
+  --dp-menu-hover: #e1eef5;
+  --dp-code-bg: #ebf4f9;
+  --dp-code-ink: #1d2428;
+  --dp-pre-bg: #fbfdfe;
+  --dp-sidebar-bg: #dcebf2;
+  --dp-example-bg: #fff;
+  --dp-admonition-bg: #ebf4f9;
+  --dp-footer: #dcebf2;
+  --dp-footer-ink: #415057;
+  --dp-footer-link: #152025;
+  --dp-nav-icon: #1d2428;
+}
+
+html.dark-theme[data-scheme="slate"] {
+  --dp-canvas: #0f181c;
+  --dp-ink: #dce9ef;
+  --dp-doc-ink: #dce9ef;
+  --dp-heading: #fff;
+  --dp-ink-muted: #b2c4cd;
+  --dp-ink-faint: #9fb4be;
+  --dp-panel: #19262c;
+  --dp-panel-strong: #152025;
+  --dp-border: #304550;
+  --dp-border-strong: #476270;
+  --dp-link: #99cce5;
+  --dp-link-hover: #b9dcee;
+  --dp-navbar: #0a1114;
+  --dp-navbar-ink: #f1f8fc;
+  --dp-navbar-hover: #19262c;
+  --dp-menu: #19262c;
+  --dp-menu-hover: #23343c;
+  --dp-code-bg: #23343c;
+  --dp-code-ink: #c2e1f0;
+  --dp-pre-bg: #0a1114;
+  --dp-sidebar-bg: #19262c;
+  --dp-example-bg: #152025;
+  --dp-admonition-bg: #19262c;
+  --dp-footer: #0a1114;
+  --dp-footer-ink: #b2c4cd;
+  --dp-footer-link: #f1f8fc;
+  --dp-nav-icon: #dce9ef;
 }

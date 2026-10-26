@@ -8,14 +8,7 @@ body.cs-picker-page main { padding: 1.5rem 1rem; }
 .cs-picker a:hover, .cs-picker-back:hover { color: var(--cs-accent-hover); }
 .cs-picker-banner { padding: 0.75rem 1rem; border: 1px solid var(--cs-accent); border-radius: 0.375rem; background: var(--cs-accent-soft); color: var(--cs-ink); margin: 1rem 0; display: flex; flex-wrap: wrap; gap: 0.5rem 1rem; align-items: center; }
 .cs-picker-banner[hidden] { display: none; }
-.cs-picker-list { list-style: none; margin: 1.25rem 0 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(20rem, 1fr)); gap: 1.25rem; }
-.cs-picker-card { border: 1px solid var(--cs-border); border-radius: 0.5rem; padding: 1rem; background: var(--cs-elevated); color: var(--cs-ink); }
-.cs-picker-card h2 { margin: 0 0 0.25rem; font-size: 1.15rem; color: var(--cs-ink); }
-.cs-picker-status { margin: 0 0 0.75rem; font-size: 0.9rem; color: var(--cs-ink-muted); }
-.cs-picker-previews { display: flex; gap: 0.5rem; }
-.cs-picker-shot { flex: 1; min-width: 0; height: 11rem; overflow: hidden; position: relative; border: 1px solid var(--cs-border); border-radius: 0.25rem; background: var(--cs-canvas); }
 .cs-picker-shot iframe { position: absolute; top: 0; left: 0; width: 400%; height: 400%; border: 0; transform: scale(0.25); transform-origin: 0 0; pointer-events: none; }
-.cs-picker-actions { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 0.75rem; }
 .cs-picker-top { display: flex; flex-wrap: wrap; gap: 0.75rem 1.25rem; align-items: center; margin: 1rem 0; }
 .cs-picker-top .light-dark-switch:empty { display: none; }
 .cs-picker button {
@@ -27,5 +20,22 @@ body.cs-picker-page main { padding: 1.5rem 1rem; }
 .cs-picker button:focus-visible { outline: 2px solid var(--cs-accent); outline-offset: 2px; }
 .cs-picker button[aria-pressed="true"] { background: var(--cs-accent); border-color: var(--cs-accent); color: var(--cs-canvas); font-weight: 600; }
 .cs-picker button[aria-pressed="true"]:hover { background: var(--cs-accent-hover); border-color: var(--cs-accent-hover); color: var(--cs-canvas); }
-.cs-picker-card[aria-current="true"] { border-color: var(--cs-accent); box-shadow: 0 0 0 1px var(--cs-accent); }
+ /* Sections: Light mode, Dark mode, Neither. Each row is a radio group of cards. */
+.cs-picker-section { margin: 1.75rem 0 0; }
+.cs-picker-section h2 { margin: 0 0 0.25rem; font-size: 1.2rem; color: var(--cs-ink); }
+.cs-picker-note { margin: 0 0 0.5rem; font-size: 0.9rem; color: var(--cs-ink-muted); }
+.cs-picker-row { display: flex; gap: 1rem; overflow-x: auto; padding: 0.5rem 0.25rem 0.75rem; scroll-snap-type: x proximity; }
+.cs-picker-card {
+  flex: 0 0 13rem; scroll-snap-align: start; cursor: pointer; display: flex; flex-direction: column;
+  border: 1px solid var(--cs-border); border-radius: 0.5rem; overflow: hidden;
+  background: var(--cs-elevated); color: var(--cs-ink);
+}
+.cs-picker-card:hover { border-color: var(--cs-accent); }
+.cs-picker-card:focus-visible { outline: 2px solid var(--cs-accent); outline-offset: 3px; }
+.cs-picker-shot { height: 8rem; overflow: hidden; position: relative; background: var(--cs-canvas); border-bottom: 1px solid var(--cs-border); }
+.cs-picker-name { padding: 0.5rem 0.75rem; font-weight: 600; }
+.cs-picker-card[aria-checked="true"] { border-color: var(--cs-accent); box-shadow: 0 0 0 2px var(--cs-accent); }
+.cs-picker-card[aria-checked="true"] .cs-picker-name { background: var(--cs-accent); color: var(--cs-canvas); }
+.cs-picker-card[aria-checked="true"] .cs-picker-name::before { content: "\2713\00a0"; }
+@media (max-width: 40rem) { .cs-picker-card { flex-basis: 10.5rem; } .cs-picker-shot { height: 6.5rem; } }
 .color-scheme-picker-link { margin: 0.25rem 0; display: inline-block; }
