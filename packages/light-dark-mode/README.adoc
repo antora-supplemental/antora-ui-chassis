@@ -10,7 +10,12 @@ antora:
   extensions:
     - require: '@antora-supplemental/light-dark-mode'
       toggle: auto              # auto (default): create the toggle when the layout placed none; placed: bind only
-      toggle_placement: navbar  # navbar (default): icon button in the top bar; footer: Light / Dark / Auto switch
+      toggle_placement: navbar  # navbar (default): icon button in the top bar; footer: Light / Dark / Auto icon switch
+      labels:                   # optional: footer switch strings (translate here)
+        light: Light
+        dark: Dark
+        auto: Auto
+        group: Theme
       follow_system: true       # default; false: start in light and ignore prefers-color-scheme
       navbar: light             # optional: <meta name="dm-navbar"> -> html[data-dm-navbar] for paint
       color_scheme:             # optional: color-scheme options, e.g. live_paint
@@ -33,8 +38,21 @@ Both share one state machine (`window.LightDarkMode`); only the markup differs.
 |===
 | `toggle_placement` | Design
 | `navbar` (default) | Compact icon button in the top bar (`#theme-toggle`, classes `navbar-item theme-toggle theme-toggle--navbar`). `aria-label` and `title` name the action ("Switch to dark mode"), `aria-pressed` is `true` in dark, `mixed` while an off-slot color scheme is pinned. Auto-created at the end of `.navbar .navbar-end`.
-| `footer` | Labeled segmented control: "Theme" plus *Light*, *Dark*, *Auto* buttons (`role="group"`, `aria-pressed`), wrapping on narrow screens, with a status note. Auto-created in the footer, before the "Color schemes" link when there is one, so the two stay distinct.
+| `footer` | Icon segmented control: sun (*Light*), moon (*Dark*) and a half-filled circle (*Auto*, follow the system), no visible text. Each button has `aria-label`, a `title` tooltip and `aria-pressed`; the group (`role="group"`) is named by `labels.group`. Buttons are 2rem squares. The selected one is a solid fill in the footer text color with the icon in `--cs-canvas` (icon on fill at least 5:1 in Default UI and Valentus, light and dark); hover is a faint tint and focus-visible an outline ring, both distinct from selected. Wraps on narrow screens, with a status note. Auto-created in the footer, before the "Color schemes" link when there is one, so the two stay distinct.
 |===
+
+=== Labels (i18n)
+
+The footer switch shows icons only; its words are in `aria-label`, `title`, the group name and the off-slot note. Set them once with `labels`; missing or empty keys keep the English defaults:
+
+[source,yaml]
+----
+    - require: '@antora-supplemental/light-dark-mode'
+      toggle_placement: footer
+      labels: { light: Clair, dark: Sombre, auto: Automatique, group: Thème }
+----
+
+The strings reach the page as JSON in `data-light-dark-mode-labels` on the runtime script. A site or theme that ships its own `light-dark-switch` partial with buttons keeps its own markup and wording.
 
 === Placing it yourself (override order)
 

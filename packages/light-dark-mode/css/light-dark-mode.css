@@ -66,7 +66,12 @@
   opacity: 0.55;
 }
 
-/* Footer variant: labeled Light / Dark / Auto switch in footer text flow. */
+/* Footer variant: Light / Dark / Auto icon switch (sun, moon, half-filled
+   circle) in the footer text flow. Each button is a 2rem (32px) square hit
+   area; strings live in aria-label/title (labels option).
+   States: selected = solid fill in the footer ink with the icon in
+   --cs-canvas (never an underline); hover = faint tint; focus-visible =
+   outline ring offset outside the button. */
 .light-dark-switch {
   display: inline-flex;
   flex-wrap: wrap;
@@ -75,38 +80,69 @@
   font-size: inherit;
   line-height: 1.4;
   margin: 0.25rem 1rem 0.25rem 0;
+  vertical-align: middle;
 }
 
 .light-dark-switch-options {
   display: inline-flex;
+  gap: 2px;
+  padding: 2px;
   border: 1px solid currentColor;
   border-radius: 999px;
-  overflow: hidden;
 }
 
 .light-dark-switch-option {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  padding: 0;
   font: inherit;
   color: inherit;
   background: transparent;
   border: 0;
-  padding: 0.3em 0.85em;
-  min-height: 2rem;
+  border-radius: 999px;
   cursor: pointer;
 }
 
-.light-dark-switch-option + .light-dark-switch-option {
-  border-left: 1px solid currentColor;
+.light-dark-switch-icon {
+  width: 1.125rem;
+  height: 1.125rem;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.light-dark-switch-icon path {
+  fill: currentColor;
+}
+
+.light-dark-switch-icon .light-dark-switch-fill {
+  stroke: none;
+}
+
+.light-dark-switch-option:hover {
+  background: color-mix(in srgb, currentColor 12%, transparent);
 }
 
 .light-dark-switch-option[aria-pressed="true"] {
-  font-weight: 700;
-  text-decoration: underline;
-  text-underline-offset: 0.2em;
+  background: currentColor;
+}
+
+.light-dark-switch-option[aria-pressed="true"] .light-dark-switch-icon {
+  stroke: var(--cs-canvas, Canvas);
+}
+
+.light-dark-switch-option[aria-pressed="true"] .light-dark-switch-icon path {
+  fill: var(--cs-canvas, Canvas);
 }
 
 .light-dark-switch-option:focus-visible {
   outline: 2px solid currentColor;
-  outline-offset: -4px;
+  outline-offset: 2px;
 }
 
 .light-dark-switch[data-light-dark-mode-state="off"] .light-dark-switch-options {

@@ -19,7 +19,7 @@
   },
   "dependencies": {
     "@antora-supplemental/color-scheme": "0.3.0",
-    "@antora-supplemental/light-dark-mode": "0.1.0",
+    "@antora-supplemental/light-dark-mode": "0.1.1",
     "@antora-supplemental/default-paint": "0.2.0"
   },
   "bundleDependencies": [

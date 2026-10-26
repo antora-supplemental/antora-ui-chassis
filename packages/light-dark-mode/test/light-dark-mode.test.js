@@ -5,7 +5,7 @@ const assert = require('node:assert/strict')
 const fs = require('node:fs')
 const path = require('node:path')
 const vm = require('node:vm')
-const { ensureLightDarkMode } = require('../lib/index.js')
+const { ensureLightDarkMode, labelsOf } = require('../lib/index.js')
 
 function catalog (partials) {
   const files = Object.entries(partials).map(([stem, body]) => ({ type: 'partial', stem, contents: Buffer.from(body) }))
@@ -34,7 +34,7 @@ describe('Antora extension', () => {
     assert.equal(c.partial('head-styles').split('data-light-dark-mode-head').length, 2)
     assert.doesNotMatch(c.partial('head-styles'), /<meta name="light-dark-mode-follow-system"/)
     const foot = c.partial('footer-scripts').split('\n')
-    assert.match(foot[2], /light-dark-mode\.js" data-light-dark-mode-toggle="auto" data-light-dark-mode-placement="navbar" defer/)
+    assert.match(foot[2], /light-dark-mode\.js" data-light-dark-mode-toggle="auto" data-light-dark-mode-placement="navbar" data-light-dark-mode-labels='[^']*' defer/)
     assert.deepEqual(c.findByType('asset').map((f) => f.path).sort(), ['css/color-scheme.css', 'css/light-dark-mode.css', 'js/light-dark-mode.js'])
   })
   it('falls back to head-meta, honours toggle: placed and follow_system: false', () => {
@@ -43,6 +43,16 @@ describe('Antora extension', () => {
     assert.match(c.partial('head-meta'), /color-scheme\.css[^\n]*\n<link[^\n]*light-dark-mode\.css/)
     assert.match(c.partial('head-meta'), /<meta name="light-dark-mode-follow-system" content="off">/)
     assert.match(c.partial('footer-scripts'), /data-light-dark-mode-toggle="placed"/)
+  })
+  it('labels option: defaults, per-key override, escaped into the script tag', () => {
+    assert.deepEqual(labelsOf({}), { light: 'Light', dark: 'Dark', auto: 'Auto', group: 'Theme' })
+    assert.deepEqual(labelsOf({ labels: { dark: 'Sombre', auto: '' } }), { light: 'Light', dark: 'Sombre', auto: 'Auto', group: 'Theme' })
+    const c = catalog({ 'head-meta': '<meta x>', 'footer-scripts': '<script src="site.js"></script>' })
+    assert.ok(ensureLightDarkMode(c, '_', { togglePlacement: 'footer', labels: { light: "Clair l'été", auto: 'Système <auto>' } }))
+    const m = c.partial('footer-scripts').match(/data-light-dark-mode-labels='([^']*)'/)
+    assert.ok(m, 'labels attribute present')
+    const decoded = m[1].replace(/&#39;/g, "'").replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&amp;/g, '&')
+    assert.deepEqual(JSON.parse(decoded), { light: "Clair l'été", dark: 'Dark', auto: 'Système <auto>', group: 'Theme' })
   })
   it('passes color_scheme options through (live paint runtime loads before this one)', () => {
     const c = catalog({ 'head-styles': '<link href="css/site.css">', 'footer-scripts': '<script src="js/ui-bus.js"></script>' })

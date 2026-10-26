@@ -15,7 +15,12 @@
  *         toggle: auto         # auto (default): create #theme-toggle in .navbar-end if the layout placed none
  *                              # placed: only bind a #theme-toggle the layout placed
  *         toggle_placement: navbar   # navbar (default): compact icon button in .navbar-end
- *                                    # footer: labeled Light / Dark / Auto switch in the footer
+ *                                    # footer: Light / Dark / Auto icon switch in the footer
+ *         labels:              # optional i18n strings for the footer switch (aria-label + title)
+ *           light: Light       #   sun button
+ *           dark: Dark         #   moon button
+ *           auto: Auto         #   half-filled circle button (follow the system)
+ *           group: Theme       #   accessible name of the button group
  *         follow_system: true  # default; false: default to light, never read the OS preference
  *         navbar: light        # optional: <meta name="dm-navbar"> value, exposed as html[data-dm-navbar] for paint
  *         color_scheme:        # optional: options passed to color-scheme (e.g. live_paint)
@@ -40,6 +45,22 @@ function followsSystem (config) {
   return !(v === false || v === 'false' || v === 'off')
 }
 
+const DEFAULT_LABELS = { light: 'Light', dark: 'Dark', auto: 'Auto', group: 'Theme' }
+
+/** Footer switch strings: defaults overridden key by key from the labels option. */
+function labelsOf (config) {
+  const given = config.labels && typeof config.labels === 'object' ? config.labels : {}
+  const out = { ...DEFAULT_LABELS }
+  for (const k of Object.keys(DEFAULT_LABELS)) {
+    if (given[k] !== undefined && given[k] !== null && String(given[k]).trim()) out[k] = String(given[k])
+  }
+  return out
+}
+
+function attrJson (value) {
+  return JSON.stringify(value).replace(/&/g, '&amp;').replace(/'/g, '&#39;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+}
+
 function placementOf (config) {
   const v = config.togglePlacement === undefined ? 'navbar' : String(config.togglePlacement)
   if (!['navbar', 'footer'].includes(v)) throw new Error(`light-dark-mode: toggle_placement must be navbar or footer, got '${v}'`)
@@ -51,7 +72,7 @@ function placementOf (config) {
      {{> light-dark-footer-slot}}  in the footer
    and the slot named by toggle_placement renders its variant, the other one
    renders nothing. The variants themselves are the light-dark-toggle (navbar
-   icon button) and light-dark-switch (footer Light / Dark / Auto) partials.
+   icon button) and light-dark-switch (footer Light / Dark / Auto icons) partials.
    Every partial here is added only when neither the site's supplemental UI
    nor the layout already has one with that name, so a direct UI override
    beats the theme or layout, which beats these chassis defaults. Without
@@ -118,7 +139,7 @@ function injectFooter (uiCatalog, config = {}) {
   if (partials.some((f) => FOOT_STEMS.includes(f.stem) && bodyOf(f).includes('js/light-dark-mode.js'))) return true
   const toggle = config.toggle === 'placed' ? 'placed' : 'auto'
   const where = placementOf(config)
-  const tag = `<script src="{{{uiRootPath}}}/js/light-dark-mode.js" data-light-dark-mode-toggle="${toggle}" data-light-dark-mode-placement="${where}" defer></script>`
+  const tag = `<script src="{{{uiRootPath}}}/js/light-dark-mode.js" data-light-dark-mode-toggle="${toggle}" data-light-dark-mode-placement="${where}" data-light-dark-mode-labels='${attrJson(labelsOf(config))}' defer></script>`
   return insertFooterTag(uiCatalog, tag, ['js/color-scheme.js', 'ui-bus.js', 'site.js'])
 }
 
@@ -153,3 +174,4 @@ module.exports.injectHead = injectHead
 module.exports.injectFooter = injectFooter
 module.exports.followsSystem = followsSystem
 module.exports.partialsFor = partialsFor
+module.exports.labelsOf = labelsOf

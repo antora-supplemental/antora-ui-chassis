@@ -185,8 +185,10 @@
   /* Toggle component, two variants with the same state code:
      - navbar: compact icon button #theme-toggle (or [data-light-dark-mode-toggle]),
        created at the start of .navbar .navbar-end.
-     - footer: labeled Light / Dark / Auto switch [data-light-dark-mode-switch],
-       created in the page footer.
+     - footer: Light / Dark / Auto icon switch [data-light-dark-mode-switch]
+       (sun, moon, half-filled circle), created in the page footer. Its
+       strings (aria-label and title of each button, group name) come from
+       data-light-dark-mode-labels, the labels option.
      data-light-dark-mode-toggle on this script: auto (create the configured
      variant when the page has none) or placed (bind only).
      data-light-dark-mode-placement: navbar (default) or footer.
@@ -198,7 +200,18 @@
   var MOON = '<svg class="theme-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>'
   var placement = (script && script.getAttribute('data-light-dark-mode-toggle')) || 'auto'
   var variant = (script && script.getAttribute('data-light-dark-mode-placement')) || 'navbar'
-  var CHOICES = [['light', 'Light'], ['dark', 'Dark'], ['system', 'Auto']]
+  var LABELS = { light: 'Light', dark: 'Dark', auto: 'Auto', group: 'Theme' }
+  try {
+    var given = JSON.parse((script && script.getAttribute('data-light-dark-mode-labels')) || '{}')
+    for (var k in LABELS) if (given && typeof given[k] === 'string' && given[k]) LABELS[k] = given[k]
+  } catch (e) {}
+  var SW = '<svg class="light-dark-switch-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">'
+  var AUTO = SW + '<circle cx="12" cy="12" r="9"></circle><path d="M12 3a9 9 0 0 1 0 18z" class="light-dark-switch-fill"></path></svg>'
+  var CHOICES = [
+    ['light', LABELS.light, SUN.replace('class="theme-icon"', 'class="light-dark-switch-icon"')],
+    ['dark', LABELS.dark, MOON.replace('class="theme-icon"', 'class="light-dark-switch-icon"')],
+    ['system', LABELS.auto, AUTO]
+  ]
 
   function offText () {
     var pin = pinned()
@@ -229,16 +242,17 @@
     box.setAttribute('data-light-dark-mode-state', auto ? m : 'off')
     var note = box.querySelector('[data-light-dark-mode-note]')
     if (note) {
-      note.textContent = auto ? '' : offText() + '. Pick Light, Dark or Auto to turn it back on.'
+      note.textContent = auto ? '' : offText() + '. Pick ' + LABELS.light + ', ' + LABELS.dark + ' or ' + LABELS.auto + ' to turn it back on.'
       note.hidden = auto
     }
   }
 
   function fillSwitch (box) {
     if (box.querySelector('[data-light-dark-mode-value]')) return
-    var html = '<span class="light-dark-switch-label" id="light-dark-switch-label">Theme</span><span class="light-dark-switch-options" role="group" aria-labelledby="light-dark-switch-label">'
+    var esc = function (t) { return String(t).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;') }
+    var html = '<span class="light-dark-switch-options" role="group" aria-label="' + esc(LABELS.group) + '">'
     CHOICES.forEach(function (c) {
-      html += '<button type="button" class="light-dark-switch-option" data-light-dark-mode-value="' + c[0] + '">' + c[1] + '</button>'
+      html += '<button type="button" class="light-dark-switch-option" data-light-dark-mode-value="' + c[0] + '" aria-label="' + esc(c[1]) + '" title="' + esc(c[1]) + '">' + c[2] + '</button>'
     })
     box.innerHTML = html + '</span><span class="light-dark-switch-note" data-light-dark-mode-note role="status" hidden></span>'
   }

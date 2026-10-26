@@ -1,5 +1,11 @@
 = Changelog
 
+== 0.1.1 - 2026-10-25
+
+* Footer switch (`toggle_placement: footer`) shows icons instead of words: sun (Light), moon (Dark), half-filled circle (Auto). Each button keeps `aria-label`, gets a `title` tooltip, and keeps `aria-pressed`; the group is named with `aria-label` instead of a visible "Theme" label.
+* New `labels` option (`light`, `dark`, `auto`, `group`) holds every switch string, including the off-slot note, so sites translate in one place. Defaults stay English.
+* Selected state is a solid fill in the footer text color with the icon in `--cs-canvas` (no underline); hover is a light tint and focus-visible an outline ring. Buttons are 2rem squares.
+
 == 0.1.0 - 2026-10-25
 
 * First release. Light/dark switching split out of `@antora-supplemental/color-scheme` 0.2.0: no-flash head hook, saved choice (`antora-theme-mode`, same keys as `antora-dark-mode` 1.x), system preference with override expiry, View Transition switch, `window.LightDarkMode` (`mode`, `isDark`, `isAuto`, `set`, `toggle`, `resume`, `subscribe`), `UiBus.state` `light-dark-mode.mode|dark|auto`.
