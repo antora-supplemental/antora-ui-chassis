@@ -185,6 +185,26 @@
         "gitPath": "github:antora-supplemental/antora-ui-chassis#brand-placeholder-v0.1.0&path:packages/brand-placeholder",
         "productTopic": "brand-placeholder"
       }
+    },
+    {
+      "id": "contrast-check",
+      "name": "Contrast check",
+      "version": "0.1.0",
+      "type": "ci-tool",
+      "layer": "chassis",
+      "description": "CI contrast checker for Antora sites: axe color-contrast plus token-pair, link, focus, hover and icon checks in every color scheme a paint declares. CLI, API and composite GitHub Action.",
+      "repository": "https://github.com/antora-supplemental/antora-ui-chassis",
+      "manifestPath": "packages/contrast-check/package.json",
+      "modulePath": "packages/contrast-check",
+      "requires": [],
+      "recommends": [
+        "color-scheme"
+      ],
+      "conflicts": [],
+      "install": {
+        "gitPath": "github:antora-supplemental/antora-ui-chassis#contrast-check-v0.1.0&path:packages/contrast-check",
+        "productTopic": "contrast-check"
+      }
     }
   ],
   "recipes": []

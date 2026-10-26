@@ -1,0 +1,97 @@
+= @antora-supplemental/contrast-check
+:description: CI contrast checker for Antora sites and paints across every color scheme.
+
+Checks a built Antora site (a directory or a URL) for color contrast in every color scheme its paint declares, and reports where it fails, where it only just passes, and what color would fix it.
+
+* *Every scheme.* Reads the paint's `@color-schemes` manifest and runs each scheme: `light` and `dark` through the emulated `prefers-color-scheme`, every other scheme through `?scheme=<id>` in each slot it declares (slot `none` in its base mode).
+* *Errors* (WCAG 2.x AA): text under 4.5:1, large text under 3:1, icons, form-control borders and focus indicators under 3:1, keyboard focus with no visible change, `--cs-*` token pairs under their threshold. Text runs through axe-core `color-contrast`.
+* *Warnings*: ratios that pass by less than the near margin (0.5), links without an underline under 3:1 against the text around them, focus or hover states too similar to rest, icons on a fill under 4.5:1, near-identical colors in one paint block, hard-coded colors outside tokens, and an optional APCA Lc readout.
+* Every finding has the page, scheme, selector, colors, ratio and a suggested color. Suggestions keep hue and saturation and move lightness only.
+
+== Install
+
+[source,json]
+----
+"devDependencies": {
+  "@antora-supplemental/contrast-check": "github:antora-supplemental/antora-ui-chassis#contrast-check-v0.1.0&path:packages/contrast-check"
+}
+----
+
+It drives Chrome or Chromium through `playwright-core` (no browser download). It finds `/usr/bin/google-chrome`, `/usr/bin/chromium` or Chrome on Windows; set `CONTRAST_CHECK_CHROME` to a browser path otherwise.
+
+== CLI
+
+[source,sh]
+----
+contrast-check build/site                       # every page (up to 20), every scheme
+contrast-check build/site --pages "index.html,guide/**/*.html" --schemes light,dark,slate
+contrast-check https://docs.example.org --pages index.html
+contrast-check build/site --json=contrast.json --fail-on warning
+----
+
+[cols="1,3"]
+|===
+| `--pages <list>` | Comma-separated pages or globs, site-relative. `_` folders and `404.html` are skipped.
+| `--max-pages <n>` | Page cap (20).
+| `--schemes <ids>` | Only these scheme ids.
+| `--paint <file.css>` | Paint stylesheet(s) for the manifest and static checks; repeatable. Default: discovered from the first page.
+| `--config <file>` | Config file. Default `./contrast-check.config.json` when present.
+| `--near <ratio>` | Near-threshold margin (0.5).
+| `--apca` | Add APCA Lc to text findings.
+| `--no-focus` | Skip the focus and hover checks.
+| `--json`, `--json=<file>` | JSON report to stdout or a file.
+| `--fail-on error\|warning\|none` | Exit 1 on errors (default), on any finding, or never (report only).
+| `--strict` | Same as `--fail-on warning`.
+| `--quiet` | Totals only.
+|===
+
+Exit codes: 0 clean (under `--fail-on`), 1 failed, 2 usage or setup error.
+
+Under GitHub Actions it prints `::error` / `::warning` annotations (with `file=` pointing at the page or paint and a `title`), and appends a summary table to `$GITHUB_STEP_SUMMARY`.
+
+== Config
+
+`contrast-check.config.json` (see `contrast-check.config.example.json`): `thresholds` (`text`, `large`, `nonText`, `link`), `nearMargin`, `similarState`, `apca`, `pages`, `maxPages`, `schemes`, `paints`, `tokens`, `failOn`, `ignore` (`selectors`, `rules`, `pages`), `maxAnnotations`. Unknown keys are an error.
+
+== GitHub Action
+
+[source,yaml]
+----
+- uses: antora-supplemental/antora-ui-chassis/packages/contrast-check@contrast-check-v0.1.0
+  with:
+    site: build/site
+    pages: "index.html,**/*.html"
+    fail-on: error   # or warning, or none for report only
+----
+
+Inputs: `site`, `pages`, `max-pages`, `schemes`, `paint`, `config`, `fail-on`, `json` (report path, default `contrast-check.json`), `args`. GitHub-hosted Ubuntu runners already have Chrome.
+
+== Rules
+
+[cols="1,1,3"]
+|===
+| Rule | Level | Meaning
+| `color-contrast` | error | axe-core: text under 4.5:1 (large text 3:1).
+| `token-pair` | error | A `--cs-*` pair (ink/canvas, accent/canvas, code fg/bg, ...) under its threshold. Translucent surfaces are composited over `--cs-canvas`.
+| `icon-contrast` | error | An icon (svg, icon font) under 3:1 against its fill.
+| `control-boundary` | error | A form control whose fill does not stand out and whose border is under 3:1.
+| `focus-indicator` | error | Focus outline, ring or border under 3:1 against the background.
+| `focus-not-visible` | error | Keyboard focus changes nothing visible. The browser's own ring (`outline-style: auto`) passes.
+| `near-threshold`, `token-pair-near` | warning | Passes by less than `nearMargin`.
+| `link-not-distinct` | warning | A link without an underline under 3:1 against the text around it.
+| `focus-too-similar`, `hover-too-similar`, `hover-unchanged` | warning | State change under `similarState` (1.2:1), or none. Reported once per selector, listing the schemes.
+| `icon-on-fill` | warning | Icon at 3:1 or more but under 4.5:1 on its fill.
+| `token-boundary` | warning | `--cs-border` on `--cs-canvas` under 3:1; fine for decoration.
+| `near-identical-colors` | warning | Paint colors in one block within OKLab ΔE 0.02.
+| `hard-coded-color` | warning | Literal colors outside tokens (color-scheme's paint validator).
+| `scheme-not-applied` | warning | `?scheme=<id>` did not take effect.
+|===
+
+== API
+
+[source,js]
+----
+import { run, mergeConfig, consoleReport } from '@antora-supplemental/contrast-check'
+const { findings, meta } = await run('build/site', mergeConfig({ maxPages: 5 }))
+console.log(consoleReport(findings, meta))
+----

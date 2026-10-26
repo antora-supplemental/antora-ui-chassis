@@ -1,0 +1,36 @@
+= Contrast check in CI
+:description: Check an Antora site's contrast in every color scheme its paint declares, locally and in GitHub Actions.
+:keywords: contrast, accessibility, wcag, color scheme, ci, github actions, axe
+
+`@antora-supplemental/contrast-check` loads a built site in Chrome once per color scheme and reports contrast failures as errors and close calls as warnings, each with the page, scheme, selector, colors, ratio and a suggested color. Package README: `packages/contrast-check/README.adoc`.
+
+== Which schemes run
+
+The paint's `/* @color-schemes {...} */` manifest (xref:color-scheme.adoc[]) decides. `light` and `dark` run through the emulated `prefers-color-scheme`. Every other scheme runs through `?scheme=<id>`, once per slot it declares (`both` runs twice), or in its base mode for slot `none`. A site with no manifest runs light and dark.
+
+== Errors and warnings
+
+Errors are WCAG 2.x AA failures: text under 4.5:1, large text under 3:1, icons, control borders and focus indicators under 3:1, and keyboard focus that changes nothing visible. Warnings are the near misses and style problems: ratios within 0.5 of the threshold, links without an underline under 3:1 against their surrounding text, hover and focus states too close to rest, icons on a fill under 4.5:1, near-identical and hard-coded paint colors.
+
+Suggested colors keep the hue and saturation and move only lightness, so a fix stays on brand.
+
+== Run it locally
+
+[source,sh]
+----
+npx antora antora-playbook.yml
+npx contrast-check build/site --pages "index.html,**/*.html" --max-pages 10
+----
+
+== Run it in GitHub Actions
+
+[source,yaml]
+----
+- run: npx antora antora-playbook.yml
+- uses: antora-supplemental/antora-ui-chassis/packages/contrast-check@contrast-check-v0.1.0
+  with:
+    site: build/site
+    fail-on: error
+----
+
+Findings show as annotations on the run and as a table in the job summary. Use `fail-on: none` to report without failing while you fix existing issues, and `ignore` in `contrast-check.config.json` for findings you accept (for example a third-party widget).

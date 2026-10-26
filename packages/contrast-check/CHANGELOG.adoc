@@ -1,0 +1,12 @@
+= Changelog
+
+== 0.1.0 - 2026-10-25
+
+=== Added
+
+* `contrast-check` CLI and API: checks a built Antora site or URL in every scheme from the paint's `@color-schemes` manifest (light/dark through `prefers-color-scheme`, others through `?scheme=`).
+* Errors: axe-core `color-contrast`, `--cs-*` token pairs, icon contrast, form-control boundaries, focus indicators and invisible focus.
+* Warnings: near-threshold ratios, links not distinct from surrounding text, focus and hover states too similar to rest, icons on a fill under 4.5:1, near-identical paint colors, hard-coded colors, optional APCA readout.
+* Lightness-only color suggestions on every ratio finding.
+* Console, `--json`, GitHub `::error`/`::warning` annotations, `$GITHUB_STEP_SUMMARY` table, `--fail-on error|warning|none`, `--strict`, and `contrast-check.config.json`.
+* Composite GitHub Action (`packages/contrast-check/action.yml`).

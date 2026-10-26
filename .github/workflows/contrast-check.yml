@@ -1,0 +1,48 @@
+name: Contrast check
+
+# Package tests (unit + browser fixtures) for packages/contrast-check, then
+# the action itself against the fixtures: pass must be clean, fail must fail.
+on:
+  push:
+    branches: [main]
+    paths: ["packages/contrast-check/**", "packages/color-scheme/**", ".github/workflows/contrast-check.yml"]
+  pull_request:
+    paths: ["packages/contrast-check/**", "packages/color-scheme/**", ".github/workflows/contrast-check.yml"]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: "24"
+          package-manager-cache: false
+      - name: Install
+        working-directory: packages/contrast-check
+        run: npm install --no-audit --no-fund --ignore-scripts
+      - name: Unit and browser tests
+        working-directory: packages/contrast-check
+        env:
+          CONTRAST_CHECK_CHROME: /usr/bin/google-chrome
+        run: npm test
+      - name: Action on the pass fixture (must be clean)
+        uses: ./packages/contrast-check
+        with:
+          site: packages/contrast-check/test/fixtures/pass
+          fail-on: warning
+          json: pass.json
+      - name: Action on the fail fixture (must fail)
+        id: fail
+        continue-on-error: true
+        uses: ./packages/contrast-check
+        with:
+          site: packages/contrast-check/test/fixtures/fail
+          json: fail.json
+      - name: Expect the fail fixture to fail
+        if: steps.fail.outcome != 'failure'
+        run: echo "::error::contrast-check passed the fail fixture" && exit 1

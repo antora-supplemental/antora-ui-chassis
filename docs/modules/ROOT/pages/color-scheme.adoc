@@ -8,6 +8,8 @@ Dark mode on an Antora site takes three layers:
 * `@antora-supplemental/color-scheme` (chassis): the `--cs-*` token contract, the color schemes a paint declares (light/dark slots, a picker page when a paint has more than two), and optional live paint for previews. Package README: `packages/color-scheme/README.adoc`.
 * Paint: the colors. `@antora-supplemental/default-paint` for the Default UI (xref:default-paint.adoc[]), Valentus Paint for Valentus.
 
+To check every scheme for contrast in CI see xref:contrast-check.adoc[].
+
 `antora-dark-mode` 2.x is built here (`packages/antora-dark-mode`) and registers all three. Upgrading: xref:migrate-dark-mode.adoc[].
 
 == Override order

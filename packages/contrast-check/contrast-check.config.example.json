@@ -1,0 +1,16 @@
+{
+  "thresholds": { "text": 4.5, "large": 3, "nonText": 3, "link": 3 },
+  "nearMargin": 0.5,
+  "similarState": 1.2,
+  "apca": false,
+  "pages": ["index.html", "**/*.html"],
+  "maxPages": 20,
+  "schemes": [],
+  "failOn": "error",
+  "ignore": {
+    "selectors": ["#search-input"],
+    "rules": ["hover-unchanged"],
+    "pages": ["_/**"]
+  },
+  "maxAnnotations": 50
+}

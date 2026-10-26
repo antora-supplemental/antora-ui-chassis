@@ -1,0 +1,69 @@
+name: Antora contrast check
+description: WCAG contrast, link, focus and hover checks across every color scheme a paint declares, with annotations and a step summary.
+branding:
+  icon: eye
+  color: purple
+inputs:
+  site:
+    description: Built site directory (or http(s) URL) to check.
+    required: true
+  pages:
+    description: Comma-separated pages or globs, site-relative (default every .html up to max-pages).
+    default: ""
+  max-pages:
+    description: Page cap.
+    default: "20"
+  schemes:
+    description: Comma-separated scheme ids (default every scheme in the paint manifest).
+    default: ""
+  paint:
+    description: Paint stylesheet for the manifest and static checks (default discovered from the first page).
+    default: ""
+  config:
+    description: Config file (default ./contrast-check.config.json when present).
+    default: ""
+  fail-on:
+    description: "error (default), warning, or none (report only)."
+    default: error
+  json:
+    description: Write the JSON report to this file.
+    default: contrast-check.json
+  args:
+    description: Extra CLI arguments.
+    default: ""
+outputs:
+  report:
+    description: Path to the JSON report.
+    value: ${{ inputs.json }}
+runs:
+  using: composite
+  steps:
+    - name: Install contrast-check dependencies
+      shell: bash
+      working-directory: ${{ github.action_path }}
+      run: npm install --no-save --no-audit --no-fund --omit=dev --ignore-scripts
+    - name: Run contrast-check
+      shell: bash
+      env:
+        CC_SITE: ${{ inputs.site }}
+        CC_PAGES: ${{ inputs.pages }}
+        CC_MAX: ${{ inputs.max-pages }}
+        CC_SCHEMES: ${{ inputs.schemes }}
+        CC_PAINT: ${{ inputs.paint }}
+        CC_CONFIG: ${{ inputs.config }}
+        CC_FAIL: ${{ inputs.fail-on }}
+        CC_JSON: ${{ inputs.json }}
+        CC_ARGS: ${{ inputs.args }}
+        CC_BIN: ${{ github.action_path }}/bin/contrast-check.js
+      run: |
+        set -u
+        a=("$CC_SITE" --max-pages "$CC_MAX" --fail-on "$CC_FAIL" "--json=$CC_JSON")
+        [ -n "$CC_PAGES" ] && a+=(--pages "$CC_PAGES")
+        [ -n "$CC_SCHEMES" ] && a+=(--schemes "$CC_SCHEMES")
+        [ -n "$CC_PAINT" ] && a+=(--paint "$CC_PAINT")
+        [ -n "$CC_CONFIG" ] && a+=(--config "$CC_CONFIG")
+        if [ -z "${CONTRAST_CHECK_CHROME:-}" ]; then
+          for c in /usr/bin/google-chrome /usr/bin/chromium /usr/bin/chromium-browser; do [ -x "$c" ] && export CONTRAST_CHECK_CHROME="$c" && break; done
+        fi
+        # shellcheck disable=SC2086
+        node "$CC_BIN" "${a[@]}" $CC_ARGS
