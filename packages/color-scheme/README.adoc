@@ -17,7 +17,7 @@ antora:
 
 [source,json]
 ----
-"@antora-supplemental/color-scheme": "github:antora-supplemental/antora-ui-chassis#color-scheme-v0.5.0&path:packages/color-scheme"
+"@antora-supplemental/color-scheme": "github:antora-supplemental/antora-ui-chassis#color-scheme-v0.5.1&path:packages/color-scheme"
 ----
 
 The extension links `css/color-scheme.css` after `site.css`. When the active paint declares more than two schemes (or the site sets slots or forces the picker) it also inlines the schemes head hook and loads `js/color-scheme.js`; `live_paint` adds the paint head hook.
@@ -100,7 +100,7 @@ A visitor can reassign the slots (saved in the `cs-scheme-slots` cookie for a ye
 
 === Picker page
 
-When the picker is on, the build adds `color-schemes.html`: one card per scheme of the active paint with a live preview (an iframe of `preview_page` with `?cs-preview=<id>&cs-preview-mode=light|dark`, which never writes cookies), and buttons "Use for light" and "Use for dark" for slot schemes, and "Use for this visit (turns off automatic light/dark)" only for `none` schemes. A banner offers "Turn automatic light/dark back on" while a `none` scheme is pinned. The picker lists schemes, never paints.
+When the picker is on, the build adds a `color-schemes.html` page to the start page's component version, rendered in the UI's default layout (site header, nav, footer and light/dark toggle; it falls back to a standalone `_/color-schemes.html` only without a start page). Cards and buttons are styled with the `--cs-*` tokens, so they follow the paint and scheme; the scheme in a slot shows a filled button. One card per scheme of the active paint with a live preview (an iframe of `preview_page` with `?cs-preview=<id>&cs-preview-mode=light|dark`, which never writes cookies), and buttons "Use for light" and "Use for dark" for slot schemes, and "Use for this visit (turns off automatic light/dark)" only for `none` schemes. A banner offers "Turn automatic light/dark back on" while a `none` scheme is pinned. The picker lists schemes, never paints.
 
 The footer link is the `color-scheme-picker-link` partial. Override order: a partial of that name in your supplemental UI, then in the theme, then the chassis default. `placement: footer` includes it in `footer-content` unless a partial already does; `placement: none` leaves it to you.
 

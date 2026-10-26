@@ -11,7 +11,8 @@
  * (extra schemes are html[data-scheme="<id>"] blocks). When it has more than
  * two, or the site sets slots, this extension inlines the schemes head hook
  * (window.ColorSchemes, html[data-scheme]), loads js/color-scheme.js, and adds
- * the picker page (_/color-schemes.html) with a footer link. Light/dark
+ * the picker page (color-schemes.html in the start page's version, in the
+ * site layout) with a footer link. Light/dark
  * switching is @antora-supplemental/light-dark-mode, which requires this package.
  *
  *   antora:
@@ -293,10 +294,11 @@ function ensureColorScheme (uiCatalog, uiOutputDir, config = {}) {
    placing it to the layout. */
 const PICKER_PAGE = 'color-schemes.html'
 
-function addPickerLink (uiCatalog, picker) {
+function addPickerLink (uiCatalog, picker, pageUrl) {
   const partials = uiCatalog.findByType('partial')
   if (!partials.some((f) => f.stem === 'color-scheme-picker-link')) {
-    const body = `<a class="color-scheme-picker-link" href="{{{uiRootPath}}}/${PICKER_PAGE}">${picker.label}</a>\n`
+    const href = pageUrl ? `{{{siteRootPath}}}${pageUrl}` : `{{{uiRootPath}}}/${PICKER_PAGE}`
+    const body = `<a class="color-scheme-picker-link" href="${href}">${picker.label}</a>\n`
     uiCatalog.addFile({ type: 'partial', stem: 'color-scheme-picker-link', path: 'partials/color-scheme-picker-link.hbs', contents: Buffer.from(body) })
   }
   if (picker.placement !== 'footer') return true
@@ -325,8 +327,26 @@ function pickerScripts (uiCatalog) {
   return (text.match(re) || []).map((m) => m.split('{{{uiRootPath}}}').join('.')).join('\n')
 }
 
+const INTRO = "These are the color schemes this site's paint provides. Light and dark mode switch between the scheme in the light slot and the scheme in the dark slot. Choosing a light or dark scheme puts it in its slot and keeps automatic light/dark on. Schemes not made for light/dark can be used for this visit only, which turns automatic light/dark off until you pick Automatic or a slot scheme."
+
+/** The picker body: shared by the in-layout page and the standalone fallback. */
+function pickerBody (uiCatalog, previewHref, heading, standalone) {
+  /* In the site layout the UI's own light/dark toggle (navbar or footer) is on the page. */
+  const ldm = standalone && uiCatalog.findByType('partial').some((f) => bodyOf(f).includes('js/light-dark-mode.js'))
+  return `<div class="cs-picker">
+${heading}
+<p>${INTRO}</p>
+<div class="cs-picker-top">
+${ldm ? '<div data-light-dark-mode-switch class="light-dark-switch"></div>' : ''}
+<button type="button" id="cs-picker-reset" class="cs-picker-button">Automatic, site defaults</button>
+<a class="cs-picker-back" href="${esc(previewHref)}">Back to the docs</a>
+</div>
+<div id="cs-picker-banner" class="cs-picker-banner" role="status" hidden></div>
+<ul id="cs-picker-list" class="cs-picker-list" data-preview="${esc(previewHref)}"></ul>
+</div>`
+}
+
 function pickerHtml (uiCatalog, picker, previewHref, siteTitle) {
-  const ldm = uiCatalog.findByType('partial').some((f) => bodyOf(f).includes('js/light-dark-mode.js'))
   return `<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -338,16 +358,8 @@ ${pickerHead(uiCatalog)}
 <link rel="stylesheet" href="./css/color-scheme-picker.css">
 </head>
 <body class="cs-picker-page">
-<main class="cs-picker">
-<p><a href="${esc(previewHref)}">Back to the docs</a></p>
-<h1>${esc(picker.label)}</h1>
-<p>These are the color schemes this site's paint provides. Light and dark mode switch between the scheme in the light slot and the scheme in the dark slot. Choosing a light or dark scheme puts it in its slot and keeps automatic light/dark on. Schemes not made for light/dark can be used for this visit only, which turns automatic light/dark off until you pick Automatic or a slot scheme.</p>
-<div class="cs-picker-top">
-${ldm ? '<div data-light-dark-mode-switch class="light-dark-switch"></div>' : ''}
-<button type="button" id="cs-picker-reset">Automatic, site defaults</button>
-</div>
-<div id="cs-picker-banner" class="cs-picker-banner" role="status" hidden></div>
-<ul id="cs-picker-list" class="cs-picker-list" data-preview="${esc(previewHref)}"></ul>
+<main>
+${pickerBody(uiCatalog, previewHref, `<h1>${esc(picker.label)}</h1>`, true)}
 </main>
 ${pickerScripts(uiCatalog)}
 <script src="./js/color-scheme-picker.js" defer></script>
@@ -363,12 +375,46 @@ function previewHrefOf (uiOutputDir, url) {
   return (rel || '.') + (String(url || '/').endsWith('/') && rel ? '/' : '')
 }
 
-function addPickerPage (uiCatalog, uiOutputDir, picker, startUrl, siteTitle) {
-  const href = previewHrefOf(uiOutputDir, picker.previewPage ? '/' + picker.previewPage : startUrl)
+function addPickerAssets (uiCatalog, uiOutputDir) {
   addOrReplaceAsset(uiCatalog, uiOutputDir, 'js/color-scheme-picker.js', fs.readFileSync(path.join(ROOT, 'js', 'color-scheme-picker.js')))
   addOrReplaceAsset(uiCatalog, uiOutputDir, 'css/color-scheme-picker.css', fs.readFileSync(path.join(ROOT, 'css', 'color-scheme-picker.css')))
+}
+
+/** Standalone fallback (no content catalog page possible): _/color-schemes.html. */
+function addPickerPage (uiCatalog, uiOutputDir, picker, startUrl, siteTitle) {
+  const href = previewHrefOf(uiOutputDir, picker.previewPage ? '/' + picker.previewPage : startUrl)
+  addPickerAssets(uiCatalog, uiOutputDir)
   addOrReplaceAsset(uiCatalog, uiOutputDir, PICKER_PAGE, Buffer.from(pickerHtml(uiCatalog, picker, href, siteTitle)))
   return href
+}
+
+/** The picker as a site page in the start page's component version, so the UI's
+    default layout (header, nav, footer, paint) wraps it. Returns its URL, or null
+    when it cannot be added (no start page, or a page of that name exists). */
+function addPickerSitePage (uiCatalog, contentCatalog, uiOutputDir, picker, start) {
+  if (!contentCatalog || typeof contentCatalog.addFile !== 'function' || !start || !start.src) return null
+  const { component, version } = start.src
+  const relative = PICKER_PAGE.replace(/\.html$/, '.adoc')
+  if (contentCatalog.getById && contentCatalog.getById({ component, version, module: 'ROOT', family: 'page', relative })) return null
+  const file = contentCatalog.addFile({
+    contents: Buffer.alloc(0),
+    mediaType: 'text/html',
+    src: { component, version, module: 'ROOT', family: 'page', relative, mediaType: 'text/asciidoc' },
+  })
+  if (!file || !file.pub || !file.pub.url) return null
+  const dir = path.posix.dirname(file.pub.url)
+  const rel = (to) => path.posix.relative(dir, to) || '.'
+  const ui = rel('/' + String(uiOutputDir || '_').replace(/^\/+|\/+$/g, ''))
+  const previewHref = rel(picker.previewPage ? '/' + picker.previewPage : start.pub.url)
+  file.mediaType = 'text/html'
+  file.asciidoc = { doctitle: picker.label, attributes: { 'page-role': 'cs-picker-page', doctitle: picker.label } }
+  file.title = picker.label
+  addPickerAssets(uiCatalog, uiOutputDir)
+  file.contents = Buffer.from(`<link rel="stylesheet" href="${ui}/css/color-scheme-picker.css">
+${pickerBody(uiCatalog, previewHref, '', false)}
+<script src="${ui}/js/color-scheme-picker.js" defer></script>
+`)
+  return file.pub.url
 }
 
 const SCHEMES_MARKER = 'data-color-scheme-schemes'
@@ -415,11 +461,12 @@ function schemesListener (config, logger) {
     injectRuntimeBeforeLightDark(uiCatalog)
     if (logger) logger.info(`color-scheme: ${count} schemes (${Object.keys(schemes).join(', ')}) from ${source || 'defaults'}`)
     if (!picker) return
-    addPickerLink(uiCatalog, picker)
     const start = contentCatalog.getSiteStartPage && contentCatalog.getSiteStartPage()
     const startUrl = (start && start.pub && start.pub.url) || '/'
-    addPickerPage(uiCatalog, outDir, picker, startUrl, playbook.site?.title)
-    if (logger) logger.info(`color-scheme: picker page ${PICKER_PAGE} added`)
+    const pageUrl = addPickerSitePage(uiCatalog, contentCatalog, outDir, picker, start)
+    if (!pageUrl) addPickerPage(uiCatalog, outDir, picker, startUrl, playbook.site?.title)
+    addPickerLink(uiCatalog, picker, pageUrl)
+    if (logger) logger.info(`color-scheme: picker page ${pageUrl || PICKER_PAGE} added${pageUrl ? ' (site layout)' : ''}`)
   }
 }
 const pickerListener = schemesListener
@@ -463,6 +510,7 @@ module.exports.paintSchemes = paintSchemes
 module.exports.parseManifest = parseManifest
 module.exports.schemesConfig = schemesConfig
 module.exports.addPickerPage = addPickerPage
+module.exports.addPickerSitePage = addPickerSitePage
 module.exports.previewHrefOf = previewHrefOf
 module.exports.PICKER_PAGE = PICKER_PAGE
 module.exports.addOrReplaceAsset = addOrReplaceAsset

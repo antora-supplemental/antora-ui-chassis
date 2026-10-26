@@ -35,6 +35,7 @@
     var off = P.offSlot()
     var li = el('li', { class: 'cs-picker-card', 'data-scheme': id })
     li.appendChild(el('h2', {}, info.label))
+    if (P.get() === id) li.setAttribute('aria-current', 'true')
     var fitsLight = P.fits(key, 'light')
     var fitsDark = P.fits(key, 'dark')
     var where = []
@@ -57,7 +58,7 @@
     li.appendChild(shots)
     var row = el('div', { class: 'cs-picker-actions' })
     function btn (text, fn, pressed) {
-      var b = el('button', { type: 'button' }, text)
+      var b = el('button', { type: 'button', class: 'cs-picker-button' }, text)
       if (pressed !== undefined) b.setAttribute('aria-pressed', pressed ? 'true' : 'false')
       b.addEventListener('click', fn)
       row.appendChild(b)

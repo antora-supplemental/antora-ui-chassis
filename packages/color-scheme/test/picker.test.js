@@ -127,6 +127,26 @@ describe('build output', () => {
     assert.ok(c.partial('color-scheme-picker-link'))
     assert.doesNotMatch(c.partial('footer-content'), /picker-link/)
   })
+  it('with a content catalog the picker is a site page in the default layout; only none schemes get a visit-only button', () => {
+    const c = catalog({ 'head-styles': '<link rel="stylesheet" href="{{{uiRootPath}}}/css/paint.css">', 'footer-content': '<footer class="footer">\n</footer>', 'footer-scripts': '<script src="{{{uiRootPath}}}/js/light-dark-mode.js"></script>' }, { 'css/paint.css': FOUR })
+    ensureColorScheme(c, '_', {})
+    const added = []
+    const start = { src: { component: 'docs', version: '1.0' }, pub: { url: '/docs/1.0/index.html' } }
+    const cc = { getSiteStartPage: () => start, getById: () => undefined, addFile: (f) => { f.pub = { url: '/docs/1.0/' + f.src.relative.replace(/\.adoc$/, '.html') }; f.out = { path: f.pub.url.slice(1) }; added.push(f); return f } }
+    schemesListener({})({ playbook: { ui: { outputDir: '_' } }, contentCatalog: cc, uiCatalog: c })
+    assert.equal(added.length, 1)
+    const page = added[0]
+    assert.equal(page.mediaType, 'text/html')
+    assert.equal(page.asciidoc.doctitle, 'Color schemes')
+    const html = page.contents.toString()
+    assert.match(html, /href="\.\.\/\.\.\/_\/css\/color-scheme-picker\.css"/)
+    assert.match(html, /data-preview="index\.html"/)
+    assert.doesNotMatch(html, /<html|<h1|data-light-dark-mode-switch/, 'the layout supplies the document, title and toggle')
+    assert.match(c.partial('color-scheme-picker-link'), /href="\{\{\{siteRootPath\}\}\}\/docs\/1\.0\/color-schemes\.html"/)
+    assert.equal(pickerPage(c), undefined, 'no standalone page')
+    const js = fs.readFileSync(path.join(__dirname, '..', 'js', 'color-scheme-picker.js'), 'utf8')
+    assert.match(js, /if \(none\) btn\('Use for this visit/)
+  })
   it('the picker page reuses the UI stylesheets and hooks with relative paths and previews the start page', () => {
     const html = pickerPage(build(FOUR)).contents.toString()
     assert.match(html, /<link rel="stylesheet" href="\.\/css\/site\.css">/)
