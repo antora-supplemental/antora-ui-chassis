@@ -1,5 +1,9 @@
 = Changelog
 
+== 0.1.3 - 2026-10-26
+
+* Requires color-scheme 0.5.3 (was 0.4.0; uses the `color-scheme-tokens@0.5` contract). No API change: `ColorSchemes.offSlot()`, `preview()`, `sync()`, `set()` and `ColorScheme.setScheme()` are unchanged. Since color-scheme 0.5.0 only a `none` scheme pins light/dark (off-slot); slot schemes fill the current mode's slot and keep automation on, so the navbar `aria-pressed="mixed"` state and the footer note appear only for `none` schemes.
+
 == 0.1.2 - 2026-10-25
 
 * Requires color-scheme 0.4.0: the off-slot pin and the footer note follow color *schemes* (`window.ColorSchemes`, event `color-scheme:scheme`) instead of live paints. `color_scheme` takes the top-level `schemes`, `slots`, `slot_policy` and `picker` options.

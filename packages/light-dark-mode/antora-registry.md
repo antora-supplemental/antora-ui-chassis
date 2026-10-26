@@ -21,4 +21,4 @@ antora:
     - require: '@antora-supplemental/default-paint'
 ```
 
-Git path pin: `github:antora-supplemental/antora-ui-chassis#light-dark-mode-v0.1.0&path:packages/light-dark-mode`
+Git path pin: `github:antora-supplemental/antora-ui-chassis#light-dark-mode-v0.1.3&path:packages/light-dark-mode`

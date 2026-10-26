@@ -1,5 +1,9 @@
 = Changelog
 
+== light-dark-mode-v0.1.3 - 2026-10-26
+
+* **`light-dark-mode` 0.1.3:** depends on color-scheme 0.5.3 (was pinned to 0.4.0) and the `color-scheme-tokens@0.5` contract. No API change; with color-scheme 0.5 only `none` schemes turn light/dark automation off.
+
 == contrast-check-v0.2.0 - 2026-10-26
 
 * **`contrast-check` 0.2.0: suppression list.** `suppress` entries in the config or `--suppress <file>` (JSON/JSON5/YAML, Action input `suppress`) match on rule (ids, globs, aliases), selector, page glob, scheme and exact colors; each needs a `reason` and may `expires`. Suppressed findings do not count toward `--fail-on` and show as `N suppressed` (`--show-suppressed` lists them). Stale and expired entries are warnings (`--fail-on-stale` fails on them). Inline opt-out with `data-contrast-check-ignore="rule1 rule2"`. `loadConfig` is now async.
