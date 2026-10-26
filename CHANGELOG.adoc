@@ -1,5 +1,9 @@
 = Changelog
 
+== Unreleased (demos only, no package release) - 2026-10-25
+
+* **Demo sites move to Valentus Layout:** new `demos/valentus-layout` builds the chassis demo (`antora-playbook.yml`, top-bar light/dark toggle) and the color-scheme picker demo (`antora-playbook-picker.yml`, `scheme-demo-paint` fixture, picker page, footer Light / Dark / Auto switch) on `valentus-layout-bundle.zip` from valentus-theme v4.2.0 with `default-paint` and `brand-placeholder`, loaded from this checkout. The Default UI is no longer used for demos and stays a faithful mirror of the stock Antora UI. No published package changed.
+
 == brand-placeholder-v0.1.0 - 2026-10-25
 
 * **New `brand-placeholder` 0.1.0:** the shared placeholder logo for every Antora theme (moved from Valentus 4.1.0). Inline `currentColor` mark, logo/-dark/-mono SVGs, favicon.svg/.ico, apple-touch-icon, and the `brand-logo` / `head-icons` partials that resolve `site.keys.header_logo` and `favicon`. Override order: the site first, then the chassis placeholder; themes may set real logos only on their own demo site, never in what they ship. Antora extension (replaces theme copies with a warning), `scripts/bake.mjs` for release bundles, `scripts/validate-theme.mjs` brand-file validator.

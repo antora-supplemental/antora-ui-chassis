@@ -1,0 +1,15 @@
+{
+  "name": "chassis-demo-valentus-layout",
+  "private": true,
+  "description": "antora-ui-chassis demo sites on Valentus Layout (valentus-theme v4.2.0) with default-paint and brand-placeholder",
+  "scripts": {
+    "build": "antora antora-playbook.yml && antora antora-playbook-picker.yml",
+    "build:chassis": "antora antora-playbook.yml",
+    "build:picker": "antora antora-playbook-picker.yml",
+    "contrast": "contrast-check build/chassis && contrast-check build/picker"
+  },
+  "devDependencies": {
+    "@antora-supplemental/contrast-check": "file:../../packages/contrast-check",
+    "antora": "^3.1.14"
+  }
+}

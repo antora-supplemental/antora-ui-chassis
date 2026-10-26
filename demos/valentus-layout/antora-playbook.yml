@@ -1,0 +1,40 @@
+# Chassis demo: Valentus Layout + chassis default-paint + brand-placeholder,
+# light/dark toggle in the top bar (navbar design). Not the Default UI: the
+# Default UI stays a faithful mirror of stock Antora UI.
+site:
+  title: Antora UI Chassis demo
+  start_page: chassis-demo::index.adoc
+
+content:
+  sources:
+    - url: ../..
+      branches: HEAD
+      start_path: demos/valentus-layout/content
+    - url: https://github.com/antora-supplemental/demo-data.git
+      tags: [v0.3.5]
+      branches: []
+      start_path: docs/demo-pages
+
+ui:
+  # Valentus Layout (layout only, no Valentus Paint), pinned to valentus-theme v4.2.0.
+  bundle:
+    url: https://github.com/antora-supplemental/valentus-theme/releases/download/v4.2.0/valentus-layout-bundle.zip
+    snapshot: false
+
+output:
+  dir: ./build/chassis
+
+runtime:
+  fetch: true
+
+antora:
+  extensions:
+    - require: ../../packages/brand-placeholder/lib/index.js
+    - require: ../../packages/light-dark-mode/lib/index.js
+      toggle_placement: navbar
+    - require: ../../packages/default-paint/lib/index.js
+
+asciidoc:
+  attributes:
+    source-highlighter: highlight.js
+    page-demo-variant: chassis

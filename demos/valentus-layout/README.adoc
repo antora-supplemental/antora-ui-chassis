@@ -1,0 +1,22 @@
+= Chassis demo sites (Valentus Layout)
+
+Two demo sites for the chassis packages, both on *Valentus Layout* (`valentus-layout-bundle.zip` from valentus-theme v4.2.0) with `default-paint` and `brand-placeholder`:
+
+[cols="1,1,2"]
+|===
+| Playbook | Output | Shows
+
+| `antora-playbook.yml` | `build/chassis` | light/dark toggle in the top bar (`toggle_placement: navbar`)
+| `antora-playbook-picker.yml` | `build/picker` | `scheme-demo-paint` fixture (six schemes), the `color-schemes.html` picker page and the footer Light / Dark / Auto switch (`toggle_placement: footer`)
+|===
+
+The demos load the chassis packages from this checkout (`../../packages/...`), so they show the working tree.
+They do not use the Default UI, which stays a faithful mirror of the stock Antora UI.
+
+[source,console]
+----
+cd demos/valentus-layout
+npm install --install-links   # contrast-check from ../../packages, with its own dependencies
+npm run build
+npm run contrast
+----

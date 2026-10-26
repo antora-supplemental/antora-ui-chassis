@@ -1,0 +1,20 @@
+= Blocks and admonitions
+
+NOTE: A note admonition.
+
+TIP: A tip admonition.
+
+IMPORTANT: An important admonition.
+
+WARNING: A warning admonition.
+
+CAUTION: A caution admonition.
+
+[source,js]
+----
+// highlight.js tokens follow the paint
+const scheme = ColorScheme.getScheme()
+console.log(`active scheme: ${scheme}`, 42, true)
+----
+
+> A quoted paragraph with a https://antora.org[link].

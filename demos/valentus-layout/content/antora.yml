@@ -1,0 +1,5 @@
+name: chassis-demo
+title: Chassis demo
+version: ~
+nav:
+  - modules/ROOT/nav.adoc

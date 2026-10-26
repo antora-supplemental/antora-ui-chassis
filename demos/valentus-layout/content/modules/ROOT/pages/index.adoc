@@ -1,0 +1,21 @@
+= Antora UI Chassis demo
+:description: Chassis packages on Valentus Layout with the chassis default paint and placeholder logo.
+
+This site shows the `antora-ui-chassis` packages on *Valentus Layout* (valentus-theme v4.2.0, layout only), colored by `@antora-supplemental/default-paint`, with the shared `brand-placeholder` logo.
+
+* Light/dark mode: `@antora-supplemental/light-dark-mode`.
+* Color schemes and picker: `@antora-supplemental/color-scheme`.
+* Paint: `@antora-supplemental/default-paint`; the picker demo adds the `scheme-demo-paint` test fixture.
+
+The Default UI is not used here. It stays a faithful mirror of the stock Antora UI.
+
+== A table
+
+[cols="1,2"]
+|===
+| Layer | Package
+
+| Chassis | `color-scheme`, `light-dark-mode`, `brand-placeholder`
+| Body kit | Valentus Layout
+| Paint | `default-paint`
+|===
