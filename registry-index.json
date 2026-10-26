@@ -44,7 +44,7 @@
     {
       "id": "light-dark-mode",
       "name": "Light/dark mode (dark mode)",
-      "version": "0.1.2",
+      "version": "0.1.3",
       "type": "playbook-extension",
       "layer": "chassis",
       "description": "Dark mode for any Antora UI: no-flash head hook, saved choice, system preference, accessible toggle (top-bar icon button or footer Light / Dark / Auto switch). Successor to antora-dark-mode 1.x.",
@@ -60,7 +60,7 @@
       ],
       "conflicts": [],
       "install": {
-        "gitPath": "github:antora-supplemental/antora-ui-chassis#light-dark-mode-v0.1.2&path:packages/light-dark-mode",
+        "gitPath": "github:antora-supplemental/antora-ui-chassis#light-dark-mode-v0.1.3&path:packages/light-dark-mode",
         "productTopic": "light-dark-mode"
       }
     },
@@ -189,7 +189,7 @@
     {
       "id": "contrast-check",
       "name": "Contrast check",
-      "version": "0.1.0",
+      "version": "0.2.0",
       "type": "ci-tool",
       "layer": "chassis",
       "description": "CI contrast checker for Antora sites: axe color-contrast plus token-pair, link, focus, hover and icon checks in every color scheme a paint declares. CLI, API and composite GitHub Action.",
@@ -202,7 +202,7 @@
       ],
       "conflicts": [],
       "install": {
-        "gitPath": "github:antora-supplemental/antora-ui-chassis#contrast-check-v0.1.0&path:packages/contrast-check",
+        "gitPath": "github:antora-supplemental/antora-ui-chassis#contrast-check-v0.2.0&path:packages/contrast-check",
         "productTopic": "contrast-check"
       }
     }
