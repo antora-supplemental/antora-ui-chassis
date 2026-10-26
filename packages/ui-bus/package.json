@@ -1,6 +1,12 @@
 {
   "name": "@antora-supplemental/ui-bus",
   "version": "0.1.0",
+  "antoraRegistry": {
+    "antora": "3",
+    "provides": {
+      "ui-bus-api": "0.1"
+    }
+  },
   "description": "General event bus for Antora UI extensions: UiBus.events and UiBus.state",
   "main": "lib/index.js",
   "exports": { ".": "./lib/index.js", "./lib": "./lib/index.js", "./js/ui-bus.js": "./js/ui-bus.js" },

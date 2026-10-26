@@ -1,6 +1,15 @@
 {
   "name": "@antora-supplemental/page-state",
   "version": "0.1.0",
+  "antoraRegistry": {
+    "antora": "3",
+    "requires": {
+      "@antora-supplemental/ui-bus": "^0.1.0"
+    },
+    "uses": {
+      "ui-bus-api": "^0.1"
+    }
+  },
   "description": "Antora extension: publishes the current page's component, version, url and title as UiBus state",
   "main": "lib/index.js",
   "exports": { ".": "./lib/index.js", "./lib": "./lib/index.js" },

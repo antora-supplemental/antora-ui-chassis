@@ -1,6 +1,9 @@
 {
   "name": "@antora-supplemental/brand-placeholder",
   "version": "0.1.0",
+  "antoraRegistry": {
+    "antora": "3"
+  },
   "description": "Shared placeholder logo for Antora themes: neutral currentColor mark, logo/-dark/-mono SVGs, favicons, and the header_logo/favicon resolution partials. Sites replace it; themes never ship a brand logo.",
   "main": "lib/index.js",
   "exports": {

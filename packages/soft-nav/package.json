@@ -1,6 +1,18 @@
 {
   "name": "@antora-supplemental/soft-nav",
   "version": "0.2.0",
+  "antoraRegistry": {
+    "antora": "3",
+    "requires": {
+      "@antora-supplemental/ui-bus": "^0.1.0"
+    },
+    "uses": {
+      "ui-bus-api": "^0.1"
+    },
+    "worksWith": {
+      "@antora-supplemental/page-state": "^0.1.0"
+    }
+  },
   "description": "Antora extension: inject SoftNav runtime (soft-nav.js); publishes nav:* events on UiBus",
   "main": "lib/index.js",
   "exports": {

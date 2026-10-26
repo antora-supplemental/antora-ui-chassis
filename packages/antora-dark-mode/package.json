@@ -1,6 +1,14 @@
 {
   "name": "antora-dark-mode",
   "version": "2.0.0",
+  "antoraRegistry": {
+    "antora": "3",
+    "requires": {
+      "@antora-supplemental/light-dark-mode": "^0.1.0",
+      "@antora-supplemental/color-scheme": "^0.5.0",
+      "@antora-supplemental/default-paint": "^0.2.0"
+    }
+  },
   "description": "Dark mode for Antora 3, powered by antora-ui-chassis: registers @antora-supplemental/color-scheme, @antora-supplemental/light-dark-mode and @antora-supplemental/default-paint.",
   "main": "lib/index.js",
   "exports": {
