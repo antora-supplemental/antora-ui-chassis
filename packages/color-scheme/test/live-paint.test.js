@@ -28,7 +28,7 @@ class El {
   set rel (v) { this.attrs.rel = v }
 }
 
-function page ({ search = '', cookie = '', links = [], dark = false, extra = {}, schemes = null } = {}) {
+function page ({ search = '', cookie = '', links = [], dark = false, extra = {}, schemes = null, env = {} } = {}) {
   const jar = {}
   cookie.split(';').map((s) => s.trim()).filter(Boolean).forEach((kv) => { const [k, v] = kv.split('='); jar[k] = v })
   const writes = []
@@ -58,6 +58,7 @@ function page ({ search = '', cookie = '', links = [], dark = false, extra = {},
     },
     createElement: (n) => new El(n),
     querySelectorAll: () => head.children.filter((n) => n.nodeName === 'LINK'),
+    querySelector: () => null,
     addEventListener: (t, fn) => { (listeners[t] = listeners[t] || []).push(fn) },
     dispatchEvent: (e) => { (listeners[e.type] || []).forEach((fn) => fn(e)) },
   }
@@ -72,6 +73,7 @@ function page ({ search = '', cookie = '', links = [], dark = false, extra = {},
       allowOrigins: ['https://registry.antora-supplemental.org'],
       ...extra,
     },
+    ...env,
   }
   if (schemes) win.__colorSchemes = { param: 'scheme', cookie: 'cs-scheme', cookiePath: '/', schemes: SCHEMES, slots: { light: 'light', dark: 'dark' }, ...schemes }
   win.window = win
@@ -226,6 +228,18 @@ describe('live paint build config (0.4.0)', () => {
 })
 
 describe('schemes head hook', () => {
+  it('?scheme=<both scheme> lands in the slot of the mode the page will show (system dark, before the light/dark hook)', () => {
+    const both = { schemes: { schemes: { ...SCHEMES, slate: { label: 'Slate', slots: ['light', 'dark'], base: 'light' } } } }
+    const sys = (isDark, stored = null) => ({ matchMedia: () => ({ matches: isDark }), localStorage: { getItem: () => stored } })
+    let p = page({ search: '?scheme=slate', ...both, env: sys(true) })
+    assert.deepEqual({ ...p.win.ColorSchemes.slots() }, { light: 'light', dark: 'slate' })
+    p = page({ search: '?scheme=slate', ...both, env: sys(false) })
+    assert.deepEqual({ ...p.win.ColorSchemes.slots() }, { light: 'slate', dark: 'dark' })
+    p = page({ search: '?scheme=slate', ...both, env: sys(false, 'dark') })
+    assert.deepEqual({ ...p.win.ColorSchemes.slots() }, { light: 'light', dark: 'slate' }, 'stored dark choice wins over the system')
+    p = page({ search: '?scheme=slate', ...both, env: sys(true, 'light') })
+    assert.deepEqual({ ...p.win.ColorSchemes.slots() }, { light: 'slate', dark: 'dark' }, 'stored light choice wins over the system')
+  })
   const S = (o = {}) => page({ schemes: {}, ...o })
   it('sets html[data-scheme] from the light/dark slot', () => {
     const p = S()

@@ -1,5 +1,11 @@
 = Changelog
 
+== 0.5.3 - 2026-10-25
+
+=== Fixed
+
+* `?scheme=<id>` for a scheme that fits both slots now lands in the slot of the mode the page shows. The schemes head hook runs before the light/dark hook, so it read light on every first load and put the scheme in the light slot even when the page was dark (stored dark choice or system dark). It now resolves light/dark the way the light/dark hook does: the stored choice first, then the system when follow_system is on. Found by `@antora-supplemental/contrast-check` (`scheme-not-applied`).
+
 == 0.5.2 - 2026-10-25
 
 === Changed

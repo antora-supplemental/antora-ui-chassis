@@ -38,7 +38,18 @@
   var slotsCookie = cookieName + '-slots'
   var cookiePath = cfg.cookiePath || '/'
   var current = null
+  // This hook runs before the light/dark head hook, so resolve light/dark the
+  // same way it will (stored choice, then the system when follow_system is on):
+  // ?scheme=<both-slot scheme> must land in the slot of the mode the page shows.
   var dark = html.classList.contains('dark-theme')
+  if (!dark && !html.hasAttribute('data-theme')) {
+    try {
+      var ldm = localStorage.getItem('antora-theme-mode') || localStorage.getItem('antora-theme')
+      var follow = document.querySelector('meta[name="light-dark-mode-follow-system"]')
+      if (ldm === 'dark') dark = true
+      else if (ldm !== 'light') dark = !(follow && follow.content === 'off') && window.matchMedia('(prefers-color-scheme: dark)').matches
+    } catch (e) {}
+  }
   var defaults = { light: (cfg.slots && cfg.slots.light) || 'light', dark: (cfg.slots && cfg.slots.dark) || 'dark' }
   var slots = { light: defaults.light, dark: defaults.dark }
   var session = null
