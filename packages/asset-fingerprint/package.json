@@ -1,0 +1,47 @@
+{
+  "name": "@antora-supplemental/asset-fingerprint",
+  "version": "0.1.0",
+  "antoraRegistry": {
+    "title": "Asset Fingerprint",
+    "antora": "3",
+    "provides": {
+      "asset-fingerprint": "0.1"
+    }
+  },
+  "description": "Cache-busting for any Antora site: after the site is written, rewrites CSS and JS URLs (optionally fonts and images) in the built HTML to ?v=<content hash>, so a deploy shows up at once instead of after the browser cache expires. Antora extension and CLI; theme-agnostic.",
+  "main": "lib/index.js",
+  "exports": {
+    ".": "./lib/index.js",
+    "./lib": "./lib/index.js"
+  },
+  "bin": {
+    "asset-fingerprint": "bin/asset-fingerprint.js"
+  },
+  "files": [
+    "lib",
+    "bin",
+    "README.adoc",
+    "CHANGELOG.adoc",
+    "antora-registry.md"
+  ],
+  "scripts": {
+    "test": "node --test test/*.test.js"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "keywords": [
+    "antora",
+    "antora-extension",
+    "cache-busting",
+    "fingerprint",
+    "asset-versioning",
+    "chassis"
+  ],
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/antora-supplemental/antora-ui-chassis.git",
+    "directory": "packages/asset-fingerprint"
+  }
+}

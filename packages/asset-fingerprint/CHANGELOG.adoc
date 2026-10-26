@@ -1,0 +1,8 @@
+= Changelog
+
+== 0.1.0 - 2026-10-26
+
+* First release. Antora extension (`sitePublished`) and CLI (`asset-fingerprint [site-dir]`) that rewrite asset URLs in built HTML to `?v=<content hash>` (SHA-256 of each file, 10 hex characters by default).
+* Defaults: `_/css/**`, `_/js/**` and `**/search-index.js`. Options: `include` / `exclude` globs, `hashLength`, `fonts` and `images` (add `_/font/**` and `_/img/**`), `param`, `basePath` (taken from `site.url` when unset), `pages`, `enabled`.
+* Theme-agnostic: relative and site-root URLs are resolved to files on disk; external URLs, missing files and URLs that already carry the parameter are left alone, so a second run changes nothing.
+* Generalizes Skittles' `scripts/cache-bust.mjs` (one per-build hash) into a shared chassis package with per-file hashes.

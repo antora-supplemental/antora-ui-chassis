@@ -1,5 +1,9 @@
 = Changelog
 
+== asset-fingerprint-v0.1.0 - 2026-10-26
+
+* **New package `asset-fingerprint` 0.1.0:** theme-agnostic cache-busting. An Antora extension (`sitePublished`) and CLI that rewrite CSS/JS URLs (optionally fonts and images) in built HTML to `?v=<content hash>`, with include/exclude globs and a hash length. See `packages/asset-fingerprint/README.adoc` and `docs/modules/ROOT/pages/asset-fingerprint.adoc`.
+
 == light-dark-mode-v0.1.3 - 2026-10-26
 
 * **`light-dark-mode` 0.1.3:** depends on color-scheme 0.5.3 (was pinned to 0.4.0) and the `color-scheme-tokens@0.5` contract. No API change; with color-scheme 0.5 only `none` schemes turn light/dark automation off.
