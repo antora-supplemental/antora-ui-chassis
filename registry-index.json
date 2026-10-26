@@ -24,10 +24,10 @@
     {
       "id": "color-scheme",
       "name": "Color scheme",
-      "version": "0.2.0",
+      "version": "0.3.0",
       "type": "playbook-extension",
       "layer": "chassis",
-      "description": "Unstyled light/dark mechanism: no-FOUC head hook, saved choice, system preference, accessible toggle. No colors; replaces antora-dark-mode.",
+      "description": "Color scheme layer: the --cs-* token contract and optional live paint (view-time scheme switching, light/dark slots, picker page). Dark mode switching is light-dark-mode.",
       "repository": "https://github.com/antora-supplemental/antora-ui-chassis",
       "manifestPath": "packages/color-scheme/package.json",
       "modulePath": "packages/color-scheme",
@@ -37,14 +37,60 @@
       ],
       "conflicts": [],
       "install": {
-        "gitPath": "github:antora-supplemental/antora-ui-chassis#color-scheme-v0.2.0&path:packages/color-scheme",
+        "gitPath": "github:antora-supplemental/antora-ui-chassis#color-scheme-v0.3.0&path:packages/color-scheme",
         "productTopic": "color-scheme"
+      }
+    },
+    {
+      "id": "light-dark-mode",
+      "name": "Light/dark mode (dark mode)",
+      "version": "0.1.0",
+      "type": "playbook-extension",
+      "layer": "chassis",
+      "description": "Dark mode for any Antora UI: no-flash head hook, saved choice, system preference, accessible toggle (top-bar icon button or footer Light / Dark / Auto switch). Successor to antora-dark-mode 1.x.",
+      "repository": "https://github.com/antora-supplemental/antora-ui-chassis",
+      "manifestPath": "packages/light-dark-mode/package.json",
+      "modulePath": "packages/light-dark-mode",
+      "requires": [
+        "color-scheme"
+      ],
+      "recommends": [
+        "ui-bus",
+        "default-paint"
+      ],
+      "conflicts": [],
+      "install": {
+        "gitPath": "github:antora-supplemental/antora-ui-chassis#light-dark-mode-v0.1.0&path:packages/light-dark-mode",
+        "productTopic": "light-dark-mode"
+      }
+    },
+    {
+      "id": "antora-dark-mode",
+      "name": "antora-dark-mode",
+      "version": "2.0.0",
+      "type": "playbook-extension",
+      "layer": "meta",
+      "description": "Dark mode for Antora 3, powered by antora-ui-chassis: one require that registers light-dark-mode, color-scheme and default-paint.",
+      "repository": "https://github.com/antora-supplemental/antora-ui-chassis",
+      "manifestPath": "packages/antora-dark-mode/package.json",
+      "modulePath": "packages/antora-dark-mode",
+      "requires": [
+        "light-dark-mode",
+        "color-scheme",
+        "default-paint"
+      ],
+      "recommends": [],
+      "conflicts": [],
+      "install": {
+        "npm": "antora-dark-mode@2",
+        "gitPath": "github:antora-supplemental/antora-ui-chassis#antora-dark-mode-v2.0.0&path:packages/antora-dark-mode",
+        "productTopic": "antora-dark-mode"
       }
     },
     {
       "id": "default-paint",
       "name": "Default UI paint",
-      "version": "0.1.1",
+      "version": "0.2.0",
       "type": "playbook-extension",
       "layer": "paint",
       "description": "Paint layer: light and dark palette for the Antora Default UI (surfaces, text, links, nav, toolbar, code, admonitions). Colors only; pair with color-scheme.",
@@ -54,10 +100,12 @@
       "requires": [
         "color-scheme"
       ],
-      "recommends": [],
+      "recommends": [
+        "light-dark-mode"
+      ],
       "conflicts": [],
       "install": {
-        "gitPath": "github:antora-supplemental/antora-ui-chassis#default-paint-v0.1.1&path:packages/default-paint",
+        "gitPath": "github:antora-supplemental/antora-ui-chassis#default-paint-v0.2.0&path:packages/default-paint",
         "productTopic": "default-paint"
       }
     },

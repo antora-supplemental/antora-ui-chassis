@@ -36,7 +36,7 @@
   --dp-sidebar-bg: #e1e1e1;
   --dp-example-bg: #fff;
   --dp-admonition-bg: #fafafa;
-  --dp-footer: #fafafa;
+  --dp-footer: #e1e1e1;
   --dp-footer-ink: #5d5d5d;
   --dp-footer-link: #191919;
   --dp-nav-icon: #222;
@@ -79,6 +79,10 @@
 }
 
 html.dark-theme {
+  --dp-syntax-comment: #8b929e;
+  --dp-syntax-meta: #8b929e;
+  --dp-syntax-builtin: #e6c07b;
+  --dp-syntax-link: #d19a66;
   --dp-canvas: #1a1b1e;
   --dp-ink: #c1c2c5;
   --dp-doc-ink: #c1c2c5;
@@ -245,8 +249,8 @@ html.dark-theme .search-result-document-hit > a:hover { background: var(--dp-men
 html.dark-theme .search-result-highlight { color: var(--dp-link); }
 
 /* Footer */
-.footer { background: var(--dp-footer); color: var(--dp-footer-ink); }
-.footer a { color: var(--dp-footer-link); }
+footer.footer { background: var(--dp-footer); color: var(--dp-footer-ink); }
+footer.footer a { color: var(--dp-footer-link); }
 
 /* Toggle look (chassis places/binds #theme-toggle; this only paints it) */
 .navbar .theme-toggle {

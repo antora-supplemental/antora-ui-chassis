@@ -1,0 +1,77 @@
+= Light/dark mode, a.k.a. dark mode (`packages/light-dark-mode`)
+
+Dark mode for any Antora UI. `@antora-supplemental/light-dark-mode` switches a site between light and dark: a no-flash head hook, the saved choice, the system preference, and an accessible toggle in one of two designs. It sets no colors. Palettes are *paint* (`@antora-supplemental/default-paint` for the Default UI, Valentus Paint for Valentus), and the token names come from `@antora-supplemental/color-scheme`, which this package registers for you.
+
+== Install
+
+[source,yaml]
+----
+antora:
+  extensions:
+    - require: '@antora-supplemental/light-dark-mode'
+      toggle: auto              # auto (default): create the toggle when the layout placed none; placed: bind only
+      toggle_placement: navbar  # navbar (default): icon button in the top bar; footer: Light / Dark / Auto switch
+      follow_system: true       # default; false: start in light and ignore prefers-color-scheme
+      navbar: light             # optional: <meta name="dm-navbar"> -> html[data-dm-navbar] for paint
+      color_scheme:             # optional: color-scheme options, e.g. live_paint
+        live_paint: { ... }
+    - require: '@antora-supplemental/default-paint'   # Default UI palettes (skip when your theme has its own paint)
+----
+
+[source,json]
+----
+"@antora-supplemental/light-dark-mode": "github:antora-supplemental/antora-ui-chassis#light-dark-mode-v0.1.0&path:packages/light-dark-mode"
+----
+
+Prefer a single package with the old name? `antora-dark-mode` 2.x (link:../antora-dark-mode/README.adoc[`packages/antora-dark-mode`]) registers this package, color-scheme and default-paint with one `require`.
+
+== Two toggle designs
+
+Both share one state machine (`window.LightDarkMode`); only the markup differs.
+
+[cols="1,3",options="header"]
+|===
+| `toggle_placement` | Design
+| `navbar` (default) | Compact icon button in the top bar (`#theme-toggle`, classes `navbar-item theme-toggle theme-toggle--navbar`). `aria-label` and `title` name the action ("Switch to dark mode"), `aria-pressed` is `true` in dark, `mixed` while an off-slot color scheme is pinned. Auto-created at the end of `.navbar .navbar-end`.
+| `footer` | Labeled segmented control: "Theme" plus *Light*, *Dark*, *Auto* buttons (`role="group"`, `aria-pressed`), wrapping on narrow screens, with a status note. Auto-created in the footer, before the "Color schemes" link when there is one, so the two stay distinct.
+|===
+
+=== Placing it yourself (override order)
+
+Highest wins: *your site's supplemental UI*, then *the theme or layout*, then *these chassis defaults*. The chassis never overwrites markup or icons it was given.
+
+* Layouts include `{{> light-dark-navbar-slot}}` in the header and `{{> light-dark-footer-slot}}` in the footer. The slot named by `toggle_placement` renders its variant; the other renders nothing.
+* The variants are the partials `light-dark-toggle` (navbar button) and `light-dark-switch` (footer control). A theme or a site replaces either by shipping a partial with that name; the chassis adds its default only when no partial of that name exists.
+* A placed button keeps its own icons. Mark it `data-light-dark-mode-icons="own"` (implied when the button has child elements) or `"built-in"` to have the chassis fill sun/moon icons. `data-light-dark-mode-state` (`light`, `dark`, `off`) is set for styling.
+* A placed footer container (`[data-light-dark-mode-switch]`) keeps its buttons; give them `data-light-dark-mode-value="light|dark|system"`. Empty containers get the default three.
+* No slots in the layout? `toggle: auto` creates the variant at run time.
+
+== Hooks
+
+* `html.dark-theme`, `html[data-theme="light"|"dark"]`: resolved scheme.
+* `html[data-color-scheme-mode]`: stored choice, `system`, `light` or `dark`.
+* `html[data-dm-navbar]`: from `<meta name="dm-navbar">`.
+* Saved choice: `localStorage` `antora-theme-mode` with `antora-theme-system-snapshot` (the keys `antora-dark-mode` 1.x used; the legacy `antora-theme` key is migrated).
+* Switch transition classes: `color-scheme-animating`, `color-scheme-vt` (skipped under reduced motion).
+
+== Light/dark automation with color schemes
+
+With color-scheme live paint on, each scheme declares the slots it fits (`light`, `dark`) and the site names one scheme per slot. Light/dark then switches between the two slot schemes. Picking a scheme that is not in a slot pins it for the session and turns automation off: the navbar button shows `aria-pressed="mixed"` and the footer note says automation is off. Choosing Light, Dark, Auto, or a slot scheme turns it back on. See the color-scheme README for the slot options and the picker page.
+
+== API
+
+[source,js]
+----
+LightDarkMode.mode()        // 'system' | 'light' | 'dark'
+LightDarkMode.isDark()
+LightDarkMode.isAuto()      // false while an off-slot scheme is pinned
+LightDarkMode.set('dark')   // 'light' | 'dark' | 'system'; resumes automation when it was off
+LightDarkMode.toggle()
+LightDarkMode.resume()      // turn light/dark automation back on
+const off = LightDarkMode.subscribe(({ mode, dark, auto }) => {})
+UiBus.state.watch('light-dark-mode.dark', (dark) => {})   // also .mode and .auto
+----
+
+== Migrating
+
+From `antora-dark-mode` 1.x or from `color-scheme` 0.1/0.2 (which carried the toggle before this split): link:https://github.com/antora-supplemental/antora-ui-chassis/blob/main/docs/modules/ROOT/pages/migrate-dark-mode.adoc[Migrating dark mode to the chassis].

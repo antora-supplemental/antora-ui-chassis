@@ -1,0 +1,21 @@
+{
+  id: "light-dark-mode",
+  name: "Light/dark mode (dark mode)",
+  version: "0.1.0",
+  type: "ui-chassis-component",
+  description: "Dark mode for any Antora UI: no-flash head hook, saved choice, system preference, accessible toggle as a top-bar icon button or a footer Light / Dark / Auto switch. No colors; palettes are paint.",
+  layer: "chassis",
+  requires: ["color-scheme"],
+  slots: {
+    head: {
+      stylesheets: ["css/light-dark-mode.css"],
+      inlineScripts: ["js/light-dark-mode-head.js"],
+      after: ["css/color-scheme.css"],
+    },
+    footer: {
+      scripts: ["js/light-dark-mode.js"],
+      after: ["js/color-scheme.js", "js/ui-bus.js"],
+    },
+  },
+  partials: ["light-dark-toggle", "light-dark-switch", "light-dark-navbar-slot", "light-dark-footer-slot"],
+}

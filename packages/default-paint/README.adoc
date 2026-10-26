@@ -2,21 +2,21 @@
 :toc: macro
 
 *Layer: paint.* Light and dark colors for sites that use the stock https://gitlab.com/antora/antora-ui-default[Antora Default UI].
-Colors only — no layout, no behavior. The light/dark mechanism (no-FOUC hook, saved choice, system preference, toggle) is the chassis package link:../color-scheme/README.adoc[`@antora-supplemental/color-scheme`], which you register too.
+Colors only — no layout, no behavior. Switching between light and dark (dark mode: no-FOUC hook, saved choice, system preference, toggle) is the chassis package link:../light-dark-mode/README.adoc[`@antora-supplemental/light-dark-mode`], which you register too. Or register `antora-dark-mode` 2.x, which bundles both.
 
 toc::[]
 
 == Why a separate package
 
-Chassis packages are unstyled by contract. This package lives in the same monorepo so it versions next to `color-scheme`, but it is a sibling labelled `layer: paint` (manifest, registry and package name), never a dependency of a chassis package.
+Chassis packages are unstyled by contract. This package lives in the same monorepo so it versions next to `color-scheme` and `light-dark-mode`, but it is a sibling labelled `layer: paint` (manifest, registry and package name), never a dependency of a chassis package.
 Themes with their own paint (Valentus `css/site-paint.css`) do not use it.
 
 == Install
 
 [source,json]
 ----
-"@antora-supplemental/color-scheme": "github:antora-supplemental/antora-ui-chassis#color-scheme-v0.2.0&path:packages/color-scheme",
-"@antora-supplemental/default-paint": "github:antora-supplemental/antora-ui-chassis#default-paint-v0.1.1&path:packages/default-paint"
+"@antora-supplemental/light-dark-mode": "github:antora-supplemental/antora-ui-chassis#light-dark-mode-v0.1.0&path:packages/light-dark-mode",
+"@antora-supplemental/default-paint": "github:antora-supplemental/antora-ui-chassis#default-paint-v0.2.0&path:packages/default-paint"
 ----
 
 [source,yaml]
@@ -26,7 +26,7 @@ ui:
     url: https://gitlab.com/antora/antora-ui-default/-/jobs/artifacts/HEAD/raw/build/ui-bundle.zip?job=bundle-stable
 antora:
   extensions:
-    - require: '@antora-supplemental/color-scheme'   # mechanism + toggle (auto-placed in .navbar-end)
+    - require: '@antora-supplemental/light-dark-mode'   # dark mode switching + toggle (auto-placed in .navbar-end)
     - require: '@antora-supplemental/default-paint'  # colors
 ----
 

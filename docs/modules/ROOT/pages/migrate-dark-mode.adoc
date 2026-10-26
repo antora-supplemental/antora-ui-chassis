@@ -1,0 +1,55 @@
+= Migrating dark mode to the chassis
+:description: Move from antora-dark-mode 1.x, or from color-scheme 0.1/0.2, to light-dark-mode or antora-dark-mode 2.x.
+:keywords: dark mode, light mode, antora-dark-mode, migration, color-scheme, light-dark-mode
+
+Dark mode for Antora now lives in link:https://github.com/antora-supplemental/antora-ui-chassis[antora-ui-chassis]:
+
+* `@antora-supplemental/light-dark-mode` switches light and dark (no-flash hook, saved choice, system preference, toggle).
+* `@antora-supplemental/color-scheme` holds the token contract and optional live paint (color schemes, slots, picker).
+* `@antora-supplemental/default-paint` colors the Antora Default UI.
+* `antora-dark-mode` 2.x registers all three under the old name.
+
+== From antora-dark-mode 1.x
+
+The one-line migration: in `antora-playbook.yml`, add `- require: antora-dark-mode` under `antora.extensions` (after `npm i -D antora-dark-mode@2`), and remove the `antora-dark-mode` UI bundle URL, `supplemental_files` path or ui-module.
+
+[source,yaml]
+----
+antora:
+  extensions:
+    - require: antora-dark-mode
+----
+
+* `site.keys.dark_mode_navbar` keeps working; prefer the `navbar` option.
+* Users keep their saved choice (same `localStorage` keys).
+* Custom CSS: rename `valentus-theme-animating` / `valentus-theme-vt` to `color-scheme-animating` / `color-scheme-vt`.
+* `<themed-svg>` is no longer included: add `@dev-centr/themed-svg` if you used it.
+* Want the toggle in the footer? `toggle_placement: footer`.
+
+=== The deprecation warning
+
+Sites still installing from the old repository (git URL, release `ui-bundle.zip` or the bundle URL) keep working, but the old entry point logs this once per build, at warn level, from the `antora-dark-mode` logger:
+
+----
+antora-dark-mode 1.x is a compatibility path; dark mode moved to antora-ui-chassis. Migrate: npm i -D antora-dark-mode@2 and add "- require: antora-dark-mode" under antora.extensions in your playbook (remove the old UI bundle or supplemental files). See https://github.com/antora-supplemental/antora-ui-chassis/blob/main/docs/modules/ROOT/pages/migrate-dark-mode.adoc
+----
+
+2.x from npm or the chassis does not warn.
+
+== From color-scheme 0.1 / 0.2 (breaking in 0.3.0)
+
+`color-scheme` 0.3.0 no longer switches light and dark. Replace it with `light-dark-mode`, which registers color-scheme itself:
+
+[cols="1,1",options="header"]
+|===
+| Before | After
+| `require: '@antora-supplemental/color-scheme'` | `require: '@antora-supplemental/light-dark-mode'`
+| `toggle`, `navbar`, `enabled` | same names on light-dark-mode
+| `live_paint: {...}` | `color_scheme: { live_paint: {...} }` on light-dark-mode (or keep a separate color-scheme entry)
+| `ColorScheme.mode/isDark/set/toggle/subscribe` | `LightDarkMode.mode/isDark/set/toggle/subscribe`
+| `UiBus.state` `color-scheme.mode`, `color-scheme.dark` | `light-dark-mode.mode`, `light-dark-mode.dark` (plus `light-dark-mode.auto`)
+| `js/color-scheme-head.js` | `js/light-dark-mode-head.js` (inlined by the extension)
+| a `#theme-toggle` your layout placed | unchanged: still bound, its own icons kept. Better: `{{> light-dark-navbar-slot}}` in the header and `{{> light-dark-footer-slot}}` in the footer, and ship a `light-dark-toggle` partial for your button
+|===
+
+`ColorScheme.setPaint/getPaint/paints` stay on color-scheme.

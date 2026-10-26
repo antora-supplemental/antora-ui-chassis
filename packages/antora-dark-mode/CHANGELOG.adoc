@@ -1,0 +1,9 @@
+= Changelog
+
+== 2.0.0 - 2026-10-25
+
+* *New home:* `antora-dark-mode` is now built and published from `antora-ui-chassis` (`packages/antora-dark-mode`). It is an Antora extension that registers `@antora-supplemental/color-scheme` 0.3.0, `@antora-supplemental/light-dark-mode` 0.1.0 and `@antora-supplemental/default-paint` 0.2.0 and passes options through; it has no CSS or JS of its own.
+* *Breaking:* install with `require: antora-dark-mode` under `antora.extensions` instead of a UI bundle or supplemental files. Removed: `themed-svg-element.js` (use `@dev-centr/themed-svg`) and the VCS header partial.
+* Kept: storage keys, `html.dark-theme`, `data-theme`, `data-dm-navbar`, `site.keys.dark_mode_navbar`.
+* New: `toggle_placement: footer` (Light / Dark / Auto switch), `follow_system`, `paint: false`, live paint via `color_scheme`.
+* Migration: link:https://github.com/antora-supplemental/antora-ui-chassis/blob/main/docs/modules/ROOT/pages/migrate-dark-mode.adoc[Migrating dark mode to the chassis].

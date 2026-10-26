@@ -1,0 +1,142 @@
+name: Release
+
+# One package per tag: <package>-vX.Y.Z (for example light-dark-mode-v0.1.0,
+# antora-dark-mode-v2.0.0). Consumers pin chassis packages by git tag
+# (github:antora-supplemental/antora-ui-chassis#<tag>&path:packages/<package>),
+# so every tag gets a GitHub release with the package tarball attached.
+# Packages listed in NPM_PACKAGES are also published to npm with trusted
+# publishing (OIDC, no NPM_TOKEN).
+
+on:
+  push:
+    tags:
+      - "*-v*.*.*"
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Existing tag to release, for example antora-dark-mode-v2.0.0
+        required: true
+
+permissions:
+  contents: write
+  id-token: write # npm trusted publishing (OIDC)
+
+env:
+  RELEASE_TAG: ${{ github.event_name == 'workflow_dispatch' && inputs.tag || github.ref_name }}
+  # Space-separated package directories published to npm from this workflow.
+  NPM_PACKAGES: "antora-dark-mode"
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+          ref: ${{ env.RELEASE_TAG }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version: "24"
+          registry-url: https://registry.npmjs.org
+          package-manager-cache: false
+
+      - name: Resolve package from tag
+        id: pkg
+        run: |
+          TAG="${RELEASE_TAG}"
+          case "$TAG" in *-v[0-9]*.[0-9]*.[0-9]*) ;; *) echo "::error::Tag $TAG is not <package>-vX.Y.Z"; exit 1;; esac
+          DIR="${TAG%-v*}"
+          VERSION="${TAG##*-v}"
+          VERSION="${VERSION%%+*}"
+          if [ "$DIR" = "chassis" ]; then
+            echo "Meta tag $TAG: nothing to release"; echo "skip=true" >> "$GITHUB_OUTPUT"; exit 0
+          fi
+          if [ ! -f "packages/$DIR/package.json" ]; then echo "::error::No packages/$DIR for tag $TAG"; exit 1; fi
+          PKG_VERSION=$(node -p "require('./packages/$DIR/package.json').version")
+          if [ "$PKG_VERSION" != "$VERSION" ]; then
+            echo "::error::packages/$DIR/package.json is $PKG_VERSION, tag says $VERSION"; exit 1
+          fi
+          NAME=$(node -p "require('./packages/$DIR/package.json').name")
+          NPM=false
+          for p in $NPM_PACKAGES; do [ "$p" = "$DIR" ] && NPM=true; done
+          {
+            echo "skip=false"; echo "dir=$DIR"; echo "version=$VERSION"; echo "name=$NAME"; echo "npm=$NPM"
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Test
+        if: steps.pkg.outputs.skip == 'false'
+        run: |
+          DIR="${{ steps.pkg.outputs.dir }}"
+          if ls "packages/$DIR"/test/*.test.js >/dev/null 2>&1; then
+            node --test "packages/$DIR"/test/*.test.js
+          fi
+          if [ "$DIR" = "antora-dark-mode" ]; then
+            node --test packages/color-scheme/test/*.test.js packages/light-dark-mode/test/*.test.js packages/default-paint/test/*.test.js
+          fi
+
+      - name: Pack
+        if: steps.pkg.outputs.skip == 'false'
+        id: pack
+        run: |
+          node .github/scripts/stage-package.mjs "packages/${{ steps.pkg.outputs.dir }}" build/stage
+          cd build/stage
+          FILE=$(npm pack --silent | tail -1)
+          mv "$FILE" "$GITHUB_WORKSPACE/"
+          echo "file=$FILE" >> "$GITHUB_OUTPUT"
+
+      - name: Release notes
+        if: steps.pkg.outputs.skip == 'false'
+        run: |
+          V="${{ steps.pkg.outputs.version }}"
+          F="packages/${{ steps.pkg.outputs.dir }}/CHANGELOG.adoc"
+          NOTES=""
+          if [ -f "$F" ]; then
+            NOTES=$(awk -v v="$V" '$0 ~ "^== \\[?" v "[] ]" {flag=1; next} flag && /^== / {exit} flag {print}' "$F")
+          fi
+          [ -n "$NOTES" ] || NOTES="Release ${{ steps.pkg.outputs.name }} $V."
+          printf '%s\n\nGit pin: `github:antora-supplemental/antora-ui-chassis#%s&path:packages/%s`\n' "$NOTES" "$RELEASE_TAG" "${{ steps.pkg.outputs.dir }}" > release_notes.md
+
+      - name: Create GitHub Release
+        if: steps.pkg.outputs.skip == 'false'
+        uses: softprops/action-gh-release@v3
+        with:
+          tag_name: ${{ env.RELEASE_TAG }}
+          name: ${{ steps.pkg.outputs.name }} ${{ steps.pkg.outputs.version }}
+          body_path: release_notes.md
+          files: ${{ steps.pack.outputs.file }}
+          overwrite_files: true
+          make_latest: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Install current npm CLI
+        if: steps.pkg.outputs.npm == 'true'
+        run: npm install --global npm@11.19.1
+
+      - name: Check npm registry
+        if: steps.pkg.outputs.npm == 'true'
+        id: npm
+        run: |
+          NAME="${{ steps.pkg.outputs.name }}"
+          ESCAPED="${NAME//@/%40}"; ESCAPED="${ESCAPED//\//%2F}"
+          if curl --fail --silent --output /dev/null "https://registry.npmjs.org/${ESCAPED}/${{ steps.pkg.outputs.version }}"; then
+            echo "publish=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "publish=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Publish to npm
+        if: steps.pkg.outputs.npm == 'true' && steps.npm.outputs.publish == 'true'
+        run: |
+          npm --version
+          npm publish "${{ steps.pack.outputs.file }}" --access public
+        # Trusted publisher on npmjs.com (package -> Settings -> Trusted publishing):
+        #   Provider: GitHub Actions
+        #   Organization/user: antora-supplemental
+        #   Repository: antora-ui-chassis
+        #   Workflow filename: release.yml
+        #   Environment: (blank)
+        # Requires npm CLI >= 11.5.1. No NPM_TOKEN.

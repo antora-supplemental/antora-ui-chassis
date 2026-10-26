@@ -23,10 +23,11 @@ image::layer-paint-trim.png[Paint and trim: color, chrome, brand finish,width=42
 
 *Paint & trim* — palettes, type, logo, chrome. Valentus today ships body kit + paint together (normal for a finished car).
 
-== Color scheme (dark / light)
+== Dark mode (light / dark) and color schemes
 
-Chassis owns structural scheme hooks. Paint owns palettes. Body kit places the toggle.
-See `docs/modules/ROOT/pages/color-scheme.adoc` — includes the path to *retire* `antora-dark-mode`.
+`light-dark-mode` switches light and dark, `color-scheme` holds the token contract and live paint, paint owns palettes, and the body kit places the toggle (top bar or footer).
+`antora-dark-mode` 2.x is published from `packages/antora-dark-mode` and registers all three.
+See `docs/modules/ROOT/pages/color-scheme.adoc` and the migration guide `docs/modules/ROOT/pages/migrate-dark-mode.adoc`.
 
 == Extensions
 
@@ -36,8 +37,10 @@ See `docs/modules/ROOT/pages/extensions.adoc`.
 == Packages
 
 * `packages/content-viewport` — article measure + wide-table wrapper scroll
-* `packages/color-scheme` — unthemed dark/light hooks (no brand colors)
-* `packages/default-paint` — *paint layer, not chassis:* light/dark palette for the stock Antora Default UI, read by `color-scheme` hooks. Housed here so it versions with `color-scheme`
+* `packages/light-dark-mode` — dark mode: light/dark switching, saved choice, system preference, navbar or footer toggle (no colors)
+* `packages/color-scheme` — `--cs-*` token contract and optional live paint (schemes, light/dark slots, picker page)
+* `packages/antora-dark-mode` — `antora-dark-mode` 2.x on npm: one `require` for light-dark-mode + color-scheme + default-paint
+* `packages/default-paint` — *paint layer, not chassis:* light/dark palette for the stock Antora Default UI, read through the `--cs-*` contract. Housed here so it versions with `color-scheme` and `light-dark-mode`
 * `packages/soft-nav` — same-origin soft navigation bus (+ optional Antora inject extension)
 * `packages/soft-nav-context` — SoftNavContext navigation context (SoftNav companion for persistent chrome)
 * Diagram zoom / lightbox — use `@antora-supplemental/diagram-lightbox` (see removed `packages/diagram-zoom/README.adoc`)
@@ -45,7 +48,8 @@ See `docs/modules/ROOT/pages/extensions.adoc`.
 
 == Releases (git tags)
 
-Per-package tags: `ui-bus-vX.Y.Z`, `color-scheme-vX.Y.Z`, `default-paint-vX.Y.Z`, `soft-nav-vX.Y.Z`, `page-state-vX.Y.Z`, `chassis-compose-vX.Y.Z`.
+Per-package tags: `ui-bus-vX.Y.Z`, `color-scheme-vX.Y.Z`, `light-dark-mode-vX.Y.Z`, `default-paint-vX.Y.Z`, `antora-dark-mode-vX.Y.Z`, `soft-nav-vX.Y.Z`, `page-state-vX.Y.Z`, `chassis-compose-vX.Y.Z`.
+`.github/workflows/release.yml` turns each package tag into a GitHub release with the package tarball attached; `antora-dark-mode-v*` tags also publish `antora-dark-mode` to npm (trusted publishing).
 Meta tag `chassis-vX.Y.Z` marks the commit Facto stack and other compose pins should use (same commit as the compose package release).
 
 == Consume from Valentus

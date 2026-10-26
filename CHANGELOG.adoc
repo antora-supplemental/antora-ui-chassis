@@ -1,11 +1,14 @@
 = Changelog
 
-== Unreleased
+== color-scheme-v0.3.0, light-dark-mode-v0.1.0, default-paint-v0.2.0, antora-dark-mode-v2.0.0 - 2026-10-25
 
-* **`default-paint`: light-mode contrast fix.** Four highlight.js token colors and `--dp-ink-faint` missed WCAG AA on light panels; new `--dp-syntax-*` tokens and a darker `--dp-ink-faint` bring axe color-contrast to 0 in light and dark for every layout on this paint (Default UI, Valentus Layout). Dark unchanged.
+* **New `light-dark-mode` 0.1.0 (dark mode):** light/dark switching split out of `color-scheme`. Two toggle designs on one state machine: a compact top-bar icon button (`toggle_placement: navbar`) and a labeled footer Light / Dark / Auto switch (`toggle_placement: footer`). Layout slots `light-dark-navbar-slot` / `light-dark-footer-slot`, variant partials `light-dark-toggle` / `light-dark-switch`; site beats theme beats chassis, and placed icons are kept. `follow_system`.
+* **`color-scheme` 0.3.0 — breaking:** the light/dark mechanism and `ColorScheme.mode/isDark/set/toggle/subscribe` moved to `LightDarkMode`. New: light/dark slots for live paint (`slots`, `slot_policy`, per-scheme `slots`), off-slot session pick that turns automation off, `?paint=auto`, and a picker page (`picker`, footer link partial `color-scheme-picker-link`). Migration: `docs/modules/ROOT/pages/migrate-dark-mode.adoc`.
+* **New `antora-dark-mode` 2.0.0 (`packages/antora-dark-mode`):** the npm name now publishes from here. A relabel that registers light-dark-mode, color-scheme and default-paint and maps the 1.x options (`site.keys.dark_mode_navbar` still honored); no CSS/JS of its own; no warning.
+* **`default-paint` 0.2.0: light-mode contrast fix.** Four highlight.js token colors and `--dp-ink-faint` missed WCAG AA on light panels; new `--dp-syntax-*` tokens and a darker `--dp-ink-faint` bring axe color-contrast to 0 in light and dark for every layout on this paint (Default UI, Valentus Layout). Dark unchanged.
 * **`color-scheme`: the `--cs-*` token contract is documented** (header of `color-scheme.css`, README): core `--cs-canvas`, `-elevated`, `-ink`, `-ink-muted`, `-border`, `-accent`; `--cs-accent-hover`, `-accent-soft`, `-hover`; `--cs-code-bg`, `-code-fg`; `--cs-admonition-note|tip|important|warning|caution`. The six `--valentus-*` core names stay in the contract (paints alias them).
 * **`color-scheme`: `scripts/validate-paint.mjs`**, a paint-selector allowlist validator for the registry and paint CI. Errors on layout classes outside the allowlist, `@import` and external `url()`; literal colors outside token blocks are warnings (`--strict` makes them errors). `--extra=` admits a paint's declared layout prefixes.
-* **`default-paint`: sets the full `--cs-*` contract** from its `--dp-*` palette (adds `--dp-admonition-*` per scheme), so contract layouts such as Valentus Layout render with Default UI colors.
+* **`default-paint` 0.2.0: sets the full `--cs-*` contract** from its `--dp-*` palette (adds `--dp-admonition-*` per scheme), so contract layouts such as Valentus Layout render with Default UI colors.
 
 == color-scheme-v0.2.0, default-paint-v0.1.1 - 2026-10-25
 

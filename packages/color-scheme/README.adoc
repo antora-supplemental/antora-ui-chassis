@@ -1,6 +1,8 @@
 = Color scheme (`packages/color-scheme`)
 
-The unstyled light/dark mechanism for Antora UIs. It sets no colors: paint supplies the palettes, the body kit places and dresses the toggle. It replaces `antora-dark-mode`.
+The color scheme layer for Antora UIs: the `--cs-*` token contract that layouts and paints meet on, and opt-in *live paint* (switch color schemes on a built site, light and dark slots, a picker page). It sets no colors.
+
+*Looking for dark mode?* Light/dark switching (no-flash hook, saved choice, system preference, the toggle) moved to link:../light-dark-mode/README.adoc[`@antora-supplemental/light-dark-mode`] in 0.3.0. It registers this package, so most sites list only that one. Upgrading from 0.1/0.2 or from `antora-dark-mode`: link:https://github.com/antora-supplemental/antora-ui-chassis/blob/main/docs/modules/ROOT/pages/migrate-dark-mode.adoc[Migrating dark mode to the chassis].
 
 == Install
 
@@ -9,41 +11,15 @@ The unstyled light/dark mechanism for Antora UIs. It sets no colors: paint suppl
 antora:
   extensions:
     - require: '@antora-supplemental/color-scheme'
-      toggle: auto    # auto (default) creates #theme-toggle in .navbar-end when the body kit placed none; placed = bind only
-      navbar: light   # optional, writes <meta name="dm-navbar"> for paint (html[data-dm-navbar])
+      live_paint: { ... }   # optional, see below
 ----
 
 [source,json]
 ----
-"@antora-supplemental/color-scheme": "github:antora-supplemental/antora-ui-chassis#color-scheme-v0.2.0&path:packages/color-scheme"
+"@antora-supplemental/color-scheme": "github:antora-supplemental/antora-ui-chassis#color-scheme-v0.3.0&path:packages/color-scheme"
 ----
 
-The extension inlines the head hook right after `site.css` (first paint already has the right scheme), links `css/color-scheme.css`, and loads `js/color-scheme.js` after `ui-bus.js` / `site.js`.
-
-== Hooks
-
-* `html.dark-theme`, `html[data-theme="light"|"dark"]`: resolved scheme.
-* `html[data-color-scheme-mode]`: stored choice, `system`, `light` or `dark`.
-* `html[data-dm-navbar]`: from `<meta name="dm-navbar">`.
-* Saved choice: `localStorage` `antora-theme-mode`, with `antora-theme-system-snapshot` (same keys as `antora-dark-mode`).
-
-Style with tokens and a fallback: `color: var(--valentus-ink, CanvasText)`.
-
-== API
-
-[source,js]
-----
-ColorScheme.mode()                // 'system' | 'light' | 'dark'
-ColorScheme.isDark()
-ColorScheme.set('dark')           // or 'light', 'system'; animated unless reduced motion
-ColorScheme.toggle()
-const off = ColorScheme.subscribe(({ mode, dark }) => {})
-UiBus.state.watch('color-scheme.dark', (dark) => {})   // when UiBus is loaded
-----
-
-== Toggle
-
-Place `<button id="theme-toggle" class="...your classes...">` anywhere in the header. Chassis binds it, fills the icon and keeps `aria-label`, `title` and `aria-pressed` current. Style `.theme-toggle` and `.theme-icon` in paint or the body kit.
+The extension links `css/color-scheme.css` after `site.css`. With `live_paint` on it also inlines the paint head hook and loads `js/color-scheme.js`.
 
 == Token contract (`--cs-*`)
 
@@ -61,7 +37,7 @@ The six core tokens are also published as `--valentus-canvas`, `-elevated`, `-in
 
 == Paint validator
 
-`scripts/validate-paint.mjs` checks that a paint styles only shared hooks (token blocks, Default UI chrome, Asciidoctor content, highlight.js, the chassis toggle):
+`scripts/validate-paint.mjs` checks that a paint styles only shared hooks (token blocks, Default UI chrome, Asciidoctor content, highlight.js, the light-dark-mode toggle):
 
 [source,console]
 ----
@@ -81,23 +57,53 @@ Lets a built site switch paint at view time, so one prebuilt page can show sever
         enabled: true
         param: paint          # ?paint=<id>; ?paint=reset clears the saved choice
         cookie: cs-paint      # SameSite=Lax, Path=cookie_path (default /), one year
-        paints:               # the only paints that can load
-          default: css/default-paint.css                      # UI path, relative to the UI root
-          valentus: https://cdn.example.org/valentus/4.0.0/site-paint.css
+        paints:               # the only schemes that can load
+          default: css/default-paint.css                      # href only: fits both slots
+          valentus:
+            href: https://cdn.example.org/valentus/4.0.0/site-paint.css
+            label: Valentus
+            slots: [light, dark]                              # slots this scheme fits
+          night:
+            href: css/night.css
+            label: Night
+            slots: [dark]
+        slots: { light: default, dark: night }                # site defaults; builtin = the UI's own paint
+        slot_policy: declared   # declared (default): a scheme goes only in slots it lists; any: every slot
+        picker: auto            # auto (default): picker page when there are more than 2 schemes; true | false
+        # picker: { enabled: true, placement: footer, label: Color schemes, preview_page: index.html }
+        #   placement: footer (link in the footer) | none (build the page, place the link yourself)
         allow_origins: [https://registry.antora-supplemental.org]   # postMessage senders
 ----
+
+=== Slots and light/dark automation
+
+Each scheme declares the slots it fits; the site fills the `light` and `dark` slots (`slots:`), and a visitor can reassign them (saved in the `<cookie>-slots` cookie for a year). With `light-dark-mode` loaded, light/dark switches between the two slot schemes.
+
+* Choosing a scheme that fits the current slot puts it in that slot.
+* Choosing any other scheme is an *off-slot pick*: it is pinned for the session (session cookie `<cookie>`, gone when the browser closes) and light/dark automation turns off. The toggle shows that state (navbar `aria-pressed="mixed"`, footer note).
+* Choosing a slot scheme, Light, Dark or Auto, or `?paint=auto`, turns automation back on. `?paint=reset` also restores the site's default slots.
+
+=== Picker page
+
+When the picker is on, the build adds `color-schemes.html`: one card per scheme with a live preview (an iframe of `preview_page` with `?cs-preview=<id>&cs-preview-mode=light|dark`, which never writes cookies), and buttons "Use for light", "Use for dark" and "Use for this visit only (turns off automatic light/dark)". A banner offers "Turn automatic light/dark back on" while an off-slot scheme is pinned.
+
+The footer link is the `color-scheme-picker-link` partial. Override order: a partial of that name in your supplemental UI, then in the theme, then the chassis default. `placement: footer` includes it in `footer-content` unless a partial already does; `placement: none` leaves it to you.
 
 * Antora camelCases playbook keys, so paint ids must be lowercase letters and digits (`myteal`, not `my-teal`). Bad ids, `javascript:`/`data:` hrefs, quotes and malformed origins fail the build.
 * Order: query, then cookie, then the site's built-in paint. An unknown id is ignored (an unknown cookie is cleared). The query never carries a URL.
 * A built-in paint `<link>` whose file matches a map entry is the *base*: it is disabled while another paint is active and reused when its own id is chosen.
-* The paint picks the palette; light/dark is still chosen by `ColorScheme`. Every paint must define both schemes.
+* The scheme picks the palette; light/dark is chosen by `LightDarkMode`. A scheme that fits both slots defines `:root` and `html.dark-theme`; a single-slot scheme defines the one it fits.
 * `html[data-color-scheme-paint]` names the active live paint.
 
 [source,js]
 ----
 ColorScheme.paints()             // ['default', 'valentus']
 ColorScheme.getPaint()           // null = built-in
-ColorScheme.setPaint('valentus') // false for ids not in the map; null or 'reset' = built-in
+ColorScheme.setPaint('valentus') // false for unknown ids; null or 'auto' = automation on; 'reset' = default slots
+ColorScheme.assign('dark', 'night')   // false when the scheme does not fit the slot
+ColorScheme.slots()              // { light, dark }
+ColorScheme.offSlot()            // { id, base } while an off-slot scheme is pinned
+ColorScheme.schemes()            // [{ id, label, slots, base }]
 document.addEventListener('color-scheme:paint', (e) => e.detail.paint)
 UiBus.state.watch('color-scheme.paint', (id) => {})
 ----

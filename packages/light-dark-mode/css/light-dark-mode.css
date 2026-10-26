@@ -1,0 +1,123 @@
+/* @antora-supplemental/light-dark-mode: switch transition. No colors.
+ *
+ * The runtime uses View Transitions when the browser has them
+ * (html.light-dark-mode-vt while one runs), otherwise it sets
+ * html.light-dark-mode-animating for ~300ms. Extensions follow the
+ * color-scheme tokens or html.dark-theme and never animate the switch
+ * themselves.
+ */
+@media (prefers-reduced-motion: no-preference) {
+  html.light-dark-mode-animating,
+  html.light-dark-mode-animating *,
+  html.light-dark-mode-animating *::before,
+  html.light-dark-mode-animating *::after {
+    transition:
+      background-color 0.28s ease,
+      color 0.28s ease,
+      border-color 0.28s ease,
+      fill 0.28s ease,
+      stroke 0.28s ease,
+      box-shadow 0.28s ease,
+      filter 0.28s ease,
+      opacity 0.28s ease !important;
+  }
+
+  html.light-dark-mode-vt,
+  html.light-dark-mode-vt *,
+  html.light-dark-mode-vt *::before,
+  html.light-dark-mode-vt *::after,
+  html:active-view-transition,
+  html:active-view-transition *,
+  html:active-view-transition *::before,
+  html:active-view-transition *::after {
+    transition: none !important;
+  }
+
+  ::view-transition-old(root),
+  ::view-transition-new(root) {
+    animation-duration: 0.28s;
+  }
+}
+
+/* Toggle component. Layout only: sizes, spacing and states; colors inherit
+   (currentColor) so paint and layouts style them through tokens.
+   Navbar variant: a compact icon button that takes the header's icon-button
+   size and hit area from the header (.navbar-item in the Default UI;
+   layouts put their own class on the button they place, e.g.
+   valentus-header-icon-btn), so it sits inline with the other icons. */
+.theme-toggle--navbar {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.theme-toggle .theme-icon {
+  width: 1.25em;
+  height: 1.25em;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.theme-toggle[data-light-dark-mode-state="off"] .theme-icon {
+  opacity: 0.55;
+}
+
+/* Footer variant: labeled Light / Dark / Auto switch in footer text flow. */
+.light-dark-switch {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.25rem 0.5rem;
+  font-size: inherit;
+  line-height: 1.4;
+  margin: 0.25rem 1rem 0.25rem 0;
+}
+
+.light-dark-switch-options {
+  display: inline-flex;
+  border: 1px solid currentColor;
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.light-dark-switch-option {
+  font: inherit;
+  color: inherit;
+  background: transparent;
+  border: 0;
+  padding: 0.3em 0.85em;
+  min-height: 2rem;
+  cursor: pointer;
+}
+
+.light-dark-switch-option + .light-dark-switch-option {
+  border-left: 1px solid currentColor;
+}
+
+.light-dark-switch-option[aria-pressed="true"] {
+  font-weight: 700;
+  text-decoration: underline;
+  text-underline-offset: 0.2em;
+}
+
+.light-dark-switch-option:focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: -4px;
+}
+
+.light-dark-switch[data-light-dark-mode-state="off"] .light-dark-switch-options {
+  border-style: dashed;
+}
+
+.light-dark-switch-note {
+  flex-basis: 100%;
+  font-size: 0.9em;
+}
+
+.light-dark-switch-note[hidden] {
+  display: none;
+}

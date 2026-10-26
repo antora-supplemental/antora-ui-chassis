@@ -1,8 +1,8 @@
 = Default UI paint
-:description: Paint layer for the stock Antora Default UI, paired with the chassis color-scheme mechanism.
+:description: Paint layer for the stock Antora Default UI, paired with the chassis light-dark-mode package.
 
 `@antora-supplemental/default-paint` gives sites on the stock Antora Default UI a light and a dark palette.
-It is the *paint* layer: colors only. The *chassis* package `color-scheme` supplies the mechanism (no-FOUC hook, saved choice, system preference, toggle); a theme such as Valentus supplies its own paint instead.
+It is the *paint* layer: colors only. The *chassis* package `light-dark-mode` supplies the switching (no-FOUC hook, saved choice, system preference, toggle) and `color-scheme` the token names; a theme such as Valentus supplies its own paint instead.
 
 == Where it lives and why
 
@@ -16,7 +16,7 @@ It is labelled `layer: paint` in `ui-component.json5`, `antora-registry.md` and 
 ----
 antora:
   extensions:
-    - require: '@antora-supplemental/color-scheme'
+    - require: '@antora-supplemental/light-dark-mode'
     - require: '@antora-supplemental/default-paint'
 ----
 

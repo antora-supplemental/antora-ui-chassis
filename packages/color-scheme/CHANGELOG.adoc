@@ -1,5 +1,18 @@
 = Changelog
 
+== 0.3.0 - 2026-10-25
+
+=== Breaking
+
+* Light/dark switching moved to the new package `@antora-supplemental/light-dark-mode`: the no-FOUC head hook (`js/color-scheme-head.js`, removed), `antora-theme-mode` persistence, system preference, the toggle and the `ColorScheme.mode/isDark/set/toggle/subscribe` API (now `LightDarkMode.*`). Options `toggle`, `navbar` and `enabled` for light/dark belong to that package. It registers color-scheme, so replace `require: '@antora-supplemental/color-scheme'` with `require: '@antora-supplemental/light-dark-mode'` and move `live_paint` under `color_scheme:`. Migration: link:https://github.com/antora-supplemental/antora-ui-chassis/blob/main/docs/modules/ROOT/pages/migrate-dark-mode.adoc[Migrating dark mode to the chassis].
+
+=== Added
+
+* Live paint slots: schemes declare `slots` (`light`, `dark`), the site sets `slots: { light, dark }` and `slot_policy: declared|any`; validated at build time. `ColorScheme.assign`, `slots`, `fits`, `offSlot`, `schemes`.
+* Off-slot pick: a scheme outside the current slot is pinned for the session and turns light/dark automation off; `?paint=auto`, a slot scheme or any light/dark choice turns it back on. `?paint=reset` restores the default slots.
+* Picker page `color-schemes.html` with live previews (`?cs-preview=`, no writes), slot assignment and an automation banner. `picker: auto|true|false|{enabled, placement: footer|none, label, preview_page}`; auto when there are more than 2 schemes. Footer link via the `color-scheme-picker-link` partial (site, then theme, then chassis default).
+  Previews render the page at four times the card width and scale it down by a quarter (`.cs-picker-shot`), so they show the desktop layout instead of a squeezed one.
+
 == 0.2.0 - 2026-10-25
 
 === Added

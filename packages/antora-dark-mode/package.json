@@ -1,0 +1,49 @@
+{
+  "name": "antora-dark-mode",
+  "version": "2.0.0",
+  "description": "Dark mode for Antora 3, powered by antora-ui-chassis: registers @antora-supplemental/color-scheme, @antora-supplemental/light-dark-mode and @antora-supplemental/default-paint.",
+  "main": "lib/index.js",
+  "exports": {
+    ".": "./lib/index.js",
+    "./lib": "./lib/index.js"
+  },
+  "files": [
+    "lib",
+    "test",
+    "ui-component.json5",
+    "README.adoc",
+    "CHANGELOG.adoc"
+  ],
+  "scripts": {
+    "test": "node --test test/*.test.js"
+  },
+  "dependencies": {
+    "@antora-supplemental/color-scheme": "0.3.0",
+    "@antora-supplemental/light-dark-mode": "0.1.0",
+    "@antora-supplemental/default-paint": "0.2.0"
+  },
+  "bundleDependencies": [
+    "@antora-supplemental/color-scheme",
+    "@antora-supplemental/light-dark-mode",
+    "@antora-supplemental/default-paint"
+  ],
+  "keywords": [
+    "antora",
+    "antora-extension",
+    "dark-mode",
+    "light-dark-mode",
+    "antora-ui-default",
+    "antora-3"
+  ],
+  "homepage": "https://github.com/antora-supplemental/antora-ui-chassis/tree/main/packages/antora-dark-mode",
+  "bugs": {
+    "url": "https://github.com/antora-supplemental/antora-ui-chassis/issues"
+  },
+  "license": "MIT",
+  "author": "Ryan Johnson (https://github.com/AMDphreak)",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/antora-supplemental/antora-ui-chassis.git",
+    "directory": "packages/antora-dark-mode"
+  }
+}

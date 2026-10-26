@@ -1,19 +1,20 @@
 {
   id: "color-scheme",
   name: "Color scheme",
-  version: "0.2.0",
+  version: "0.3.0",
   type: "ui-chassis-component",
-  description: "Unstyled light/dark mechanism: no-FOUC head hook, saved choice, system preference, toggle behavior and a11y. No colors; palettes are paint, toggle placement is the body kit.",
+  description: "Color scheme layer: the --cs-* token contract and optional live paint (view-time scheme switching, light/dark slots, picker page). No colors and no light/dark toggle; that is light-dark-mode.",
   layer: "chassis",
   slots: {
     head: {
       stylesheets: ["css/color-scheme.css"],
-      inlineScripts: ["js/color-scheme-head.js"],
+      inlineScripts: ["js/color-scheme-paint-head.js (live_paint only)"],
       after: ["css/site.css"],
     },
     footer: {
-      scripts: ["js/color-scheme.js"],
+      scripts: ["js/color-scheme.js (live_paint only)", "js/color-scheme-picker.js (picker page only)"],
       after: ["js/ui-bus.js"],
     },
   },
+  partials: ["color-scheme-picker-link"],
 }

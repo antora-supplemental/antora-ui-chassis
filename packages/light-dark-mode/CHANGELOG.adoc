@@ -1,0 +1,9 @@
+= Changelog
+
+== 0.1.0 - 2026-10-25
+
+* First release. Light/dark switching split out of `@antora-supplemental/color-scheme` 0.2.0: no-flash head hook, saved choice (`antora-theme-mode`, same keys as `antora-dark-mode` 1.x), system preference with override expiry, View Transition switch, `window.LightDarkMode` (`mode`, `isDark`, `isAuto`, `set`, `toggle`, `resume`, `subscribe`), `UiBus.state` `light-dark-mode.mode|dark|auto`.
+* Two toggle designs on one state machine: `toggle_placement: navbar` (compact icon button with `aria-label`, `title`, `aria-pressed`) and `toggle_placement: footer` (labeled Light / Dark / Auto segmented control that wraps).
+* Partials `light-dark-toggle`, `light-dark-switch`, `light-dark-navbar-slot`, `light-dark-footer-slot`, each added only when the site or layout has none (override order: site, then layout, then chassis). Placed buttons keep their own icons (`data-light-dark-mode-icons`).
+* `follow_system: false` starts in light and ignores `prefers-color-scheme`.
+* Live paint slots: switches between the `light` and `dark` slot schemes; an off-slot pick turns automation off for the session (`aria-pressed="mixed"`, footer note), any light/dark choice resumes it.

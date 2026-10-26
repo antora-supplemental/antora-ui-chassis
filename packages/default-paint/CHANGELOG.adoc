@@ -1,14 +1,19 @@
 = Changelog
 
-== Unreleased
+== 0.2.0 - 2026-10-25
 
 === Fixed
 
-* Light-mode contrast (WCAG AA 4.5:1): the Default UI highlight.js comment (`#998`), meta (`#999`), built-in (`#0086b3`) and link/regexp (`#009926`) colors missed on the light code panel, and `--dp-ink-faint` (`#8e8e8e`, used by *Edit this page* and quote attribution) missed on the toolbar. New `--dp-syntax-comment|meta|builtin|link` tokens darken those four; `--dp-ink-faint` is now `#6b6b6b`. Dark mode is unchanged. Axe color-contrast on Valentus Layout + default paint (index, configuration, code-blocks, admonitions, tables): light 2/3/19/2/0 to 0; Default UI + default paint: light 3/4/20/3/1 to 0.
+* Light-mode contrast (WCAG AA 4.5:1): the Default UI highlight.js comment (`#998`), meta (`#999`), built-in (`#0086b3`) and link/regexp (`#009926`) colors missed on the light code panel, and `--dp-ink-faint` (`#8e8e8e`, used by *Edit this page* and quote attribution) missed on the toolbar. New `--dp-syntax-comment|meta|builtin|link` tokens darken those four; `--dp-ink-faint` is now `#6b6b6b`. Dark mode is unchanged (the dark block sets the same four tokens to its existing colors). Axe color-contrast on Valentus Layout + default paint (index, configuration, code-blocks, admonitions, tables): light 2/3/19/2/0 to 0; Default UI + default paint: light 3/4/20/3/1 to 0.
+* Dark-mode footer stayed light gray: the Default UI styles `footer.footer`, which beat the paint's `.footer` rule. The paint now targets `footer.footer` (and its links), so the footer, its text and the footer toggle follow `--dp-footer*` in dark mode. Light `--dp-footer` is now the Default UI's own `#e1e1e1`, so light mode is pixel-identical to stock.
 
 === Changed
 
 * Sets the full `--cs-*` contract (see `color-scheme.css`) from `--dp-*`, plus new `--dp-admonition-note|tip|important|warning|caution` per scheme. The six `--valentus-*` names are unchanged.
+
+=== Docs
+
+* Light/dark switching is now `@antora-supplemental/light-dark-mode` (color-scheme 0.3.0); install examples updated.
 
 == 0.1.1 - 2026-10-25
 

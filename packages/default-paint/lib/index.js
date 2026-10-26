@@ -6,12 +6,12 @@
  * Light and dark palette for the Antora Default UI. Adds css/default-paint.css
  * to the UI and links it at the end of head-styles (after site.css and the
  * chassis color-scheme.css), so its rules win over the bundle's. Colors only:
- * the light/dark mechanism (html.dark-theme, toggle, storage) is the chassis
- * extension @antora-supplemental/color-scheme, which you register as well.
+ * light/dark switching (html.dark-theme, toggle, storage) is the chassis
+ * extension @antora-supplemental/light-dark-mode, which you register as well.
  *
  *   antora:
  *     extensions:
- *       - require: '@antora-supplemental/color-scheme'
+ *       - require: '@antora-supplemental/light-dark-mode'
  *       - require: '@antora-supplemental/default-paint'
  */
 

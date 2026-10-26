@@ -1,11 +1,10 @@
-/* @antora-supplemental/color-scheme: unstyled light/dark mechanism.
+/* @antora-supplemental/color-scheme: the token contract. No color values.
  *
- * Chassis owns the hooks, not the colors. This file sets no color values.
- *
- * Hooks set on <html> by js/color-scheme-head.js and js/color-scheme.js:
+ * A paint styles two schemes through these hooks on <html>. They are set by
+ * the light/dark layer (@antora-supplemental/light-dark-mode) or by anything
+ * else that picks a scheme:
  *   .dark-theme                       resolved scheme is dark
  *   [data-theme="light"|"dark"]       resolved scheme
- *   [data-color-scheme-mode]          stored choice: system | light | dark
  *   [data-dm-navbar]                  from <meta name="dm-navbar">, for paint
  *
  * Token contract. A paint defines these on :root (light) and html.dark-theme
@@ -21,10 +20,8 @@
  * -ink, -ink-muted, -border, -accent (paints alias them to --cs-*); existing
  * extensions read those names, and they remain part of the contract.
  *
- * Scheme switch transition contract: the runtime uses View Transitions when the
- * browser has them (html.color-scheme-vt while one runs), otherwise it sets
- * html.color-scheme-animating for ~300ms. Extensions follow tokens or
- * html.dark-theme and never animate the switch themselves.
+ * The switch transition (light-dark-mode-animating / -vt) belongs to
+ * light-dark-mode.
  */
 :root {
   color-scheme: light dark;
@@ -36,37 +33,4 @@ html[data-theme="light"] {
 
 html[data-theme="dark"] {
   color-scheme: dark;
-}
-
-@media (prefers-reduced-motion: no-preference) {
-  html.color-scheme-animating,
-  html.color-scheme-animating *,
-  html.color-scheme-animating *::before,
-  html.color-scheme-animating *::after {
-    transition:
-      background-color 0.28s ease,
-      color 0.28s ease,
-      border-color 0.28s ease,
-      fill 0.28s ease,
-      stroke 0.28s ease,
-      box-shadow 0.28s ease,
-      filter 0.28s ease,
-      opacity 0.28s ease !important;
-  }
-
-  html.color-scheme-vt,
-  html.color-scheme-vt *,
-  html.color-scheme-vt *::before,
-  html.color-scheme-vt *::after,
-  html:active-view-transition,
-  html:active-view-transition *,
-  html:active-view-transition *::before,
-  html:active-view-transition *::after {
-    transition: none !important;
-  }
-
-  ::view-transition-old(root),
-  ::view-transition-new(root) {
-    animation-duration: 0.28s;
-  }
 }

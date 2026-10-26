@@ -1,26 +1,52 @@
-= Color scheme and retiring antora-dark-mode
+= Dark mode and color schemes
+:description: How the chassis does dark mode (light/dark switching) and color schemes, and where antora-dark-mode went.
+:keywords: dark mode, light mode, antora-dark-mode, color scheme, theme toggle
 
-== Status
+Dark mode on an Antora site takes three layers:
 
-*Done (2026-10-25).* `antora-dark-mode` is merged into `@antora-supplemental/color-scheme` 0.1.2 (tag `color-scheme-v0.1.2`) and deprecated.
-Valentus places the toggle and owns its palettes; it no longer copies dark-mode files.
+* `@antora-supplemental/light-dark-mode` (chassis): switches light and dark. No-flash head hook, saved choice, system preference, and the toggle as a top-bar icon button (`toggle_placement: navbar`) or a footer Light / Dark / Auto switch (`toggle_placement: footer`). Package README: `packages/light-dark-mode/README.adoc`.
+* `@antora-supplemental/color-scheme` (chassis): the `--cs-*` token contract, and optional live paint with light/dark slots and a picker page. Package README: `packages/color-scheme/README.adoc`.
+* Paint: the colors. `@antora-supplemental/default-paint` for the Default UI (xref:default-paint.adoc[]), Valentus Paint for Valentus.
 
-== Split of responsibility
+`antora-dark-mode` 2.x is built here (`packages/antora-dark-mode`) and registers all three. Upgrading: xref:migrate-dark-mode.adoc[].
 
-* *Chassis* (`packages/color-scheme`) — the mechanism, with no colors: no-FOUC head hook, saved choice, `prefers-color-scheme` handling, `html.dark-theme` / `data-theme` / `data-color-scheme-mode` hooks, token names, the switch transition, toggle behavior and a11y.
-* *Body kit* — where the toggle sits and how it looks (Valentus places `#theme-toggle` in its header).
-* *Paint* — actual light/dark token values (`--valentus-canvas`, `--valentus-ink`, …) and every other colored rule.
+== Override order
 
-See the package README for install, hooks and the `ColorScheme` API.
+For every piece of dark-mode markup (toggle button, footer switch, picker link) the highest wins:
+
+. your site's supplemental UI (a partial with the same name, or markup you placed),
+. the theme or layout (Valentus ships its own `light-dark-toggle`),
+. the chassis default.
+
+The chassis never replaces icons or buttons it was given.
+
+== Options
+
+[cols="1,3",options="header"]
+|===
+| Option | Meaning
+| light-dark-mode `toggle` | `auto` (default) creates the toggle when the layout placed none; `placed` binds only
+| light-dark-mode `toggle_placement` | `navbar` (default) or `footer`
+| light-dark-mode `follow_system` | `true` (default); `false` starts in light and ignores the OS
+| light-dark-mode `navbar` | `<meta name="dm-navbar">` value for paint
+| light-dark-mode `color_scheme` | options passed to color-scheme
+| color-scheme `live_paint.paints.<id>` | href, or `{ href, label, slots: [light, dark], base }`
+| color-scheme `live_paint.slots` | `{ light: <id>|builtin, dark: <id>|builtin }`
+| color-scheme `live_paint.slot_policy` | `declared` (default) or `any`
+| color-scheme `live_paint.picker` | `auto` (default, on with more than 2 schemes), `true`, `false`, or `{ enabled, placement: footer|none, label, preview_page }`
+| query | `?paint=<id>`, `?paint=auto`, `?paint=reset`; `?cs-preview=<id>&cs-preview-mode=light|dark` (preview only, no writes)
+|===
+
+An off-slot scheme (one not in the current light or dark slot) turns light/dark automation off for the session. The navbar button then reports `aria-pressed="mixed"` and its label says so; the footer switch shows a note. Choosing Light, Dark, Auto or a slot scheme turns automation back on.
 
 == Parity with antora-dark-mode 1.4.6
 
-`color-scheme` replaces `antora-dark-mode`. Every row must be equal or better before the old package is retired.
+The chassis packages (light-dark-mode for the mechanism since color-scheme 0.3.0) replace `antora-dark-mode` 1.x. Every row must be equal or better before the old package is retired.
 "Layer" says where the old behavior now lives: *chassis* (this package, no colors), *body kit* (Valentus places and dresses the toggle), *paint* (palette colors).
 
 [cols="3,2,4,1",options="header"]
 |===
-| Old antora-dark-mode behavior | Layer | color-scheme | Verdict
+| Old antora-dark-mode behavior | Layer | chassis | Verdict
 
 | FOUC: inline head script adds `html.dark-theme` before first paint
 | chassis
@@ -103,16 +129,9 @@ See the package README for install, hooks and the `ColorScheme` API.
 | out of scope
 |===
 
-== Retirement of antora-dark-mode
+== Where antora-dark-mode went
 
-`antora-dark-mode` is deprecated. Its README carries a migration section:
-
-. Remove the `antora-dark-mode` UI bundle, supplemental files or ui-module.
-. Add `require: '@antora-supplemental/color-scheme'` to the playbook.
-. Keep or add paint that defines both palettes on `html.dark-theme`: Valentus ships its own; on the Default UI add `require: '@antora-supplemental/default-paint'`.
-. Rename `valentus-theme-animating` / `valentus-theme-vt` in custom CSS to `color-scheme-animating` / `color-scheme-vt`.
-
-Saved user choices carry over because the storage keys are unchanged.
+`antora-dark-mode` 2.0.0 is published from this repository (`packages/antora-dark-mode`) as a thin Antora extension over light-dark-mode, color-scheme and default-paint. The old repository is a compatibility path: its UI bundle and git installs keep working, forward to the chassis and log one warning per build with the one-line migration. Nothing is archived or deprecated. See xref:migrate-dark-mode.adoc[].
 
 == CSS short-circuit fallbacks
 
@@ -136,7 +155,7 @@ The registry checks a paint with `packages/color-scheme/scripts/validate-paint.m
 
 == Live paint and registry previews
 
-`color-scheme` 0.2.0 can swap the paint of a built site at view time (`live_paint`, off by default). Options and API: `packages/color-scheme/README.adoc`.
+`color-scheme` (0.2.0 and later) can swap the paint of a built site at view time (`live_paint`, off by default). Options and API: `packages/color-scheme/README.adoc`.
 
 Security: only ids from the playbook `paints` map load, hrefs are validated at build time, and `postMessage` is accepted only from `allow_origins`. A page URL can pick a paint but never name a stylesheet.
 

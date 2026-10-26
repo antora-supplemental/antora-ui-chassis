@@ -1,19 +1,39 @@
 {
   "name": "@antora-supplemental/color-scheme",
-  "version": "0.2.0",
-  "description": "Unstyled light/dark mechanism for Antora UIs: no-FOUC head hook, saved choice, system preference, accessible toggle. Palettes belong to paint.",
+  "version": "0.3.0",
+  "description": "Color scheme layer for Antora UIs: the --cs-* token contract and optional live paint (switch schemes at view time, light/dark slots, picker page). Light/dark switching is @antora-supplemental/light-dark-mode.",
   "main": "lib/index.js",
   "exports": {
     ".": "./lib/index.js",
     "./lib": "./lib/index.js",
     "./js/color-scheme.js": "./js/color-scheme.js",
-    "./js/color-scheme-head.js": "./js/color-scheme-head.js",
     "./js/color-scheme-paint-head.js": "./js/color-scheme-paint-head.js",
-    "./css/color-scheme.css": "./css/color-scheme.css"
+    "./js/color-scheme-picker.js": "./js/color-scheme-picker.js",
+    "./css/color-scheme.css": "./css/color-scheme.css",
+    "./css/color-scheme-picker.css": "./css/color-scheme-picker.css"
   },
-  "files": ["lib", "js", "css", "test", "ui-component.json5", "README.adoc", "CHANGELOG.adoc"],
-  "scripts": { "test": "node --test test/*.test.js" },
-  "keywords": ["antora", "antora-ui", "antora-extension", "color-scheme", "dark-mode", "chassis"],
+  "files": [
+    "lib",
+    "js",
+    "css",
+    "scripts",
+    "test",
+    "ui-component.json5",
+    "README.adoc",
+    "CHANGELOG.adoc"
+  ],
+  "scripts": {
+    "test": "node --test test/*.test.js"
+  },
+  "keywords": [
+    "antora",
+    "antora-ui",
+    "antora-extension",
+    "color-scheme",
+    "theme",
+    "dark-mode",
+    "chassis"
+  ],
   "license": "MIT",
   "repository": {
     "type": "git",

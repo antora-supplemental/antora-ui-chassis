@@ -1,9 +1,9 @@
 {
   id: "default-paint",
   name: "Default UI paint",
-  version: "0.1.1",
+  version: "0.2.0",
   type: "ui-paint",
-  description: "Paint layer: light and dark palette for the Antora Default UI (surfaces, text, links, nav, toolbar, code, admonitions). Colors only; the mechanism is the chassis color-scheme package.",
+  description: "Paint layer: light and dark palette for the Antora Default UI (surfaces, text, links, nav, toolbar, code, admonitions). Colors only; switching is the chassis light-dark-mode package.",
   layer: "paint",
   requires: ["color-scheme"],
   slots: {

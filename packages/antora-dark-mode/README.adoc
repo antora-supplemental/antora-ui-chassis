@@ -1,0 +1,52 @@
+= antora-dark-mode 2.x: dark mode for Antora, powered by antora-ui-chassis
+
+*antora-dark-mode 2.x is a label on the chassis dark mode.* It has no CSS or JavaScript of its own: the one `require` registers three packages from link:https://github.com/antora-supplemental/antora-ui-chassis[antora-ui-chassis] and passes your options to them.
+
+[cols="2,3",options="header"]
+|===
+| Package | What it installs on your site
+| link:https://github.com/antora-supplemental/antora-ui-chassis/tree/main/packages/color-scheme[`@antora-supplemental/color-scheme`] | `css/color-scheme.css` (the `--cs-*` token names, no colors); with `color_scheme.live_paint` also the scheme switcher and picker page
+| link:https://github.com/antora-supplemental/antora-ui-chassis/tree/main/packages/light-dark-mode[`@antora-supplemental/light-dark-mode`] | An inline no-flash script in `<head>`, `css/light-dark-mode.css` (toggle layout and switch transition), `js/light-dark-mode.js` (saved choice, system preference, toggle), and the toggle partials
+| link:https://github.com/antora-supplemental/antora-ui-chassis/tree/main/packages/default-paint[`@antora-supplemental/default-paint`] | `css/default-paint.css`: the light and dark palette for the Antora Default UI (turn off with `paint: false` when your theme has its own)
+|===
+
+The 1.x line was a supplemental UI / UI bundle overlay in the link:https://github.com/antora-supplemental/antora-dark-mode[antora-dark-mode repository]. That repository is now a compatibility path that forwards here. Migration: link:https://github.com/antora-supplemental/antora-ui-chassis/blob/main/docs/modules/ROOT/pages/migrate-dark-mode.adoc[Migrating dark mode to the chassis].
+
+== Install
+
+[source,console]
+----
+npm i -D antora-dark-mode@2
+----
+
+[source,yaml]
+----
+antora:
+  extensions:
+    - require: antora-dark-mode
+      navbar: dark              # dark (default) | light | match: navbar colors in dark mode (html[data-dm-navbar])
+      toggle: auto              # auto (default) | placed: bind a #theme-toggle your UI placed
+      toggle_placement: navbar  # navbar (default): icon button in the top bar | footer: Light / Dark / Auto switch
+      follow_system: true       # false: start in light, ignore the OS preference
+      paint: true               # false: skip default-paint (bring your own palette)
+      color_scheme: {}          # passed to color-scheme, e.g. live_paint
+----
+
+`site.keys.dark_mode_navbar` from 1.x still sets `navbar` when the option is absent. Saved choices carry over: the `localStorage` keys (`antora-theme-mode`, legacy `antora-theme`) and the `html.dark-theme` / `data-theme` / `data-dm-navbar` hooks are unchanged.
+
+== Option mapping
+
+[cols="1,2",options="header"]
+|===
+| antora-dark-mode | Goes to
+| `navbar` (or `site.keys.dark_mode_navbar`) | light-dark-mode `navbar`
+| `toggle`, `toggle_placement`, `follow_system`, `enabled` | light-dark-mode, same names
+| `color_scheme` | light-dark-mode `color_scheme` (color-scheme options)
+| `paint: false` | default-paint is not registered
+|===
+
+== Not carried over from 1.x
+
+* `js/themed-svg-element.js` (the `<themed-svg>` upgrade) is not dark mode and is not included. Use link:https://www.npmjs.com/package/@dev-centr/themed-svg[`@dev-centr/themed-svg`].
+* The VCS header icons partial (`header-content.hbs`) is not included; the toggle is created in `.navbar-end` or placed by your UI.
+* No warning is logged: 2.x is the supported line.
