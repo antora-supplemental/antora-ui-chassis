@@ -18,6 +18,8 @@ export const DEFAULTS = Object.freeze({
   tokens: true, // --cs-* token-pair checks
   ignore: { selectors: [], rules: [], pages: [] },
   maxAnnotations: 50,
+  suppress: [], // [{ rule, selector, page, scheme, colors: { fg, bg }, reason, expires }]
+  failOnStale: false, // exit 1 when a suppression is stale or expired
 })
 
 const KEYS = new Set(Object.keys(DEFAULTS))
@@ -33,16 +35,45 @@ export function mergeConfig (...layers) {
       else out[k] = v
     }
   }
+  if (!Array.isArray(out.suppress)) throw new Error('contrast-check: suppress must be an array')
   for (const k of ['selectors', 'rules', 'pages']) if (!Array.isArray(out.ignore[k])) throw new Error(`contrast-check: ignore.${k} must be an array`)
   for (const [k, v] of Object.entries(out.thresholds)) if (typeof v !== 'number' || v < 1 || v > 21) throw new Error(`contrast-check: thresholds.${k} must be a ratio between 1 and 21`)
   return out
 }
 
-export function loadConfig (file, cwd = process.cwd()) {
-  const f = file ? path.resolve(cwd, file) : path.join(cwd, 'contrast-check.config.json')
+/** Parse a JSON, JSON5/JSONC or YAML file by extension (YAML and JSON5 need the optional yaml / json5 packages). */
+export async function parseFile (f) {
+  const text = readFileSync(f, 'utf8').replace(/^\uFEFF/, '')
+  const ext = path.extname(f).toLowerCase()
+  if (ext === '.yml' || ext === '.yaml') {
+    let yaml; try { yaml = await import('yaml') } catch { throw new Error(`contrast-check: reading ${f} needs the 'yaml' package (npm i yaml)`) }
+    return (yaml.parse || yaml.default.parse)(text) ?? {}
+  }
+  if (ext === '.json5' || ext === '.jsonc') {
+    let j5; try { j5 = await import('json5') } catch { throw new Error(`contrast-check: reading ${f} needs the 'json5' package (npm i json5)`) }
+    return (j5.parse || j5.default.parse)(text)
+  }
+  return JSON.parse(text)
+}
+
+const NAMES = ['contrast-check.config.json', 'contrast-check.config.json5', 'contrast-check.config.yaml', 'contrast-check.config.yml']
+
+/** Load a --suppress file: an array, or an object with a `suppress` array. */
+export async function loadSuppressFile (file, cwd = process.cwd()) {
+  const f = path.resolve(cwd, file)
+  if (!existsSync(f)) throw new Error(`contrast-check: suppress file not found: ${file}`)
+  const d = await parseFile(f)
+  const list = Array.isArray(d) ? d : d?.suppress
+  if (!Array.isArray(list)) throw new Error(`contrast-check: ${file} must be an array of suppressions or { "suppress": [...] }`)
+  // Default ids name the file, e.g. suppress.json#2, so stale warnings point at it.
+  return list.map((e, i) => e && typeof e === 'object' && !e.id ? { id: `${path.basename(f)}#${i + 1}`, ...e } : e)
+}
+
+export async function loadConfig (file, cwd = process.cwd()) {
+  const f = file ? path.resolve(cwd, file) : (NAMES.map((n) => path.join(cwd, n)).find(existsSync) || path.join(cwd, NAMES[0]))
   if (!existsSync(f)) {
     if (file) throw new Error(`contrast-check: config file not found: ${file}`)
     return { config: {}, file: null }
   }
-  return { config: JSON.parse(readFileSync(f, 'utf8')), file: f }
+  return { config: (await parseFile(f)) || {}, file: f }
 }

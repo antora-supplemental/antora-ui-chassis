@@ -12,5 +12,11 @@
     "rules": ["hover-unchanged"],
     "pages": ["_/**"]
   },
-  "maxAnnotations": 50
+  "maxAnnotations": 50,
+  "failOnStale": false,
+  "suppress": [
+    { "rule": "color-contrast", "selector": ".search-input::placeholder", "scheme": ["dark"], "reason": "Placeholder text, not content; tracked in #42", "expires": "2027-03-31" },
+    { "rule": "hover-no-change", "page": "api/**/*.html", "reason": "Generated API nav uses focus styles only" },
+    { "rule": "link-distinguishable", "selector": ".toc a", "colors": { "fg": "#1565c0", "bg": "#ffffff" }, "reason": "TOC links are a list, not inline text" }
+  ]
 }

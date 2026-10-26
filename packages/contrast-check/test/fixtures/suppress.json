@@ -1,0 +1,5 @@
+[
+  { "rule": "color-contrast", "selector": "/^p$/", "scheme": ["light", "dark"], "reason": "fixture: known low-contrast paragraph" },
+  { "rule": "icon-contrast", "reason": "fixture: never matches (stale)" },
+  { "rule": "token-pair", "reason": "fixture: expired", "expires": "2020-01-01" }
+]

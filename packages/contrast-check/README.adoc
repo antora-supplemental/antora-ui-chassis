@@ -42,6 +42,9 @@ contrast-check build/site --json=contrast.json --fail-on warning
 | `--json`, `--json=<file>` | JSON report to stdout or a file.
 | `--fail-on error\|warning\|none` | Exit 1 on errors (default), on any finding, or never (report only).
 | `--strict` | Same as `--fail-on warning`.
+| `--suppress <file>` | Suppression list (JSON, JSON5 or YAML; repeatable), added to the config's `suppress`. See <<Suppressions>>.
+| `--show-suppressed` | List suppressed findings with the entry and reason.
+| `--fail-on-stale` | Exit 1 when a suppression matched nothing or has expired.
 | `--quiet` | Totals only.
 |===
 
@@ -51,20 +54,63 @@ Under GitHub Actions it prints `::error` / `::warning` annotations (with `file=`
 
 == Config
 
-`contrast-check.config.json` (see `contrast-check.config.example.json`): `thresholds` (`text`, `large`, `nonText`, `link`), `nearMargin`, `similarState`, `apca`, `pages`, `maxPages`, `schemes`, `paints`, `tokens`, `failOn`, `ignore` (`selectors`, `rules`, `pages`), `maxAnnotations`. Unknown keys are an error.
+`contrast-check.config.json` (see `contrast-check.config.example.json`): `thresholds` (`text`, `large`, `nonText`, `link`), `nearMargin`, `similarState`, `apca`, `pages`, `maxPages`, `schemes`, `paints`, `tokens`, `failOn`, `ignore` (`selectors`, `rules`, `pages`), `maxAnnotations`, `suppress`, `failOnStale`. Unknown keys are an error. The file may also be `contrast-check.config.json5` or `.yaml`/`.yml` (needs the optional `json5` / `yaml` packages, installed by default).
+
+`ignore` drops whole rules, pages or selectors silently; prefer `suppress` for known findings, which needs a reason, can expire, and is reported.
+
+== Suppressions
+
+A suppression marks a known finding as accepted. Suppressed findings do not count toward `--fail-on`; the totals read `3 error(s), 1 warning(s), 4 suppressed`, and `--show-suppressed` lists them with their reasons (JSON: `suppressed`, `counts.suppressed`).
+
+Entries come from the config's `suppress` array and from `--suppress <file>` (an array, or `{ "suppress": [...] }`; JSON, JSON5 or YAML) or the Action's `suppress` input. Each entry matches on any combination of these, and all given fields must match:
+
+[cols="1,3"]
+|===
+| `rule` / `rules` | Rule id (`color-contrast`, `token-pair`, ...), glob (`focus-*`), `all`, or an alias: `link-distinguishable` (`link-not-distinct`), `near-identical` (`near-identical-colors`), `faint-border` (`control-boundary`, `token-boundary`), `hover-no-change` (`hover-unchanged`), `hardcoded-color` (`hard-coded-color`).
+| `selector` | The finding's selector: exact, substring, or `/regex/flags`.
+| `page` / `pages` | Site-relative page glob (`guide/**/*.html`; leading `/` optional). Paint-file findings have no page and never match.
+| `scheme` / `schemes` | Scheme id (`dark`) or run (`dark/dark`).
+| `colors` (`fg`, `bg`), or `fg` / `bg` | Exact colors, compared after normalizing (`#777` = `#777777` = `rgb(119,119,119)`).
+| `reason` | Required.
+| `expires` | Optional `YYYY-MM-DD`. After that day the entry is ignored and reported as `suppression-expired`.
+| `id` | Optional name for reports (default `config#2` or `<file>#2`).
+|===
+
+Matching runs per page and scheme before findings are merged, so a page or scheme filter suppresses exactly that part and the rest still reports.
+
+An entry that matches nothing is reported as a `suppression-stale` warning (console, `::warning` annotation, step summary) so the list does not rot. Stale and expired entries do not fail the run unless `--fail-on-stale` (config `failOnStale: true`).
+
+[source,yaml]
+----
+# contrast-check.suppress.yaml
+suppress:
+  - rule: color-contrast
+    selector: .search-input
+    scheme: [dark]
+    reason: Placeholder text, not content; tracked in #42
+    expires: 2027-03-31
+  - rule: hover-no-change
+    page: api/**/*.html
+    reason: Generated API nav uses focus styles only
+----
+
+=== Inline opt-out
+
+Mark an element (or an ancestor) in the page: `data-contrast-check-ignore="focus-not-visible hover-no-change"` suppresses those rules (ids, aliases or globs) for that element; an empty value suppresses every rule. These show as suppressed by `inline`. Static paint and token findings have no element and need a `suppress` entry.
+
 
 == GitHub Action
 
 [source,yaml]
 ----
-- uses: antora-supplemental/antora-ui-chassis/packages/contrast-check@contrast-check-v0.1.0
+- uses: antora-supplemental/antora-ui-chassis/packages/contrast-check@contrast-check-v0.2.0
   with:
     site: build/site
     pages: "index.html,**/*.html"
     fail-on: error   # or warning, or none for report only
 ----
 
-Inputs: `site`, `pages`, `max-pages`, `schemes`, `paint`, `config`, `fail-on`, `json` (report path, default `contrast-check.json`), `args`. GitHub-hosted Ubuntu runners already have Chrome.
+Inputs: `site`, `pages`, `max-pages`, `schemes`, `paint`, `config`, `fail-on`, `suppress` (suppression file), `show-suppressed`, `fail-on-stale` (`"true"`/`"false"`), `json` (report path, default `contrast-check.json`), `args`. GitHub-hosted Ubuntu runners already have Chrome.
 
 == Rules
 

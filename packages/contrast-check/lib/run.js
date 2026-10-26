@@ -7,6 +7,7 @@ import path from 'node:path'
 import { readManifest, schemeRuns, checkPaint } from './paint.js'
 import { analyze, analyzeFocus, analyzeHover, axeFindings, TOKENS } from './analyze.js'
 import { probe, focusables, snapshot } from './probe.js'
+import { normalizeSuppressions, applySuppressions, suppressionWarnings, inlineIgnores } from './suppress.js'
 
 const require = createRequire(import.meta.url)
 const TYPES = { '.html': 'text/html', '.css': 'text/css', '.js': 'text/javascript', '.svg': 'image/svg+xml', '.json': 'application/json', '.png': 'image/png', '.woff2': 'font/woff2', '.woff': 'font/woff', '.ico': 'image/x-icon', '.jpg': 'image/jpeg' }
@@ -170,7 +171,10 @@ export async function run (target, cfg, log = () => {}) {
             if (f) fs.push(f)
           }
         }
-        for (const f of [...ax, ...pf, ...fs]) if (!cfg.ignore.rules.includes(f.rule)) findings.push({ ...f, file: ctx.file })
+        const pageFs = [...ax, ...pf, ...fs].filter((f) => !cfg.ignore.rules.includes(f.rule))
+        // Inline opt-out: data-contrast-check-ignore="rule1 rule2" on the element or an ancestor (empty = every rule).
+        const marks = await page.evaluate((sels) => sels.map((s) => { try { const h = s && document.querySelector(s)?.closest('[data-contrast-check-ignore]'); return h ? h.getAttribute('data-contrast-check-ignore') : null } catch { return null } }), pageFs.map((f) => f.selector))
+        pageFs.forEach((f, i) => findings.push({ ...f, file: ctx.file, ...(marks[i] != null && inlineIgnores(marks[i], f.rule) ? { suppressedBy: 'inline', suppressReason: `data-contrast-check-ignore="${marks[i]}"` } : {}) }))
       }
       await context.close()
     }
@@ -178,7 +182,9 @@ export async function run (target, cfg, log = () => {}) {
     await browser.close()
     if (srv) srv.server.close()
   }
-  return { findings: dedupe(findings), meta }
+  const entries = normalizeSuppressions(cfg.suppress)
+  const { kept, suppressed, used, expired } = applySuppressions(findings, entries)
+  return { findings: dedupe(kept), suppressed: dedupe(suppressed), suppressionWarnings: suppressionWarnings(entries, used, expired), meta }
 }
 
 /** Hover findings are about the stylesheet, not the colors: one per selector, listing every scheme run. */
@@ -190,8 +196,8 @@ export function dedupe (findings) {
   for (const f of findings) {
     const agnostic = SCHEME_AGNOSTIC.has(f.rule)
     const k = agnostic
-      ? [f.level, f.rule, f.selector].join('|')
-      : [f.level, f.rule, f.scheme, f.mode, f.selector, f.fg, f.bg, f.ratio, f.file && !f.page ? f.file : ''].join('|')
+      ? [f.level, f.rule, f.suppressedBy, f.selector].join('|')
+      : [f.level, f.rule, f.suppressedBy, f.scheme, f.mode, f.selector, f.fg, f.bg, f.ratio, f.file && !f.page ? f.file : ''].join('|')
     const run = f.scheme ? `${f.scheme}/${f.mode}` : null
     const g = map.get(k)
     if (g) {

@@ -1,5 +1,9 @@
 = Changelog
 
+== contrast-check-v0.2.0 - 2026-10-26
+
+* **`contrast-check` 0.2.0: suppression list.** `suppress` entries in the config or `--suppress <file>` (JSON/JSON5/YAML, Action input `suppress`) match on rule (ids, globs, aliases), selector, page glob, scheme and exact colors; each needs a `reason` and may `expires`. Suppressed findings do not count toward `--fail-on` and show as `N suppressed` (`--show-suppressed` lists them). Stale and expired entries are warnings (`--fail-on-stale` fails on them). Inline opt-out with `data-contrast-check-ignore="rule1 rule2"`. `loadConfig` is now async.
+
 == Unreleased (demos only, no package release) - 2026-10-25
 
 * **Demo sites move to Valentus Layout:** new `demos/valentus-layout` builds the chassis demo (`antora-playbook.yml`, top-bar light/dark toggle) and the color-scheme picker demo (`antora-playbook-picker.yml`, `scheme-demo-paint` fixture, picker page, footer Light / Dark / Auto switch) on `valentus-layout-bundle.zip` from valentus-theme v4.2.0 with `default-paint` and `brand-placeholder`, loaded from this checkout. The Default UI is no longer used for demos and stays a faithful mirror of the stock Antora UI. No published package changed.

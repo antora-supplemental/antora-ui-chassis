@@ -1,6 +1,6 @@
 {
   "name": "@antora-supplemental/contrast-check",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "CI contrast checker for Antora sites and paints: axe color-contrast plus token-pair, link, focus, hover and icon-on-fill checks across every color scheme a paint declares. WCAG AA failures are errors; near-threshold ratios and style issues are warnings with suggested colors. Console, JSON, GitHub annotations and step summary output.",
   "type": "module",
   "main": "lib/index.js",
@@ -15,6 +15,10 @@
   "dependencies": {
     "axe-core": "^4.10.0",
     "playwright-core": "^1.50.0"
+  },
+  "optionalDependencies": {
+    "json5": "^2.2.3",
+    "yaml": "^2.6.0"
   },
   "engines": { "node": ">=20" },
   "keywords": ["antora", "accessibility", "a11y", "contrast", "wcag", "apca", "axe", "ci", "github-actions", "color-scheme"],

@@ -1,5 +1,19 @@
 = Changelog
 
+== 0.2.0 - 2026-10-26
+
+=== Added
+
+* Suppression list: `suppress` entries in the config and `--suppress <file>` (JSON, JSON5 or YAML; Action input `suppress`). Entries match on rule (ids, globs, `all`, and aliases such as `link-distinguishable`, `faint-border`, `hover-no-change`), selector (exact, substring, `/regex/`), page glob, scheme and exact colors; each needs a `reason` and may `expires`.
+* Suppressed findings do not count toward `--fail-on`; totals show `N suppressed`; `--show-suppressed` (Action `show-suppressed`) lists them; JSON has `suppressed` and `counts.suppressed`.
+* Stale (unused) and expired suppressions are `suppression-stale` / `suppression-expired` warnings and annotations; `--fail-on-stale` / `failOnStale` makes them fail.
+* Inline opt-out: `data-contrast-check-ignore="rule1 rule2"` on an element or ancestor (empty = every rule).
+* Config may be `contrast-check.config.json5` or `.yaml`; `json5` and `yaml` are optional dependencies.
+
+=== Changed
+
+* API: `loadConfig` is async. `run()` also returns `suppressed` and `suppressionWarnings`.
+
 == 0.1.0 - 2026-10-25
 
 === Added

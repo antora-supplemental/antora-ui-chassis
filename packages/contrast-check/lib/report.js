@@ -25,12 +25,21 @@ export function line (f) {
   return `${f.level === 'error' ? 'error' : 'warn '} ${f.rule} ${where(f)} ${f.selector ?? ''}${bits.length ? ' | ' + bits.join(', ') : ''}\n        ${f.message}`
 }
 
-export function consoleReport (fs, meta, limit = 200) {
+const supTail = (x) => x.suppressed?.length ? `, ${x.suppressed.length} suppressed` : ''
+/** Totals line: "E error(s), W warning(s)[, N suppressed]". */
+export function totals (fs, extra = {}) { const c = counts(fs); return `${c.error} error(s), ${c.warning} warning(s)${supTail(extra)}` }
+
+export function consoleReport (fs, meta, limit = 200, extra = {}) {
   const s = sortFindings(fs); const c = counts(fs)
   const out = [`contrast-check: ${meta.pages.length} page(s) x ${meta.schemes.length} scheme run(s) [${meta.schemes.join(', ')}]${meta.paints.length ? `; paints: ${meta.paints.join(', ')}` : ''}`]
   for (const f of s.slice(0, limit)) out.push(line(f))
   if (s.length > limit) out.push(`... ${s.length - limit} more (use --json for all)`)
-  out.push(`${c.error} error(s), ${c.warning} warning(s)`)
+  for (const w of extra.suppressionWarnings || []) out.push(`warn  suppression-${w.kind} ${w.message}`)
+  if (extra.showSuppressed && extra.suppressed?.length) {
+    out.push('suppressed:')
+    for (const f of sortFindings(extra.suppressed)) out.push(line(f).replace(/^(error|warn )/, 'supp ') + `\n        suppressed by ${f.suppressedBy}: ${f.suppressReason}`)
+  }
+  out.push(`${c.error} error(s), ${c.warning} warning(s)${supTail(extra)}`)
   return out.join('\n')
 }
 
@@ -45,9 +54,9 @@ export function annotations (fs, max = 50) {
 }
 
 const cell = (s) => String(s ?? '').replace(/\|/g, '\\|').replace(/\n/g, ' ')
-export function markdownSummary (fs, meta, top = 30) {
+export function markdownSummary (fs, meta, top = 30, extra = {}) {
   const c = counts(fs); const s = sortFindings(fs)
-  const out = [`## Contrast check: ${c.error ? '❌' : '✅'} ${c.error} error(s), ${c.warning} warning(s)`, '',
+  const out = [`## Contrast check: ${c.error ? '❌' : '✅'} ${c.error} error(s), ${c.warning} warning(s)${supTail(extra)}`, '',
     `${meta.pages.length} page(s), schemes: ${meta.schemes.map((x) => '`' + x + '`').join(', ')}`, '',
     '| Scheme | Errors | Warnings |', '| --- | ---: | ---: |',
     ...Object.entries(c.byScheme).map(([k, v]) => `| ${k} | ${v.error} | ${v.warning} |`), '']
@@ -55,7 +64,15 @@ export function markdownSummary (fs, meta, top = 30) {
     out.push(`### Top ${Math.min(top, s.length)} findings`, '', '| Level | Rule | Scheme | Page | Selector | Colors | Ratio | Suggest |', '| --- | --- | --- | --- | --- | --- | ---: | --- |')
     for (const f of s.slice(0, top)) out.push(`| ${f.level} | ${f.rule} | ${cell(f.scheme ? `${f.scheme}/${f.mode}` : '')} | ${cell(f.pages?.[0] || f.file)} | \`${cell(f.selector)}\` | ${cell(colors(f))} | ${f.ratio != null ? `${f.ratio}:1` : ''} | ${cell(f.suggestion)} |`)
   }
+  if (extra.suppressionWarnings?.length) out.push('', '### Suppression warnings', '', ...extra.suppressionWarnings.map((w) => `- **${w.kind}**: ${cell(w.message)}`))
+  if (extra.showSuppressed && extra.suppressed?.length) {
+    out.push('', `### ${extra.suppressed.length} suppressed`, '', '| Rule | Scheme | Page | Selector | By | Reason |', '| --- | --- | --- | --- | --- | --- |')
+    for (const f of sortFindings(extra.suppressed)) out.push(`| ${f.rule} | ${cell(f.scheme ? `${f.scheme}/${f.mode}` : '')} | ${cell(f.pages?.[0] || f.file)} | \`${cell(f.selector)}\` | ${cell(f.suppressedBy)} | ${cell(f.suppressReason)} |`)
+  }
   return out.join('\n') + '\n'
 }
+
+/** ::warning lines for stale and expired suppressions. */
+export function suppressionAnnotations (ws = []) { return ws.map((w) => `::warning title=${escProp(`contrast-check suppression-${w.kind}`)}::${esc(w.message)}`) }
 
 export function writeSummary (md, file = process.env.GITHUB_STEP_SUMMARY) { if (file) appendFileSync(file, md) }
