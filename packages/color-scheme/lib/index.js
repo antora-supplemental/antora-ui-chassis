@@ -3,30 +3,41 @@
 /**
  * @antora-supplemental/color-scheme - Antora extension.
  *
- * The token contract layer, with no colors and no switching: links
- * css/color-scheme.css (contract and the CSS color-scheme property) right after
- * the UI's site.css. With live_paint enabled it also inlines the paint head hook
- * and loads js/color-scheme.js (ColorScheme.setPaint and the postMessage bridge).
- * Light/dark switching is @antora-supplemental/light-dark-mode, which requires
- * this package.
+ * The token contract layer, with no colors of its own: links css/color-scheme.css
+ * (contract and the CSS color-scheme property) right after the UI's site.css.
+ *
+ * Schemes: the active paint provides named color schemes, light and dark at
+ * least, declared in an @color-schemes manifest comment in its stylesheet
+ * (extra schemes are html[data-scheme="<id>"] blocks). When it has more than
+ * two, or the site sets slots, this extension inlines the schemes head hook
+ * (window.ColorSchemes, html[data-scheme]), loads js/color-scheme.js, and adds
+ * the picker page (_/color-schemes.html) with a footer link. Light/dark
+ * switching is @antora-supplemental/light-dark-mode, which requires this package.
  *
  *   antora:
  *     extensions:
  *       - require: '@antora-supplemental/color-scheme'
- *         live_paint:      # optional (off by default): pick the paint at view time
+ *         schemes:              # optional: add or relabel schemes (normally the paint's manifest)
+ *           pink: { label: Pink, slots: [light] }
+ *         slots: { light: light, dark: dark }   # default slot schemes
+ *         slot_policy: declared # or any: every scheme fits both slots
+ *         picker: auto          # true | false | { enabled, placement: footer|none, label, preview_page }
+ *         scheme_param: scheme  # ?scheme=<id>; ?scheme=reset clears
+ *         scheme_cookie: cs-scheme
+ *         live_paint:           # optional preview/demo feature: swap the whole paint (no picker UI)
  *           enabled: true
- *           param: paint           # ?paint=<id>; ?paint=reset clears
- *           cookie: cs-paint       # remembers the choice (SameSite=Lax)
+ *           param: paint        # ?paint=<id>; ?paint=reset clears
+ *           cookie: cs-paint
  *           cookie_path: /
- *           paints:                # the ONLY loadable paints; ids: lowercase letters/digits
- *             default: css/default-paint.css                       # UI path (relative to the UI root)
+ *           paints:             # the ONLY loadable paints; ids: lowercase letters/digits
+ *             default: css/default-paint.css
  *             valentus: https://cdn.example.org/valentus/site-paint.css
  *           allow_origins: [https://registry.antora-supplemental.org]   # postMessage senders
  *
- * Antora camelCases playbook keys, so live_paint / cookie_path / allow_origins
- * arrive as livePaint / cookiePath / allowOrigins. The 0.2 options toggle and
- * navbar moved to light-dark-mode; they are rejected here so a stale playbook
- * fails loudly.
+ * Antora camelCases playbook keys (slot_policy -> slotPolicy). Options that
+ * moved are rejected so a stale playbook fails loudly: toggle and navbar
+ * (0.3.0, to light-dark-mode); live_paint.slots, slot_policy, picker and per-paint
+ * slots/base (0.4.0, now top-level and per scheme).
  */
 
 const fs = require('node:fs')
@@ -66,53 +77,129 @@ const ORIGIN = /^https?:\/\/[^/\s'"<>]+$/
 const SLOTS = ['light', 'dark']
 const RESERVED = ['reset', 'auto', 'builtin']
 
-/** Validated live-paint config, or null when disabled. Throws on bad input so a typo fails the build. */
+/** Validated live-paint config, or null when disabled. Live paint swaps the whole
+    paint for previews and demos; it has no slots and no picker UI. Throws on bad
+    input so a typo fails the build. */
 function livePaintConfig (config = {}) {
   const lp = config.livePaint
   if (!lp || lp.enabled !== true) return null
+  for (const key of ['slots', 'slotPolicy', 'picker']) {
+    if (lp[key] !== undefined) throw new Error(`color-scheme livePaint.${key} moved in color-scheme 0.4.0: slots, slot_policy and picker are top-level color-scheme options and work on the active paint's schemes`)
+  }
   const paints = {}
   const meta = {}
   for (const [id, entry] of Object.entries(lp.paints || {})) {
     if (!PAINT_ID.test(id) || RESERVED.includes(id)) throw new Error(`color-scheme livePaint: invalid paint id '${id}' (lowercase letters and digits, starting with a letter; not ${RESERVED.join('/')})`)
     const e = entry && typeof entry === 'object' ? entry : { href: entry }
+    if (e.slots !== undefined || e.base !== undefined) throw new Error(`color-scheme livePaint: paint '${id}' slots/base moved in color-scheme 0.4.0; declare schemes in the paint's @color-schemes manifest`)
     const h = String(e.href || '')
     if (!h || /[\s"'<>`\\]|^(javascript|data):/i.test(h)) throw new Error(`color-scheme livePaint: invalid href for paint '${id}'`)
     paints[id] = h
-    const slots = e.slots === undefined ? SLOTS.slice() : [].concat(e.slots).map(String)
-    for (const sl of slots) if (!SLOTS.includes(sl)) throw new Error(`color-scheme livePaint: paint '${id}' slots must be light and/or dark, got '${sl}'`)
-    if (e.base !== undefined && !SLOTS.includes(e.base)) throw new Error(`color-scheme livePaint: paint '${id}' base must be light or dark`)
-    const label = e.label === undefined ? id : String(e.label).slice(0, 80)
-    meta[id] = { label, slots: [...new Set(slots)], base: e.base || (slots.length === 1 ? slots[0] : 'light') }
+    meta[id] = { label: e.label === undefined ? id : String(e.label).slice(0, 80) }
   }
   if (!Object.keys(paints).length) throw new Error('color-scheme livePaint: paints map is empty')
-  const slotPolicy = lp.slotPolicy === undefined ? 'declared' : String(lp.slotPolicy)
-  if (!['declared', 'any'].includes(slotPolicy)) throw new Error(`color-scheme livePaint: slot_policy must be declared or any, got '${slotPolicy}'`)
-  const slots = { light: null, dark: null }
-  for (const sl of SLOTS) {
-    const v = lp.slots && lp.slots[sl]
-    if (v === undefined || v === null || v === 'builtin') continue
-    if (!paints[v]) throw new Error(`color-scheme livePaint: slots.${sl} '${v}' is not in paints`)
-    if (slotPolicy !== 'any' && !meta[v].slots.includes(sl)) throw new Error(`color-scheme livePaint: paint '${v}' does not declare the ${sl} slot (declares ${meta[v].slots.join(', ') || 'none'}); set slot_policy: any to allow it`)
-    slots[sl] = v
-  }
   const allowOrigins = [].concat(lp.allowOrigins || []).map(String)
   for (const o of allowOrigins) if (!ORIGIN.test(o)) throw new Error(`color-scheme livePaint: allowOrigins entry '${o}' must be scheme://host[:port]`)
   const name = (v, d) => (/^[A-Za-z0-9_-]{1,64}$/.test(String(v || '')) ? String(v) : d)
   const cookiePath = /^\/[^\s;,]*$/.test(String(lp.cookiePath || '')) ? lp.cookiePath : '/'
-  return { param: name(lp.param, 'paint'), cookie: name(lp.cookie, 'cs-paint'), cookiePath, paints, meta, slots, slotPolicy, allowOrigins }
+  return { param: name(lp.param, 'paint'), cookie: name(lp.cookie, 'cs-paint'), cookiePath, paints, meta, allowOrigins }
 }
 
-/** Picker page settings, or null when off. auto (default) turns it on when the paints map has more than two schemes. */
-function pickerConfig (config = {}) {
-  const lp = livePaintConfig(config)
-  if (!lp) return null
-  let p = config.livePaint.picker
+/* Schemes. A paint provides named color schemes: light (its :root block) and
+   dark (its html.dark-theme block), plus any html[data-scheme="<id>"] blocks.
+   It declares them in a manifest comment in its stylesheet:
+
+     /* @color-schemes
+     { "light": { "label": "Light" }, "dark": { "label": "Dark" },
+       "pink": { "label": "Pink", "slots": ["light"] } }
+     *\/
+
+   Each scheme: label, slots (light and/or dark: which slot it may fill) and
+   base (light or dark: the light/dark state it is drawn on; defaults to its
+   only slot, else light). The site's color-scheme `schemes` option adds or
+   overrides entries (for a paint without a manifest, or to relabel). */
+const MANIFEST = /\/\*!?\s*@color-schemes\b([\s\S]*?)\*\//
+
+function parseManifest (css, where = 'stylesheet') {
+  const m = MANIFEST.exec(String(css || ''))
+  if (!m) return null
+  try {
+    return JSON.parse(m[1].trim())
+  } catch (err) {
+    throw new Error(`color-scheme: invalid @color-schemes manifest in ${where}: ${err.message}`)
+  }
+}
+
+function normalizeScheme (id, e, where) {
+  if (!PAINT_ID.test(id) || RESERVED.includes(id)) throw new Error(`color-scheme: invalid scheme id '${id}' in ${where} (lowercase letters and digits, starting with a letter; not ${RESERVED.join('/')})`)
+  e = e && typeof e === 'object' ? e : {}
+  const implicit = SLOTS.includes(id) ? [id] : SLOTS.slice()
+  const slots = e.slots === undefined ? (e.base && !SLOTS.includes(id) ? [e.base] : implicit) : [].concat(e.slots).map(String)
+  for (const sl of slots) if (!SLOTS.includes(sl)) throw new Error(`color-scheme: scheme '${id}' in ${where}: slots must be light and/or dark, got '${sl}'`)
+  if (e.base !== undefined && !SLOTS.includes(e.base)) throw new Error(`color-scheme: scheme '${id}' in ${where}: base must be light or dark`)
+  const base = e.base || (SLOTS.includes(id) ? id : slots.length === 1 ? slots[0] : 'light')
+  const label = e.label === undefined ? id.charAt(0).toUpperCase() + id.slice(1) : String(e.label).slice(0, 80)
+  return { label, slots: [...new Set(slots)], base }
+}
+
+/** Stylesheets linked from the head partials, in order, as UI asset paths. */
+function linkedStylesheets (uiCatalog) {
+  const text = uiCatalog.findByType('partial').filter((f) => HEAD_STEMS.includes(f.stem)).map(bodyOf).join('\n')
+  const out = []
+  const re = /<link rel="stylesheet" href="\{\{\{uiRootPath\}\}\}\/([^"{}]+\.css)"/g
+  let m
+  while ((m = re.exec(text))) out.push(m[1])
+  return out
+}
+
+/** The active paint's schemes: { id: { label, slots, base } }. The paint is the last
+    linked stylesheet with a @color-schemes manifest (paints link after the bundle). */
+function paintSchemes (uiCatalog, config = {}) {
+  const assets = uiCatalog.findByType('asset')
+  let declared = null
+  let source = null
+  for (const rel of linkedStylesheets(uiCatalog)) {
+    const file = assets.find((f) => f.path === rel)
+    const manifest = file && parseManifest(bodyOf(file), rel)
+    if (manifest) { declared = manifest; source = rel }
+  }
+  const raw = Object.assign({ light: {}, dark: {} }, declared || {})
+  for (const [id, e] of Object.entries(config.schemes || {})) {
+    if (e === false || e === null) { delete raw[id]; continue }
+    raw[id] = Object.assign({}, raw[id] || {}, e)
+  }
+  const schemes = {}
+  for (const [id, e] of Object.entries(raw)) schemes[id] = normalizeScheme(id, e, source || 'color-scheme schemes')
+  for (const sl of SLOTS) if (!schemes[sl]) throw new Error(`color-scheme: the active paint must provide a '${sl}' scheme`)
+  return { schemes, source }
+}
+
+/** Validated scheme settings (schemes, slots, slot policy, cookie). */
+function schemesConfig (schemes, config = {}) {
+  const slotPolicy = config.slotPolicy === undefined ? 'declared' : String(config.slotPolicy)
+  if (!['declared', 'any'].includes(slotPolicy)) throw new Error(`color-scheme: slot_policy must be declared or any, got '${slotPolicy}'`)
+  const slots = { light: 'light', dark: 'dark' }
+  for (const sl of SLOTS) {
+    const v = config.slots && config.slots[sl]
+    if (v === undefined || v === null) continue
+    if (!schemes[v]) throw new Error(`color-scheme: slots.${sl} '${v}' is not a scheme of the active paint (${Object.keys(schemes).join(', ')})`)
+    if (slotPolicy !== 'any' && !schemes[v].slots.includes(sl)) throw new Error(`color-scheme: scheme '${v}' does not declare the ${sl} slot (declares ${schemes[v].slots.join(', ') || 'none'}); set slot_policy: any to allow it`)
+    slots[sl] = v
+  }
+  const name = (v, d) => (/^[A-Za-z0-9_-]{1,64}$/.test(String(v || '')) ? String(v) : d)
+  const cookiePath = /^\/[^\s;,]*$/.test(String(config.cookiePath || '')) ? config.cookiePath : '/'
+  return { param: name(config.schemeParam, 'scheme'), cookie: name(config.schemeCookie, 'cs-scheme'), cookiePath, schemes, slots, slotPolicy }
+}
+
+/** Picker page settings, or null when off. auto (default) turns it on when the active paint has more than two schemes. */
+function pickerConfig (config = {}, schemeCount = 2) {
+  let p = config.picker
   if (p === undefined || typeof p !== 'object' || p === null) p = { enabled: p === undefined ? 'auto' : p }
   const enabled = p.enabled === undefined ? 'auto' : p.enabled
-  if (![true, false, 'auto'].includes(enabled)) throw new Error("color-scheme livePaint.picker.enabled must be true, false or 'auto'")
-  if (enabled === false || (enabled === 'auto' && Object.keys(lp.paints).length <= 2)) return null
+  if (![true, false, 'auto'].includes(enabled)) throw new Error("color-scheme picker.enabled must be true, false or 'auto'")
+  if (enabled === false || (enabled === 'auto' && schemeCount <= 2)) return null
   const placement = p.placement === undefined ? 'footer' : String(p.placement)
-  if (!['footer', 'none'].includes(placement)) throw new Error("color-scheme livePaint.picker.placement must be 'footer' or 'none'")
+  if (!['footer', 'none'].includes(placement)) throw new Error("color-scheme picker.placement must be 'footer' or 'none'")
   const label = p.label === undefined ? 'Color schemes' : String(p.label).replace(/[<>&"]/g, '').slice(0, 60)
   return { placement, label, previewPage: p.previewPage ? String(p.previewPage).replace(/^\/+/, '') : null }
 }
@@ -188,8 +275,6 @@ function ensureColorScheme (uiCatalog, uiOutputDir, config = {}) {
   if (!injectHead(uiCatalog, config)) return false
   if (!livePaintConfig(config)) return true
   addOrReplaceAsset(uiCatalog, uiOutputDir, 'js/color-scheme.js', fs.readFileSync(path.join(ROOT, 'js', 'color-scheme.js')))
-  const picker = pickerConfig(config)
-  if (picker) addPickerLink(uiCatalog, picker)
   return injectFooter(uiCatalog)
 }
 
@@ -223,7 +308,7 @@ const esc = (v) => String(v).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&l
 /** The picker page head: the UI's own stylesheets plus the color-scheme and light/dark hooks, with uiRootPath = '.'. */
 function pickerHead (uiCatalog) {
   const text = uiCatalog.findByType('partial').filter((f) => HEAD_STEMS.includes(f.stem)).map(bodyOf).join('\n')
-  const re = /<link rel="stylesheet" href="\{\{\{uiRootPath\}\}\}\/[^"{}]+"[^>{}]*>|<meta name="(?:dm-navbar|light-dark-mode-follow-system)"[^>]*>|<script data-(?:color-scheme-live-paint|light-dark-mode-head)>[\s\S]*?<\/script>/g
+  const re = /<link rel="stylesheet" href="\{\{\{uiRootPath\}\}\}\/[^"{}]+"[^>{}]*>|<meta name="(?:dm-navbar|light-dark-mode-follow-system)"[^>]*>|<script data-(?:color-scheme-live-paint|color-scheme-schemes|light-dark-mode-head)>[\s\S]*?<\/script>/g
   return (text.match(re) || []).map((m) => m.split('{{{uiRootPath}}}').join('.')).join('\n')
 }
 
@@ -249,7 +334,7 @@ ${pickerHead(uiCatalog)}
 <main class="cs-picker">
 <p><a href="${esc(previewHref)}">Back to the docs</a></p>
 <h1>${esc(picker.label)}</h1>
-<p>Light and dark mode switch between a light scheme and a dark scheme. Put a scheme in the light or dark slot to use it with automatic light/dark. Picking a scheme for this visit only turns automatic light/dark off until you pick Automatic or a slot scheme.</p>
+<p>These are the color schemes this site's paint provides. Light and dark mode switch between the scheme in the light slot and the scheme in the dark slot. Put a scheme in a slot to use it with automatic light/dark. Picking a scheme for this visit only turns automatic light/dark off until you pick Automatic or a slot scheme.</p>
 <div class="cs-picker-top">
 ${ldm ? '<div data-light-dark-mode-switch class="light-dark-switch"></div>' : ''}
 <button type="button" id="cs-picker-reset">Automatic, site defaults</button>
@@ -279,17 +364,69 @@ function addPickerPage (uiCatalog, uiOutputDir, picker, startUrl, siteTitle) {
   return href
 }
 
-/** contentClassified listener that builds the picker page, after every uiLoaded listener (light-dark-mode, paint) has run. Layers that call ensureColorScheme register it too. */
-function pickerListener (config, logger) {
+const SCHEMES_MARKER = 'data-color-scheme-schemes'
+
+/** Inline the schemes head hook before the light/dark head hook (that hook reads
+    the pinned scheme), else right after css/color-scheme.css. */
+function injectSchemesHead (uiCatalog, cfg) {
+  const partials = uiCatalog.findByType('partial').filter((f) => HEAD_STEMS.includes(f.stem))
+  if (partials.some((f) => bodyOf(f).includes(SCHEMES_MARKER))) return true
+  const json = JSON.stringify(cfg).replace(/</g, '\\u003c').replace(/\{\{/g, '{\\u007b')
+  const hook = fs.readFileSync(path.join(ROOT, 'js', 'color-scheme-schemes-head.js'), 'utf8').trim()
+  const block = `<script ${SCHEMES_MARKER}>\nwindow.__colorSchemes = ${json};\n${hook}\n</script>`
+  for (const [needle, before] of [['<script data-light-dark-mode-head>', true], [HEAD_MARKER, false]]) {
+    const file = partials.find((f) => bodyOf(f).includes(needle))
+    if (!file) continue
+    const lines = bodyOf(file).split('\n')
+    const idx = lines.findIndex((l) => l.includes(needle))
+    lines.splice(before ? idx : idx + 1, 0, block)
+    file.contents = Buffer.from(lines.join('\n'))
+    return true
+  }
+  return false
+}
+
+/** contentClassified listener, after every uiLoaded listener (light-dark-mode, paints)
+    has run: reads the active paint's schemes and, when it has more than light and
+    dark (or the site sets slots), adds the schemes hook, the runtime and the picker.
+    Layers that call ensureColorScheme register it too; it runs once. */
+function schemesListener (config, logger) {
   return ({ playbook, contentCatalog, uiCatalog }) => {
     if (config.enabled === false) return
-    const picker = pickerConfig(config)
+    const partials = uiCatalog.findByType('partial')
+    if (!partials.some((f) => HEAD_STEMS.includes(f.stem) && bodyOf(f).includes(HEAD_MARKER))) return
+    if (partials.some((f) => HEAD_STEMS.includes(f.stem) && bodyOf(f).includes(SCHEMES_MARKER))) return
+    const { schemes, source } = paintSchemes(uiCatalog, config)
+    const cfg = schemesConfig(schemes, config)
+    const count = Object.keys(schemes).length
+    const custom = cfg.slots.light !== 'light' || cfg.slots.dark !== 'dark'
+    const picker = pickerConfig(config, count)
+    if (count <= 2 && !custom && !picker) return
+    const outDir = playbook.ui?.outputDir || '_'
+    injectSchemesHead(uiCatalog, cfg)
+    addOrReplaceAsset(uiCatalog, outDir, 'js/color-scheme.js', fs.readFileSync(path.join(ROOT, 'js', 'color-scheme.js')))
+    injectRuntimeBeforeLightDark(uiCatalog)
+    if (logger) logger.info(`color-scheme: ${count} schemes (${Object.keys(schemes).join(', ')}) from ${source || 'defaults'}`)
     if (!picker) return
+    addPickerLink(uiCatalog, picker)
     const start = contentCatalog.getSiteStartPage && contentCatalog.getSiteStartPage()
     const startUrl = (start && start.pub && start.pub.url) || '/'
-    addPickerPage(uiCatalog, playbook.ui?.outputDir || '_', picker, startUrl, playbook.site?.title)
+    addPickerPage(uiCatalog, outDir, picker, startUrl, playbook.site?.title)
     if (logger) logger.info(`color-scheme: picker page ${PICKER_PAGE} added`)
   }
+}
+const pickerListener = schemesListener
+
+/** js/color-scheme.js before js/light-dark-mode.js when that is already in the footer, else as injectFooter. */
+function injectRuntimeBeforeLightDark (uiCatalog) {
+  const partials = uiCatalog.findByType('partial').filter((f) => FOOT_STEMS.includes(f.stem))
+  if (partials.some((f) => bodyOf(f).includes('js/color-scheme.js'))) return true
+  const foot = partials.find((f) => bodyOf(f).includes('js/light-dark-mode.js'))
+  if (!foot) return injectFooter(uiCatalog)
+  const lines = bodyOf(foot).split('\n')
+  lines.splice(lines.findIndex((l) => l.includes('js/light-dark-mode.js')), 0, '<script src="{{{uiRootPath}}}/js/color-scheme.js" defer></script>')
+  foot.contents = Buffer.from(lines.join('\n'))
+  return true
 }
 
 // Antora binds `this` to the generator context and passes ({ config, ... }) only when
@@ -314,6 +451,10 @@ module.exports.injectFooter = injectFooter
 module.exports.livePaintConfig = livePaintConfig
 module.exports.pickerConfig = pickerConfig
 module.exports.pickerListener = pickerListener
+module.exports.schemesListener = schemesListener
+module.exports.paintSchemes = paintSchemes
+module.exports.parseManifest = parseManifest
+module.exports.schemesConfig = schemesConfig
 module.exports.addPickerPage = addPickerPage
 module.exports.previewHrefOf = previewHrefOf
 module.exports.PICKER_PAGE = PICKER_PAGE

@@ -16,7 +16,7 @@ Themes with their own paint (Valentus `css/site-paint.css`) do not use it.
 [source,json]
 ----
 "@antora-supplemental/light-dark-mode": "github:antora-supplemental/antora-ui-chassis#light-dark-mode-v0.1.0&path:packages/light-dark-mode",
-"@antora-supplemental/default-paint": "github:antora-supplemental/antora-ui-chassis#default-paint-v0.2.0&path:packages/default-paint"
+"@antora-supplemental/default-paint": "github:antora-supplemental/antora-ui-chassis#default-paint-v0.2.1&path:packages/default-paint"
 ----
 
 [source,yaml]

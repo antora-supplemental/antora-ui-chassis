@@ -3,8 +3,8 @@
    (no flash). Sets html.dark-theme, html[data-theme] and
    html[data-light-dark-mode]. With follow_system off (meta
    light-dark-mode-follow-system=off) an unset choice means light. Runs after
-   the color-scheme live-paint hook when both are present, and tells it the
-   resolved scheme so the slot scheme loads before first paint. */
+   the color-scheme schemes hook when both are present, and tells it the
+   resolved scheme so the slot scheme is set before first paint. */
 (function () {
   var html = document.documentElement
   var navbar = document.querySelector('meta[name="dm-navbar"]')
@@ -19,8 +19,8 @@
   var dark = mode === 'system'
     ? followSystem && window.matchMedia('(prefers-color-scheme: dark)').matches
     : mode === 'dark'
-  // color-scheme live paint: an off-slot scheme pins light/dark; a preview frame forces it.
-  var paint = window.ColorSchemePaint
+  // color-scheme schemes: an off-slot scheme pins light/dark; a preview frame forces it.
+  var paint = window.ColorSchemes
   var pv = paint && paint.preview ? paint.preview() : false
   var pin = paint && paint.offSlot ? paint.offSlot() : null
   if (pv) dark = pv === 'dark'

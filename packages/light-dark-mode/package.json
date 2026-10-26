@@ -1,6 +1,6 @@
 {
   "name": "@antora-supplemental/light-dark-mode",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Light/dark mode (dark mode) for Antora UIs: no-flash head hook, saved choice, system preference, accessible toggle as a top-bar icon button or a footer Light / Dark / Auto switch. Built on @antora-supplemental/color-scheme.",
   "main": "lib/index.js",
   "exports": {
@@ -23,7 +23,7 @@
     "test": "node --test test/*.test.js"
   },
   "dependencies": {
-    "@antora-supplemental/color-scheme": "github:antora-supplemental/antora-ui-chassis#color-scheme-v0.3.0&path:packages/color-scheme"
+    "@antora-supplemental/color-scheme": "github:antora-supplemental/antora-ui-chassis#color-scheme-v0.4.0&path:packages/color-scheme"
   },
   "keywords": [
     "antora",

@@ -1,10 +1,11 @@
 /* @antora-supplemental/color-scheme picker page (color-schemes.html in the UI
-   output dir). Lists every scheme with a live preview, its light/dark slots,
-   and buttons to put it in a slot or use it for this visit only.
-   Needs the live-paint head hook (window.ColorSchemePaint); uses the light/dark
-   layer (window.LightDarkMode) when present. */
+   output dir). Lists every color scheme the active paint provides, with a live
+   preview, its light/dark slots, and buttons to put it in a slot or use it for
+   this visit only. It does not list paints (live paint is separate).
+   Needs the schemes head hook (window.ColorSchemes); uses the light/dark layer
+   (window.LightDarkMode) when present. */
 (function () {
-  var P = window.ColorSchemePaint
+  var P = window.ColorSchemes
   var list = document.getElementById('cs-picker-list')
   var banner = document.getElementById('cs-picker-banner')
   if (!P || !list) return
@@ -17,7 +18,7 @@
     if (text !== undefined) n.textContent = text
     return n
   }
-  function choose (id) { if (CS() && CS().setPaint) CS().setPaint(id); else P.set(id); render() }
+  function choose (id) { if (CS() && CS().setScheme) CS().setScheme(id); else P.set(id); render() }
   function assign (slot, id) {
     if (CS() && CS().assign) CS().assign(slot, id); else P.assign(slot, id)
     if (P.offSlot()) choose('auto')
@@ -28,8 +29,8 @@
   }
 
   function card (id) {
-    var info = id === 'builtin' ? { id: 'builtin', label: 'Built-in', slots: ['light', 'dark'] } : P.info(id)
-    var key = id === 'builtin' ? null : id
+    var info = P.info(id)
+    var key = id
     var slots = P.slots()
     var off = P.offSlot()
     var li = el('li', { class: 'cs-picker-card', 'data-scheme': id })
@@ -45,9 +46,8 @@
           : 'Not a light or dark scheme on this site'
     li.appendChild(el('p', { class: 'cs-picker-status' }, status))
     var shots = el('div', { class: 'cs-picker-previews' })
-    ;['light', 'dark'].forEach(function (m) {
-      if (m === 'dark' && !fitsDark && fitsLight) return
-      if (m === 'light' && !fitsLight && fitsDark) return
+    var modes = fitsLight && fitsDark ? ['light', 'dark'] : fitsLight ? ['light'] : fitsDark ? ['dark'] : [info.base]
+    modes.forEach(function (m) {
       /* Render the page at desktop width and scale it down, so previews show the real layout. */
       var shot = el('div', { class: 'cs-picker-shot' })
       shot.appendChild(el('iframe', { src: frameSrc(id, m), title: info.label + ' preview (' + m + ')', loading: 'lazy', tabindex: '-1' }))
@@ -63,7 +63,7 @@
     }
     if (fitsLight) btn('Use for light', function () { assign('light', key) }, slots.light === key)
     if (fitsDark) btn('Use for dark', function () { assign('dark', key) }, slots.dark === key)
-    if (key) btn('Use for this visit only (turns off automatic light/dark)', function () { choose(id) }, !!(off && off.id === id))
+    btn('Use for this visit only (turns off automatic light/dark)', function () { choose(id) }, !!(off && off.id === id))
     li.appendChild(row)
     return li
   }
@@ -81,14 +81,11 @@
       }
     }
     list.textContent = ''
-    var ids = P.ids()
-    var slots = P.slots()
-    if (slots.light === null || slots.dark === null || ids.indexOf('builtin') < 0) list.appendChild(card('builtin'))
-    ids.forEach(function (id) { list.appendChild(card(id)) })
+    P.ids().forEach(function (id) { list.appendChild(card(id)) })
   }
 
   var reset = document.getElementById('cs-picker-reset')
   if (reset) reset.addEventListener('click', function () { choose('reset') })
-  document.addEventListener('color-scheme:paint', render)
+  document.addEventListener('color-scheme:scheme', render)
   render()
 })()

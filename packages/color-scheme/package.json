@@ -1,6 +1,6 @@
 {
   "name": "@antora-supplemental/color-scheme",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "description": "Color scheme layer for Antora UIs: the --cs-* token contract and optional live paint (switch schemes at view time, light/dark slots, picker page). Light/dark switching is @antora-supplemental/light-dark-mode.",
   "main": "lib/index.js",
   "exports": {
@@ -8,6 +8,7 @@
     "./lib": "./lib/index.js",
     "./js/color-scheme.js": "./js/color-scheme.js",
     "./js/color-scheme-paint-head.js": "./js/color-scheme-paint-head.js",
+    "./js/color-scheme-schemes-head.js": "./js/color-scheme-schemes-head.js",
     "./js/color-scheme-picker.js": "./js/color-scheme-picker.js",
     "./css/color-scheme.css": "./css/color-scheme.css",
     "./css/color-scheme-picker.css": "./css/color-scheme-picker.css"

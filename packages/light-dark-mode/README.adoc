@@ -18,14 +18,14 @@ antora:
         group: Theme
       follow_system: true       # default; false: start in light and ignore prefers-color-scheme
       navbar: light             # optional: <meta name="dm-navbar"> -> html[data-dm-navbar] for paint
-      color_scheme:             # optional: color-scheme options, e.g. live_paint
-        live_paint: { ... }
+      color_scheme:             # optional: color-scheme options (schemes, slots, picker, live_paint)
+        slots: { ... }
     - require: '@antora-supplemental/default-paint'   # Default UI palettes (skip when your theme has its own paint)
 ----
 
 [source,json]
 ----
-"@antora-supplemental/light-dark-mode": "github:antora-supplemental/antora-ui-chassis#light-dark-mode-v0.1.0&path:packages/light-dark-mode"
+"@antora-supplemental/light-dark-mode": "github:antora-supplemental/antora-ui-chassis#light-dark-mode-v0.1.2&path:packages/light-dark-mode"
 ----
 
 Prefer a single package with the old name? `antora-dark-mode` 2.x (link:../antora-dark-mode/README.adoc[`packages/antora-dark-mode`]) registers this package, color-scheme and default-paint with one `require`.

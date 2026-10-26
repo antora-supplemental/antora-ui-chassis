@@ -1,6 +1,6 @@
 {
   "name": "@antora-supplemental/default-paint",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "PAINT layer: light and dark palette for the Antora Default UI on the chassis --cs-* contract. Colors only; pair with @antora-supplemental/light-dark-mode for switching.",
   "main": "lib/index.js",
   "exports": {

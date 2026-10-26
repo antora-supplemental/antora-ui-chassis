@@ -5,7 +5,7 @@
 Dark mode for Antora now lives in link:https://github.com/antora-supplemental/antora-ui-chassis[antora-ui-chassis]:
 
 * `@antora-supplemental/light-dark-mode` switches light and dark (no-flash hook, saved choice, system preference, toggle).
-* `@antora-supplemental/color-scheme` holds the token contract and optional live paint (color schemes, slots, picker).
+* `@antora-supplemental/color-scheme` holds the token contract and the color schemes a paint declares (slots, picker) and optional live paint previews.
 * `@antora-supplemental/default-paint` colors the Antora Default UI.
 * `antora-dark-mode` 2.x registers all three under the old name.
 

@@ -1,5 +1,19 @@
 = Changelog
 
+== 0.4.0 - 2026-10-25
+
+=== Breaking
+
+* The picker lists the active paint's *color schemes*, not paints. A paint declares its schemes in a `/* @color-schemes {json} */` manifest (every paint has `light` and `dark`; more are optional) and styles them under `html[data-scheme="<id>"]`. The site's `light` and `dark` slots choose from those schemes.
+* `slots`, `slot_policy` and `picker` moved from `live_paint` to top-level color-scheme options; the old keys and per-paint `slots`/`base` fail the build with a pointer. `picker: auto` now turns on when the active paint has more than two schemes. New `schemes` (add, relabel or drop paint schemes), `scheme_param` (`?scheme=`, default `scheme`) and `scheme_cookie` (default `cs-scheme`; slots in `cs-scheme-slots`).
+* Live paint (`?paint=`, `cs-paint`) is now only a preview feature that swaps the whole paint: no slots, no picker UI.
+* API: `ColorScheme.getScheme`, `setScheme`, event `color-scheme:scheme` and `UiBus.state` `color-scheme.scheme` for schemes; `getPaint`, `setPaint`, `paints` and `color-scheme:paint` stay for live paint. postMessage adds `color-scheme:scheme` and `color-scheme:assign`.
+
+=== Added
+
+* `js/color-scheme-schemes-head.js` (`window.ColorSchemes`): no-flash head hook that sets `html[data-scheme]` and pins light/dark to an off-slot scheme's `base`.
+* Test fixture paint `test/fixtures/scheme-demo-paint` with four schemes (light, dark, pink, midnight).
+
 == 0.3.0 - 2026-10-25
 
 === Breaking

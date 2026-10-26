@@ -1,0 +1,68 @@
+/* Scheme demo paint (test fixture). Layered on default-paint: adds two schemes
+   on top of its light and dark. pink is drawn on light, midnight on dark. */
+/* @color-schemes
+{
+  "light": { "label": "Light" },
+  "dark": { "label": "Dark" },
+  "pink": { "label": "Pink", "slots": ["light"] },
+  "midnight": { "label": "Midnight", "slots": ["dark"] }
+}
+*/
+html[data-scheme="pink"] {
+  --dp-canvas: #fff5f8;
+  --dp-ink: #2b1a22;
+  --dp-doc-ink: #3a2430;
+  --dp-heading: #2b0f1d;
+  --dp-ink-muted: #6b4558;
+  --dp-ink-faint: #74495d;
+  --dp-panel: #fde7ef;
+  --dp-panel-strong: #f9d5e3;
+  --dp-border: #f2bfd3;
+  --dp-border-strong: #d98aab;
+  --dp-link: #a8165a;
+  --dp-link-hover: #820f45;
+  --dp-navbar: #820f45;
+  --dp-navbar-ink: #fff;
+  --dp-navbar-hover: #9c1453;
+  --dp-menu: #fff5f8;
+  --dp-menu-hover: #fbdbe7;
+  --dp-code-bg: #fde7ef;
+  --dp-code-ink: #2b1a22;
+  --dp-pre-bg: #fffafc;
+  --dp-sidebar-bg: #f9d5e3;
+  --dp-example-bg: #fff;
+  --dp-admonition-bg: #fde7ef;
+  --dp-footer: #f9d5e3;
+  --dp-footer-ink: #5e3a4c;
+  --dp-footer-link: #2b0f1d;
+  --dp-nav-icon: #2b1a22;
+}
+html.dark-theme[data-scheme="midnight"] {
+  --dp-canvas: #0b1020;
+  --dp-ink: #d6def5;
+  --dp-doc-ink: #d6def5;
+  --dp-heading: #fff;
+  --dp-ink-muted: #a9b4d6;
+  --dp-ink-faint: #95a1c8;
+  --dp-panel: #121a33;
+  --dp-panel-strong: #0f162b;
+  --dp-border: #26325a;
+  --dp-border-strong: #3a4a7d;
+  --dp-link: #7fb2ff;
+  --dp-link-hover: #a8caff;
+  --dp-navbar: #070b17;
+  --dp-navbar-ink: #eef2ff;
+  --dp-navbar-hover: #121a33;
+  --dp-menu: #121a33;
+  --dp-menu-hover: #1a2445;
+  --dp-code-bg: #1a2445;
+  --dp-code-ink: #ffb3c7;
+  --dp-pre-bg: #070b17;
+  --dp-sidebar-bg: #121a33;
+  --dp-example-bg: #0f162b;
+  --dp-admonition-bg: #121a33;
+  --dp-footer: #070b17;
+  --dp-footer-ink: #a9b4d6;
+  --dp-footer-link: #eef2ff;
+  --dp-nav-icon: #d6def5;
+}

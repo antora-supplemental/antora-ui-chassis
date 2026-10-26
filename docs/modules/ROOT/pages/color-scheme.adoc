@@ -5,7 +5,7 @@
 Dark mode on an Antora site takes three layers:
 
 * `@antora-supplemental/light-dark-mode` (chassis): switches light and dark. No-flash head hook, saved choice, system preference, and the toggle as a top-bar icon button (`toggle_placement: navbar`) or a footer Light / Dark / Auto switch (`toggle_placement: footer`). Package README: `packages/light-dark-mode/README.adoc`.
-* `@antora-supplemental/color-scheme` (chassis): the `--cs-*` token contract, and optional live paint with light/dark slots and a picker page. Package README: `packages/color-scheme/README.adoc`.
+* `@antora-supplemental/color-scheme` (chassis): the `--cs-*` token contract, the color schemes a paint declares (light/dark slots, a picker page when a paint has more than two), and optional live paint for previews. Package README: `packages/color-scheme/README.adoc`.
 * Paint: the colors. `@antora-supplemental/default-paint` for the Default UI (xref:default-paint.adoc[]), Valentus Paint for Valentus.
 
 `antora-dark-mode` 2.x is built here (`packages/antora-dark-mode`) and registers all three. Upgrading: xref:migrate-dark-mode.adoc[].
@@ -30,11 +30,13 @@ The chassis never replaces icons or buttons it was given.
 | light-dark-mode `follow_system` | `true` (default); `false` starts in light and ignores the OS
 | light-dark-mode `navbar` | `<meta name="dm-navbar">` value for paint
 | light-dark-mode `color_scheme` | options passed to color-scheme
-| color-scheme `live_paint.paints.<id>` | href, or `{ href, label, slots: [light, dark], base }`
-| color-scheme `live_paint.slots` | `{ light: <id>|builtin, dark: <id>|builtin }`
-| color-scheme `live_paint.slot_policy` | `declared` (default) or `any`
-| color-scheme `live_paint.picker` | `auto` (default, on with more than 2 schemes), `true`, `false`, or `{ enabled, placement: footer|none, label, preview_page }`
-| query | `?paint=<id>`, `?paint=auto`, `?paint=reset`; `?cs-preview=<id>&cs-preview-mode=light|dark` (preview only, no writes)
+| paint `/* @color-schemes {json} */` | the schemes the paint provides: `{ <id>: { label, slots: [light, dark], base } }`; `light` and `dark` always exist
+| color-scheme `schemes` | add, relabel or drop (`false`) paint schemes
+| color-scheme `slots` | `{ light: <scheme>, dark: <scheme> }` (default `light`, `dark`)
+| color-scheme `slot_policy` | `declared` (default) or `any`
+| color-scheme `picker` | `auto` (default, on when the paint has more than 2 schemes), `true`, `false`, or `{ enabled, placement: footer|none, label, preview_page }`
+| color-scheme `live_paint.paints.<id>` | preview only: href, or `{ href, label }`
+| query | `?scheme=<id>`, `?scheme=auto`, `?scheme=reset`; `?paint=<id>`, `?paint=reset` (live paint); `?cs-preview=<id>&cs-preview-mode=light|dark` (preview only, no writes)
 |===
 
 An off-slot scheme (one not in the current light or dark slot) turns light/dark automation off for the session. The navbar button then reports `aria-pressed="mixed"` and its label says so; the footer switch shows a note. Choosing Light, Dark, Auto or a slot scheme turns automation back on.
@@ -155,7 +157,7 @@ The registry checks a paint with `packages/color-scheme/scripts/validate-paint.m
 
 == Live paint and registry previews
 
-`color-scheme` (0.2.0 and later) can swap the paint of a built site at view time (`live_paint`, off by default). Options and API: `packages/color-scheme/README.adoc`.
+`color-scheme` (0.2.0 and later) can swap the paint of a built site at view time (`live_paint`, off by default). Since 0.4.0 live paint is only this preview feature: the picker page lists the active paint's color schemes, never paints. Options and API: `packages/color-scheme/README.adoc`.
 
 Security: only ids from the playbook `paints` map load, hrefs are validated at build time, and `postMessage` is accepted only from `allow_origins`. A page URL can pick a paint but never name a stylesheet.
 

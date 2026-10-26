@@ -1,6 +1,6 @@
 = Color scheme (`packages/color-scheme`)
 
-The color scheme layer for Antora UIs: the `--cs-*` token contract that layouts and paints meet on, and opt-in *live paint* (switch color schemes on a built site, light and dark slots, a picker page). It sets no colors.
+The color scheme layer for Antora UIs: the `--cs-*` token contract that layouts and paints meet on, the *color schemes* a paint declares (light and dark slots, a picker page when a paint has more than two), and opt-in *live paint* (swap the whole paint for previews). It sets no colors.
 
 *Looking for dark mode?* Light/dark switching (no-flash hook, saved choice, system preference, the toggle) moved to link:../light-dark-mode/README.adoc[`@antora-supplemental/light-dark-mode`] in 0.3.0. It registers this package, so most sites list only that one. Upgrading from 0.1/0.2 or from `antora-dark-mode`: link:https://github.com/antora-supplemental/antora-ui-chassis/blob/main/docs/modules/ROOT/pages/migrate-dark-mode.adoc[Migrating dark mode to the chassis].
 
@@ -11,15 +11,16 @@ The color scheme layer for Antora UIs: the `--cs-*` token contract that layouts 
 antora:
   extensions:
     - require: '@antora-supplemental/color-scheme'
-      live_paint: { ... }   # optional, see below
+      slots: { ... }        # optional, see Color schemes
+      live_paint: { ... }   # optional preview feature, see below
 ----
 
 [source,json]
 ----
-"@antora-supplemental/color-scheme": "github:antora-supplemental/antora-ui-chassis#color-scheme-v0.3.0&path:packages/color-scheme"
+"@antora-supplemental/color-scheme": "github:antora-supplemental/antora-ui-chassis#color-scheme-v0.4.0&path:packages/color-scheme"
 ----
 
-The extension links `css/color-scheme.css` after `site.css`. With `live_paint` on it also inlines the paint head hook and loads `js/color-scheme.js`.
+The extension links `css/color-scheme.css` after `site.css`. When the active paint declares more than two schemes (or the site sets slots or forces the picker) it also inlines the schemes head hook and loads `js/color-scheme.js`; `live_paint` adds the paint head hook.
 
 == Token contract (`--cs-*`)
 
@@ -46,66 +47,104 @@ node scripts/validate-paint.mjs path/to/paint.css [--extra=.my-layout-] [--stric
 
 Layout classes not on the allowlist, `@import` and external `url()` are errors. Literal colors outside token blocks are warnings, errors with `--strict`. `--extra` takes the layout prefixes a paint declares (registry manifest `paint.extraSelectors`). Exit code 0 means pass.
 
-== Live paint (opt-in)
+== Color schemes
 
-Lets a built site switch paint at view time, so one prebuilt page can show several paints (registry previews, paint pickers). Off by default.
+A paint declares the color schemes it provides. Every paint has `light` and `dark`; a paint can add more (sepia, high contrast, a brand tint). The site's `light` and `dark` *slots* each hold one of those schemes, and `light-dark-mode` switches between the two slots.
+
+The paint declares its schemes in a manifest comment at the top of its stylesheet:
+
+[source,css]
+----
+/* @color-schemes
+{
+  "light": { "label": "Light" },
+  "dark": { "label": "Dark" },
+  "sepia": { "label": "Sepia", "slots": ["light"] },
+  "midnight": { "label": "Midnight", "slots": ["dark"] }
+}
+*/
+:root { ... }                              /* light */
+html.dark-theme { ... }                    /* dark */
+html[data-scheme="sepia"] { ... }          /* drawn on light */
+html.dark-theme[data-scheme="midnight"] { ... }
+----
+
+* `slots` lists the slots a scheme fits (`light`, `dark`; default both, `light` and `dark` fit their own). `base` is the light/dark state it is drawn on (default: `dark` when it fits only dark, else `light`).
+* The active paint is the last stylesheet in `head-styles` with a manifest. A paint without one provides `light` and `dark` only. `default-paint` and Valentus Paint declare exactly those two.
+* The runtime sets `html[data-scheme="<id>"]`; the scheme's CSS keys off that, and light/dark still sets `html.dark-theme`.
 
 [source,yaml]
 ----
-    - require: '@antora-supplemental/color-scheme'
-      live_paint:
-        enabled: true
-        param: paint          # ?paint=<id>; ?paint=reset clears the saved choice
-        cookie: cs-paint      # SameSite=Lax, Path=cookie_path (default /), one year
-        paints:               # the only schemes that can load
-          default: css/default-paint.css                      # href only: fits both slots
-          valentus:
-            href: https://cdn.example.org/valentus/4.0.0/site-paint.css
-            label: Valentus
-            slots: [light, dark]                              # slots this scheme fits
-          night:
-            href: css/night.css
-            label: Night
-            slots: [dark]
-        slots: { light: default, dark: night }                # site defaults; builtin = the UI's own paint
+    - require: '@antora-supplemental/light-dark-mode'
+      color_scheme:
+        schemes:                # optional: add, relabel or drop (false) paint schemes
+          sepia: { label: Old paper }
+        slots: { light: sepia, dark: dark }   # site defaults; must be schemes of the active paint
         slot_policy: declared   # declared (default): a scheme goes only in slots it lists; any: every slot
-        picker: auto            # auto (default): picker page when there are more than 2 schemes; true | false
+        picker: auto            # auto (default): on when the paint has more than 2 schemes; true | false
         # picker: { enabled: true, placement: footer, label: Color schemes, preview_page: index.html }
         #   placement: footer (link in the footer) | none (build the page, place the link yourself)
-        allow_origins: [https://registry.antora-supplemental.org]   # postMessage senders
+        scheme_param: scheme    # ?scheme=<id>; ?scheme=auto turns automation on; ?scheme=reset restores default slots
+        scheme_cookie: cs-scheme
 ----
+
+With only `light` and `dark` and the default slots, nothing is added: no head hook, no runtime, no footer link. Scheme ids are lowercase letters and digits (Antora camelCases playbook keys). Unknown slot values, bad slots and unfitting slots fail the build.
 
 === Slots and light/dark automation
 
-Each scheme declares the slots it fits; the site fills the `light` and `dark` slots (`slots:`), and a visitor can reassign them (saved in the `<cookie>-slots` cookie for a year). With `light-dark-mode` loaded, light/dark switches between the two slot schemes.
+A visitor can reassign the slots (saved in the `cs-scheme-slots` cookie for a year).
 
 * Choosing a scheme that fits the current slot puts it in that slot.
-* Choosing any other scheme is an *off-slot pick*: it is pinned for the session (session cookie `<cookie>`, gone when the browser closes) and light/dark automation turns off. The toggle shows that state (navbar `aria-pressed="mixed"`, footer note).
-* Choosing a slot scheme, Light, Dark or Auto, or `?paint=auto`, turns automation back on. `?paint=reset` also restores the site's default slots.
+* Choosing any other scheme is an *off-slot pick*: it is pinned for the session (session cookie `cs-scheme`, gone when the browser closes) and light/dark automation turns off, pinned to the scheme's `base`. The toggle shows that state (navbar `aria-pressed="mixed"`, footer note).
+* Choosing a slot scheme, Light, Dark or Auto, or `?scheme=auto`, turns automation back on. `?scheme=reset` also restores the site's default slots.
 
 === Picker page
 
-When the picker is on, the build adds `color-schemes.html`: one card per scheme with a live preview (an iframe of `preview_page` with `?cs-preview=<id>&cs-preview-mode=light|dark`, which never writes cookies), and buttons "Use for light", "Use for dark" and "Use for this visit only (turns off automatic light/dark)". A banner offers "Turn automatic light/dark back on" while an off-slot scheme is pinned.
+When the picker is on, the build adds `color-schemes.html`: one card per scheme of the active paint with a live preview (an iframe of `preview_page` with `?cs-preview=<id>&cs-preview-mode=light|dark`, which never writes cookies), and buttons "Use for light", "Use for dark" and "Use for this visit only (turns off automatic light/dark)". A banner offers "Turn automatic light/dark back on" while an off-slot scheme is pinned. The picker lists schemes, never paints.
 
 The footer link is the `color-scheme-picker-link` partial. Override order: a partial of that name in your supplemental UI, then in the theme, then the chassis default. `placement: footer` includes it in `footer-content` unless a partial already does; `placement: none` leaves it to you.
 
-* Antora camelCases playbook keys, so paint ids must be lowercase letters and digits (`myteal`, not `my-teal`). Bad ids, `javascript:`/`data:` hrefs, quotes and malformed origins fail the build.
+[source,js]
+----
+ColorScheme.schemes()            // [{ id, label, slots, base }]
+ColorScheme.getScheme()          // active scheme id (also html[data-scheme])
+ColorScheme.setScheme('sepia')   // false for unknown ids; null or 'auto' = automation on; 'reset' = default slots
+ColorScheme.assign('dark', 'midnight')   // false when the scheme does not fit the slot
+ColorScheme.slots()              // { light, dark }
+ColorScheme.offSlot()            // { id, base } while an off-slot scheme is pinned
+document.addEventListener('color-scheme:scheme', (e) => e.detail.scheme)
+UiBus.state.watch('color-scheme.scheme', (id) => {})
+----
+
+== Live paint (opt-in preview)
+
+Swaps the whole paint stylesheet at view time, so one prebuilt page can show several paints (registry previews, paint demos). Off by default. It has no slots and no picker UI; it is separate from color schemes (a live-painted page still shows that paint's schemes).
+
+[source,yaml]
+----
+      color_scheme:
+        live_paint:
+          enabled: true
+          param: paint          # ?paint=<id>; ?paint=reset clears the saved choice
+          cookie: cs-paint      # SameSite=Lax, Path=cookie_path (default /), one year
+          paints:               # the only paints that can load
+            default: css/default-paint.css
+            valentus: { href: 'https://cdn.example.org/valentus/4.0.0/site-paint.css', label: Valentus }
+          allow_origins: [https://registry.antora-supplemental.org]   # postMessage senders
+----
+
+* `live_paint.slots`, `slot_policy`, `picker` and per-paint `slots`/`base` (0.3.0) fail the build with a pointer to the top-level options.
+* Paint ids are lowercase letters and digits. Bad ids, `javascript:`/`data:` hrefs, quotes and malformed origins fail the build.
 * Order: query, then cookie, then the site's built-in paint. An unknown id is ignored (an unknown cookie is cleared). The query never carries a URL.
 * A built-in paint `<link>` whose file matches a map entry is the *base*: it is disabled while another paint is active and reused when its own id is chosen.
-* The scheme picks the palette; light/dark is chosen by `LightDarkMode`. A scheme that fits both slots defines `:root` and `html.dark-theme`; a single-slot scheme defines the one it fits.
 * `html[data-color-scheme-paint]` names the active live paint.
 
 [source,js]
 ----
 ColorScheme.paints()             // ['default', 'valentus']
 ColorScheme.getPaint()           // null = built-in
-ColorScheme.setPaint('valentus') // false for unknown ids; null or 'auto' = automation on; 'reset' = default slots
-ColorScheme.assign('dark', 'night')   // false when the scheme does not fit the slot
-ColorScheme.slots()              // { light, dark }
-ColorScheme.offSlot()            // { id, base } while an off-slot scheme is pinned
-ColorScheme.schemes()            // [{ id, label, slots, base }]
+ColorScheme.setPaint('valentus') // false for unknown ids; null or 'reset' = built-in
 document.addEventListener('color-scheme:paint', (e) => e.detail.paint)
-UiBus.state.watch('color-scheme.paint', (id) => {})
 ----
 
 From an allow-listed parent:
@@ -113,8 +152,10 @@ From an allow-listed parent:
 [source,js]
 ----
 frame.contentWindow.postMessage({ type: 'color-scheme:paint', id: 'valentus' }, siteOrigin)
+frame.contentWindow.postMessage({ type: 'color-scheme:scheme', id: 'sepia' }, siteOrigin)
+frame.contentWindow.postMessage({ type: 'color-scheme:assign', slot: 'dark', id: 'midnight' }, siteOrigin)
 frame.contentWindow.postMessage({ type: 'color-scheme:mode', mode: 'dark' }, siteOrigin)
-// replies { type: 'color-scheme:state', paint, paints, mode, dark }; on load the frame posts color-scheme:ready
+// replies { type: 'color-scheme:state', paint, paints, scheme, schemes, slots, offSlot, mode, dark }; on load the frame posts color-scheme:ready
 ----
 
-In a cross-site iframe browsers usually drop the cookie, so pass `?paint=<id>` in the `src` or use `postMessage`.
+In a cross-site iframe browsers usually drop the cookie, so pass `?paint=<id>` or `?scheme=<id>` in the `src` or use `postMessage`.

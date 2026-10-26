@@ -1,5 +1,9 @@
 = Changelog
 
+== 0.1.2 - 2026-10-25
+
+* Requires color-scheme 0.4.0: the off-slot pin and the footer note follow color *schemes* (`window.ColorSchemes`, event `color-scheme:scheme`) instead of live paints. `color_scheme` takes the top-level `schemes`, `slots`, `slot_policy` and `picker` options.
+
 == 0.1.1 - 2026-10-25
 
 * Footer switch (`toggle_placement: footer`) shows icons instead of words: sun (Light), moon (Dark), half-filled circle (Auto). Each button keeps `aria-label`, gets a `title` tooltip, and keeps `aria-pressed`; the group is named with `aria-label` instead of a visible "Theme" label.

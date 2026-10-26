@@ -1,0 +1,160 @@
+/* @antora-supplemental/color-scheme schemes and slots. Inlined in <head> before
+   paint stylesheets apply, so the chosen scheme is in place for the first paint.
+   The extension adds it only when the active paint has schemes beyond light
+   and dark, or the site sets color_scheme slots.
+
+   A paint provides named color schemes. `light` (its :root block) and `dark`
+   (its html.dark-theme block) always exist; a paint can add more with
+   html[data-scheme="<id>"] blocks declared in its @color-schemes manifest.
+   This hook sets html[data-scheme] to the active scheme; nothing is loaded.
+
+   Config comes from window.__colorSchemes (written by the extension):
+     { param, cookie, cookiePath, slotPolicy,
+       schemes: { id: { label, slots: ['light','dark'], base } },
+       slots: { light: id, dark: id } }
+
+   Two light/dark slots each hold a scheme. The active scheme is the slot
+   scheme for the resolved light/dark state, unless the visitor picked an
+   off-slot scheme for this session: then that scheme is pinned and light/dark
+   automation is off until they choose a slot scheme or "auto". A scheme fits
+   the slots it declares; slot_policy 'any' lets any scheme go in either slot.
+
+   Storage: cookie <cookie>-slots "light.dark" (one year) and session cookie
+   <cookie> for an off-slot pick.
+   Query: ?<param>=<id> chooses like setScheme; ?<param>=reset clears both;
+   ?cs-preview=<id>[&cs-preview-mode=light|dark] shows a scheme without saving
+   (used by the picker page previews). */
+(function () {
+  var cfg = window.__colorSchemes
+  if (!cfg || window.ColorSchemes) return
+  var html = document.documentElement
+  var schemes = cfg.schemes || {}
+  var anySlot = cfg.slotPolicy === 'any'
+  var param = cfg.param || 'scheme'
+  var cookieName = cfg.cookie || 'cs-scheme'
+  var slotsCookie = cookieName + '-slots'
+  var cookiePath = cfg.cookiePath || '/'
+  var current = null
+  var dark = html.classList.contains('dark-theme')
+  var defaults = { light: (cfg.slots && cfg.slots.light) || 'light', dark: (cfg.slots && cfg.slots.dark) || 'dark' }
+  var slots = { light: defaults.light, dark: defaults.dark }
+  var session = null
+  var preview = false
+
+  function has (id) { return typeof id === 'string' && id !== 'reset' && id !== 'auto' && Object.prototype.hasOwnProperty.call(schemes, id) }
+  function declared (id) { return (schemes[id] && schemes[id].slots) || [] }
+  function fits (id, slot) { return has(id) && (slot === 'light' || slot === 'dark') && (anySlot || declared(id).indexOf(slot) >= 0) }
+  function readCookie (name) {
+    var m = ('; ' + document.cookie).match(new RegExp('; ' + name.replace(/[^\w-]/g, '') + '=([^;]*)'))
+    return m ? decodeURIComponent(m[1]) : null
+  }
+  function writeCookie (name, value, persistent) {
+    if (preview) return
+    var base = name + '=' + (value ? encodeURIComponent(value) : '') + '; Path=' + cookiePath + '; SameSite=Lax'
+    document.cookie = base + (!value ? '; Max-Age=0' : persistent ? '; Max-Age=31536000' : '')
+  }
+  function saveSlots () {
+    if (slots.light === defaults.light && slots.dark === defaults.dark) writeCookie(slotsCookie, null)
+    else writeCookie(slotsCookie, slots.light + '.' + slots.dark, true)
+  }
+  function refresh () {
+    current = session || slots[dark ? 'dark' : 'light']
+    html.setAttribute('data-scheme', current)
+    if (session) html.setAttribute('data-color-scheme-off-slot', session)
+    else html.removeAttribute('data-color-scheme-off-slot')
+  }
+
+  /** null/'auto' = automation on with the current slots; a scheme that fits the
+      current light/dark slot goes into that slot; any other is an off-slot pick. */
+  function choose (id) {
+    if (id === null || id === undefined || id === 'auto') {
+      session = null
+      writeCookie(cookieName, null)
+      refresh()
+      return true
+    }
+    if (!has(id)) return false
+    var slot = dark ? 'dark' : 'light'
+    if (fits(id, slot)) {
+      session = null
+      writeCookie(cookieName, null)
+      slots[slot] = id
+      saveSlots()
+    } else {
+      session = id
+      writeCookie(cookieName, id)
+    }
+    refresh()
+    return true
+  }
+  function assign (slot, id) {
+    if (!fits(id, slot)) return false
+    slots[slot] = id
+    saveSlots()
+    refresh()
+    return true
+  }
+  function reset () {
+    session = null
+    slots = { light: defaults.light, dark: defaults.dark }
+    writeCookie(cookieName, null)
+    writeCookie(slotsCookie, null)
+    refresh()
+  }
+
+  var q = null
+  var pv = null
+  var pvMode = null
+  try {
+    var sp = new URLSearchParams(window.location.search)
+    q = sp.get(param)
+    pv = sp.get('cs-preview')
+    pvMode = sp.get('cs-preview-mode')
+  } catch (e) {}
+  var saved = readCookie(slotsCookie)
+  if (saved && /^[^.]+\.[^.]+$/.test(saved)) {
+    var parts = saved.split('.')
+    if (fits(parts[0], 'light')) slots.light = parts[0]
+    if (fits(parts[1], 'dark')) slots.dark = parts[1]
+  } else if (saved) writeCookie(slotsCookie, null)
+  var s = readCookie(cookieName)
+  if (has(s)) session = s
+  else if (s) writeCookie(cookieName, null)
+  if (pv !== null && has(pv)) {
+    preview = true
+    session = pv
+    if (pvMode === 'light' || pvMode === 'dark') {
+      dark = pvMode === 'dark'
+      html.setAttribute('data-color-scheme-preview', pvMode)
+    }
+    refresh()
+  } else if (q === 'reset') reset()
+  else if (has(q)) choose(q)
+  else refresh()
+
+  function info (id) {
+    var m = schemes[id] || {}
+    return { id: id, label: m.label || id, slots: declared(id).slice(), base: m.base || 'light' }
+  }
+  window.ColorSchemes = {
+    ids: function () { return Object.keys(schemes).filter(has) },
+    get: function () { return current },
+    set: function (id) { return id === 'reset' ? (reset(), true) : choose(id) },
+    assign: assign,
+    fits: fits,
+    slotsOf: function (id) { return anySlot ? ['light', 'dark'] : declared(id).slice() },
+    slots: function () { return { light: slots.light, dark: slots.dark } },
+    info: info,
+    /** Off-slot scheme pinned for this session, or null while automation is on. */
+    offSlot: function () { return session ? { id: session, base: info(session).base } : null },
+    preview: function () { return preview ? (pvMode || null) : false },
+    /** Called by the light/dark layer whenever the resolved light/dark state changes. */
+    sync: function (isDark) {
+      if (preview && pvMode) return
+      isDark = !!isDark
+      if (isDark === dark) return
+      dark = isDark
+      refresh()
+    },
+  }
+})()

@@ -23,8 +23,8 @@
  *           group: Theme       #   accessible name of the button group
  *         follow_system: true  # default; false: default to light, never read the OS preference
  *         navbar: light        # optional: <meta name="dm-navbar"> value, exposed as html[data-dm-navbar] for paint
- *         color_scheme:        # optional: options passed to color-scheme (e.g. live_paint)
- *           live_paint: { ... }
+ *         color_scheme:        # optional: options passed to color-scheme (schemes, slots, picker, live_paint)
+ *           slots: { ... }
  *
  * List color-scheme separately instead of color_scheme when you prefer; it runs
  * once either way. Antora camelCases keys (follow_system -> followSystem,
@@ -162,7 +162,7 @@ function register ({ config }) {
     if (ok) logger.info('light-dark-mode: head hook and js/light-dark-mode.js injected')
     else logger.warn('light-dark-mode: UI has no head-styles/head-meta or footer-scripts partial; nothing injected')
   })
-  // color-scheme picker page (live_paint.picker), same as registering color-scheme itself.
+  // color-scheme schemes, slots and picker page, same as registering color-scheme itself.
   const cs = config.colorScheme || {}
   this.on('contentClassified', (ctx) => { if (config.enabled !== false) colorScheme.pickerListener(cs, logger)(ctx) })
 }

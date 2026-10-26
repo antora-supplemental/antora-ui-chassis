@@ -1,5 +1,9 @@
 = Changelog
 
+== 0.2.1 - 2026-10-25
+
+* Declares its schemes for color-scheme 0.4.0: a `@color-schemes` manifest with `light` and `dark` only, so no color scheme picker link is added. Colors are unchanged.
+
 == 0.2.0 - 2026-10-25
 
 === Fixed

@@ -64,8 +64,8 @@
     }
     return 'system'
   }
-  function pinned () { var p = window.ColorSchemePaint; return p && p.offSlot ? p.offSlot() : null }
-  function previewMode () { var p = window.ColorSchemePaint; return p && p.preview ? p.preview() : false }
+  function pinned () { var p = window.ColorSchemes; return p && p.offSlot ? p.offSlot() : null }
+  function previewMode () { var p = window.ColorSchemes; return p && p.preview ? p.preview() : false }
   function resolve (m) {
     var pv = previewMode()
     if (pv) return pv === 'dark'
@@ -111,7 +111,7 @@
       html.classList.toggle('dark-theme', dark)
       html.setAttribute('data-theme', dark ? 'dark' : 'light')
       html.setAttribute('data-light-dark-mode', m)
-      if (window.ColorSchemePaint) window.ColorSchemePaint.sync(dark)
+      if (window.ColorSchemes) window.ColorSchemes.sync(dark)
     }, animate && flip)
     var auto = !pinned()
     if (changed || auto !== lastAuto) notify({ mode: m, dark: dark, auto: auto })
@@ -120,8 +120,8 @@
 
   function set (next, opts) {
     if (pinned()) {
-      if (window.ColorScheme && window.ColorScheme.setPaint) window.ColorScheme.setPaint('auto')
-      else window.ColorSchemePaint.set('auto')
+      if (window.ColorScheme && window.ColorScheme.setScheme) window.ColorScheme.setScheme('auto')
+      else window.ColorSchemes.set('auto')
     }
     if (next === 'system') {
       write(MODE_KEY, 'system')
@@ -160,7 +160,7 @@
   apply(false)
   notify({ mode: mode(), dark: resolve(mode()), auto: !pinned() })
   // An off-slot scheme pins light/dark; a slot scheme or 'auto' releases it.
-  document.addEventListener('color-scheme:paint', function () { apply(true) })
+  document.addEventListener('color-scheme:scheme', function () { apply(true) })
   if (followSystem) {
     if (systemMq.addEventListener) systemMq.addEventListener('change', onSystemChange)
     else systemMq.addListener(onSystemChange)
@@ -179,7 +179,7 @@
     subscribe: subscribe,
     /** false while an off-slot color scheme has switched light/dark automation off */
     isAuto: function () { return !pinned() },
-    resume: function () { if (window.ColorScheme && window.ColorScheme.setPaint) window.ColorScheme.setPaint('auto'); else if (window.ColorSchemePaint) window.ColorSchemePaint.set('auto'); apply(true) }
+    resume: function () { if (window.ColorScheme && window.ColorScheme.setScheme) window.ColorScheme.setScheme('auto'); else if (window.ColorSchemes) window.ColorSchemes.set('auto'); apply(true) }
   }
 
   /* Toggle component, two variants with the same state code:
