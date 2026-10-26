@@ -2,6 +2,7 @@
   "name": "@antora-supplemental/page-state",
   "version": "0.1.0",
   "antoraRegistry": {
+    "title": "Page State",
     "antora": "3",
     "requires": {
       "@antora-supplemental/ui-bus": "^0.1.0"

@@ -2,6 +2,7 @@
   "name": "antora-dark-mode",
   "version": "2.0.0",
   "antoraRegistry": {
+    "title": "Antora Dark Mode",
     "antora": "3",
     "requires": {
       "@antora-supplemental/light-dark-mode": "^0.1.0",

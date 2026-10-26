@@ -2,6 +2,7 @@
   "name": "@antora-supplemental/soft-nav",
   "version": "0.2.0",
   "antoraRegistry": {
+    "title": "Soft Navigation",
     "antora": "3",
     "requires": {
       "@antora-supplemental/ui-bus": "^0.1.0"

@@ -2,6 +2,7 @@
   "name": "@antora-supplemental/color-scheme",
   "version": "0.5.3",
   "antoraRegistry": {
+    "title": "Color Scheme",
     "antora": "3",
     "provides": {
       "color-scheme-tokens": "0.5"

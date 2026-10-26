@@ -2,6 +2,7 @@
   "name": "@antora-supplemental/light-dark-mode",
   "version": "0.1.3",
   "antoraRegistry": {
+    "title": "Light/Dark Mode",
     "antora": "3",
     "requires": {
       "@antora-supplemental/color-scheme": "^0.5.3"

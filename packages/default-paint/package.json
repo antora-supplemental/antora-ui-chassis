@@ -2,6 +2,7 @@
   "name": "@antora-supplemental/default-paint",
   "version": "0.2.1",
   "antoraRegistry": {
+    "title": "Default Paint",
     "antora": "3",
     "requires": {
       "@antora-supplemental/color-scheme": "^0.5.0"

@@ -2,6 +2,7 @@
   "name": "@antora-supplemental/ui-bus",
   "version": "0.1.0",
   "antoraRegistry": {
+    "title": "UI Bus",
     "antora": "3",
     "provides": {
       "ui-bus-api": "0.1"

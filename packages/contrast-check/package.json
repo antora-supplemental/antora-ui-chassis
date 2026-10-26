@@ -2,6 +2,7 @@
   "name": "@antora-supplemental/contrast-check",
   "version": "0.2.0",
   "antoraRegistry": {
+    "title": "Contrast Check",
     "antora": "3",
     "uses": {
       "color-scheme-tokens": "^0.5"

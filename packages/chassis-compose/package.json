@@ -2,6 +2,7 @@
   "name": "@antora-supplemental/chassis-compose",
   "version": "0.2.0",
   "antoraRegistry": {
+    "title": "Chassis Compose",
     "antora": "3"
   },
   "description": "Meta Antora extension: wires chassis build-time extensions (ui-bus, soft-nav, page-state)",
