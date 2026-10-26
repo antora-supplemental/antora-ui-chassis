@@ -3,6 +3,8 @@
   "version": "2.0.0",
   "antoraRegistry": {
     "title": "Antora Dark Mode",
+    "variantOf": "github.com/antora-supplemental/antora-ui-chassis/light-dark-mode",
+    "variantLabel": "One require for the Default UI: toggle, palette and paint in a single Antora extension",
     "antora": "3",
     "requires": {
       "@antora-supplemental/light-dark-mode": "^0.1.0",
