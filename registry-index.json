@@ -205,6 +205,24 @@
         "gitPath": "github:antora-supplemental/antora-ui-chassis#contrast-check-v0.2.0&path:packages/contrast-check",
         "productTopic": "contrast-check"
       }
+    },
+    {
+      "id": "asset-fingerprint",
+      "name": "Asset Fingerprint",
+      "version": "0.1.0",
+      "type": "playbook-extension",
+      "layer": "chassis",
+      "description": "Theme-agnostic versioned asset links: after site generation, adds ?v=<content hash> to CSS/JS (optionally font/image) URLs in the built HTML. Antora extension plus CLI; include/exclude globs, hash length.",
+      "repository": "https://github.com/antora-supplemental/antora-ui-chassis",
+      "manifestPath": "packages/asset-fingerprint/package.json",
+      "modulePath": "packages/asset-fingerprint",
+      "requires": [],
+      "recommends": [],
+      "conflicts": [],
+      "install": {
+        "gitPath": "github:antora-supplemental/antora-ui-chassis#asset-fingerprint-v0.1.0&path:packages/asset-fingerprint",
+        "productTopic": "asset-fingerprint"
+      }
     }
   ],
   "recipes": []
