@@ -13,6 +13,7 @@
     'dark-mode',
     'antora-dark-mode',
     'default-paint',
+    'brand-placeholder',
   ],
-  productTopics: ['ui-bus', 'soft-nav', 'page-state', 'chassis-compose', 'color-scheme', 'light-dark-mode', 'antora-dark-mode', 'default-paint'],
+  productTopics: ['ui-bus', 'soft-nav', 'page-state', 'chassis-compose', 'color-scheme', 'light-dark-mode', 'antora-dark-mode', 'default-paint', 'brand-placeholder'],
 }

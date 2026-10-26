@@ -1,0 +1,11 @@
+{
+  id: "brand-placeholder",
+  name: "Brand placeholder (placeholder logo)",
+  version: "0.1.0",
+  type: "ui-chassis-component",
+  description: "Shared placeholder logo and favicons for every Antora theme, plus the header_logo/favicon resolution partials. Override order: site first, then this placeholder; themes may not ship a brand logo.",
+  layer: "chassis",
+  requires: [],
+  assets: ["img/logo.svg", "img/logo-dark.svg", "img/logo-mono.svg", "img/favicon.svg", "img/favicon.ico", "img/apple-touch-icon.png"],
+  partials: ["brand-logo", "brand-placeholder-logo", "head-icons"],
+}

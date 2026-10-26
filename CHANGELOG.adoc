@@ -1,5 +1,9 @@
 = Changelog
 
+== brand-placeholder-v0.1.0 - 2026-10-25
+
+* **New `brand-placeholder` 0.1.0:** the shared placeholder logo for every Antora theme (moved from Valentus 4.1.0). Inline `currentColor` mark, logo/-dark/-mono SVGs, favicon.svg/.ico, apple-touch-icon, and the `brand-logo` / `head-icons` partials that resolve `site.keys.header_logo` and `favicon`. Override order: the site first, then the chassis placeholder; themes may set real logos only on their own demo site, never in what they ship. Antora extension (replaces theme copies with a warning), `scripts/bake.mjs` for release bundles, `scripts/validate-theme.mjs` brand-file validator.
+
 == color-scheme-v0.3.0, light-dark-mode-v0.1.0, default-paint-v0.2.0, antora-dark-mode-v2.0.0 - 2026-10-25
 
 * **New `light-dark-mode` 0.1.0 (dark mode):** light/dark switching split out of `color-scheme`. Two toggle designs on one state machine: a compact top-bar icon button (`toggle_placement: navbar`) and a labeled footer Light / Dark / Auto switch (`toggle_placement: footer`). Layout slots `light-dark-navbar-slot` / `light-dark-footer-slot`, variant partials `light-dark-toggle` / `light-dark-switch`; site beats theme beats chassis, and placed icons are kept. `follow_system`.

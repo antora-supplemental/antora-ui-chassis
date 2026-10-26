@@ -1,0 +1,100 @@
+= Brand placeholder, the shared placeholder logo (`packages/brand-placeholder`)
+
+`@antora-supplemental/brand-placeholder` is the one placeholder logo every Antora theme uses.
+A theme ships *no* brand logo of its own: its header calls the chassis partial, and a site sees this neutral six-petal mark (labeled "Placeholder logo - replace with your own") until it sets its own logo.
+
+== The rule
+
+* *Sites* set real logos (`site.keys.header_logo`, their own files in `ui.supplemental_files`).
+* *Themes* never ship a brand logo, favicon or touch icon in what they release. A theme may show its own brand on its *own demo site* only, by layering it from outside the bundle (for example a `docs/brand` supplemental layer and `header_logo` in the demo playbook).
+* A theme cannot override the placeholder in its bundle. The extension puts the chassis copy back over a theme copy (and logs a warning), and `scripts/validate-theme.mjs` warns in the theme's CI.
+
+== What it provides
+
+[cols="1,3"]
+|===
+| File | Purpose
+
+| `partials/brand-logo.hbs` | Header logo resolution (below). Themes call `{{> brand-logo base="my-header-logo"}}` inside their home link.
+| `partials/brand-placeholder-logo.hbs` | The mark as inline SVG in `currentColor`, so it takes the header text color in light and dark.
+| `partials/head-icons.hbs` | Favicon and touch-icon links. Themes put `{{> head-icons}}` in `head-meta`.
+| `img/logo.svg`, `img/logo-dark.svg` | The mark as files (neutral gray; `logo.svg` lightens under `prefers-color-scheme: dark`).
+| `img/logo-mono.svg` | Single color, `currentColor`.
+| `img/favicon.svg`, `img/favicon.ico` (16/32/48), `img/apple-touch-icon.png` (180) | Placeholder icons.
+|===
+
+== Override order
+
+Highest first:
+
+. *The site.* `site.keys.header_logo` (plus `header_logo_dark` for a light/dark pair, `header_logo_tone: mono` for a `<base>--mono` class) and `site.keys.favicon` name files under `img/`; any of the paths above that the playbook ships through `ui.supplemental_files` (a directory or virtual `{ path, contents }` entries) replace the chassis copy.
+. *The chassis placeholder* (this package).
+
+The theme bundle is not a step: it only carries the chassis copies.
+
+`brand-logo` renders:
+
+* `header_logo` and `header_logo_dark` set: two `<img>` (`<base> <base>--for-light`, `<base> <base>--for-dark`);
+* `header_logo` set: one `<img class="<base>">`;
+* neither: `{{> brand-placeholder-logo}}` with `class="<base> <base>--placeholder"`.
+
+Parameters (all optional): `base` (default `brand-logo`), `size` for the `<img>` (default 34), `placeholder_size` (default 30).
+
+== Use it in a theme
+
+Two ways to get the files into a UI, both with the same result.
+
+*Baked into the theme's release bundle* (what a site downloads as `ui-bundle.zip`):
+
+[source,json]
+----
+"devDependencies": {
+  "@antora-supplemental/brand-placeholder": "github:antora-supplemental/antora-ui-chassis#brand-placeholder-v0.1.0&path:packages/brand-placeholder"
+}
+----
+
+[source,sh]
+----
+cp -r my-theme/supplemental-ui/* build/ui-bundle/
+node node_modules/@antora-supplemental/brand-placeholder/scripts/bake.mjs build/ui-bundle   # last, so chassis copies win
+node node_modules/@antora-supplemental/brand-placeholder/scripts/validate-theme.mjs build/ui-bundle --strict
+----
+
+*As an Antora extension* (playbooks that layer the theme from a directory, such as a theme's own docs build):
+
+[source,yaml]
+----
+antora:
+  extensions:
+    - require: '@antora-supplemental/brand-placeholder'
+----
+
+On `uiLoaded` it adds the files, replaces theme copies, and keeps the ones the site supplies.
+
+== Replace the placeholder (sites)
+
+[source,yaml]
+----
+site:
+  keys:
+    header_logo: acme.svg          # img/acme.svg from your supplemental files
+    header_logo_dark: acme-dark.svg  # optional
+    favicon: acme-favicon.svg      # optional; otherwise ship img/favicon.svg + favicon.ico
+ui:
+  supplemental_files: ./supplemental-ui
+----
+
+Tint the inline placeholder from CSS by setting `color` on the `<base>--placeholder` class.
+
+== Validator
+
+[source,sh]
+----
+node .../brand-placeholder/scripts/validate-theme.mjs <theme-ui-dir> [--strict] [--allow=img/vcs/]
+----
+
+Warns when the dir has a chassis path with different contents, or any other `img/` file named like a logo or icon (`logo`, `favicon`, `apple-touch-icon`, `brand`, `mark`). Identical baked copies are fine. `--allow` takes path substrings to skip (for example VCS host marks). `--strict` exits 1 on any warning.
+
+== Picking up a newer placeholder
+
+Themes pin this package by git tag (`#brand-placeholder-vX.Y.Z`) and bake it into each release. A new placeholder reaches sites when the theme bumps that pin and cuts a release; sites on the theme's rolling line (for example Valentus `v4`) then get it with no change of their own.

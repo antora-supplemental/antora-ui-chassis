@@ -1,0 +1,8 @@
+= Changelog
+
+== 0.1.0 - 2026-10-25
+
+* First release. The shared placeholder logo for Antora themes, moved from Valentus 4.1.0: inline `currentColor` mark (`partials/brand-placeholder-logo.hbs`), `img/logo.svg`, `logo-dark.svg`, `logo-mono.svg`, `favicon.svg`, `favicon.ico`, `apple-touch-icon.png`.
+* `partials/brand-logo.hbs` resolves `site.keys.header_logo` / `header_logo_dark` / `header_logo_tone`, falling back to the placeholder; `partials/head-icons.hbs` resolves `site.keys.favicon`. Override order: site first, then the chassis placeholder. Themes do not override.
+* Antora extension: adds the files on `uiLoaded`, replaces theme copies with a warning, keeps files the site ships in `ui.supplemental_files`.
+* `scripts/bake.mjs` for theme release bundles; `scripts/validate-theme.mjs` warns when a theme UI ships brand files.

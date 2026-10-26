@@ -1,0 +1,34 @@
+= Placeholder logo (brand-placeholder)
+:description: Themes ship no brand logo. The chassis placeholder shows until the site sets its own.
+
+Every Antora theme built on the chassis shows the same neutral placeholder logo until the *site* sets its own.
+The package is `@antora-supplemental/brand-placeholder` (`packages/brand-placeholder`).
+
+== Who sets the logo
+
+[cols="1,2"]
+|===
+| Layer | May set a logo?
+
+| Site (playbook `site.keys`, `ui.supplemental_files`) | Yes. Always wins.
+| Theme bundle (what a theme releases) | *No.* Calls the chassis partials and carries the chassis files.
+| Theme's own demo site | Yes, from outside the bundle (a demo-only supplemental layer plus `header_logo` in the demo playbook).
+| Chassis | The placeholder, used when nothing above set one.
+|===
+
+The extension restores the chassis copy over any theme copy of a placeholder path and logs a warning.
+`scripts/validate-theme.mjs` warns in theme CI when a theme UI directory ships logo-like files.
+
+== Override order
+
+. Site: `site.keys.header_logo`, `header_logo_dark`, `favicon`, and same-path files in `ui.supplemental_files`.
+. Chassis placeholder.
+
+== Theme integration
+
+* Header: `{{> brand-logo base="<your-logo-class>"}}` inside the home link.
+* Head: `{{> head-icons}}` in `head-meta`.
+* Release bundle: copy your layout, then run `brand-placeholder/scripts/bake.mjs` on the bundle directory, then `validate-theme.mjs --strict`.
+* Theme docs build that layers the theme from a directory: add `- require: '@antora-supplemental/brand-placeholder'`.
+
+Full reference: `packages/brand-placeholder/README.adoc`.

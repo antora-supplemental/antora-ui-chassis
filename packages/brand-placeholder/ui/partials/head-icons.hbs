@@ -1,0 +1,12 @@
+{{!-- @antora-supplemental/brand-placeholder: favicons.
+  Order: site.keys.favicon (an img/ basename the site ships) first, else the
+  img/favicon.svg + favicon.ico at those paths (the site's own copies when it
+  ships them through ui.supplemental_files, otherwise the chassis placeholder).
+  Themes include this partial in head-meta and must not ship their own icons. --}}
+{{#if site.keys.favicon}}
+<link rel="icon" href="{{{uiRootPath}}}/img/{{site.keys.favicon}}">
+{{else}}
+<link rel="icon" href="{{{uiRootPath}}}/img/favicon.svg" type="image/svg+xml">
+<link rel="icon" href="{{{uiRootPath}}}/img/favicon.ico" sizes="32x32">
+{{/if}}
+<link rel="apple-touch-icon" href="{{{uiRootPath}}}/img/apple-touch-icon.png">

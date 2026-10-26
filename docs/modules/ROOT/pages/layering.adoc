@@ -17,12 +17,12 @@ Same question shows up for dark/light and for search.
 |Engine |Power unit |Antora pipeline + UI model data
 |Chassis |Frame + mounts |Unthemed region parts + contracts (this repo)
 |Body kit |Unpainted shell |Silhouette / column layout (Valentus body, Default UI body, ...)
-|Paint & trim |Finish |Palettes, type, logo, chrome
+|Paint & trim |Finish |Palettes, type, chrome (logo: the site's, placeholder from `brand-placeholder`)
 |Bolt-ons |Aftermarket |Extensions (may reach into body; slots preferred)
 |===
 
 Default UI and Valentus are *peers* at `ui.bundle` — each usually ships body kit + paint together.
-Paint stays a first-class replaceable face (keep silhouette, swap colors/logo).
+Paint stays a first-class replaceable face (keep silhouette, swap colors). The logo is never paint: sites set it, themes show the chassis placeholder (xref:brand-placeholder.adoc[]).
 
 == Images
 

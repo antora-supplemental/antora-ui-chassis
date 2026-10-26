@@ -1,0 +1,16 @@
+{{!-- @antora-supplemental/brand-placeholder: header logo resolution.
+  Order: the site's keys and files first, then the chassis placeholder.
+    site.keys.header_logo + header_logo_dark  -> light/dark <img> pair
+    site.keys.header_logo                     -> one <img> (header_logo_tone: mono adds <base>--mono)
+    neither                                   -> {{> brand-placeholder-logo}} inline
+  Parameters (all optional): base (BEM block class, default "brand-logo"),
+  size (img size, default 34), placeholder_size (default 30).
+  Themes call this partial and must not ship their own logo files. --}}
+{{#if site.keys.headerLogoDark}}
+<img class="{{#if base}}{{base}}{{else}}brand-logo{{/if}} {{#if base}}{{base}}{{else}}brand-logo{{/if}}--for-light" src="{{{uiRootPath}}}/img/{{#if site.keys.headerLogo}}{{site.keys.headerLogo}}{{else}}logo.svg{{/if}}" width="{{#if size}}{{size}}{{else}}34{{/if}}" height="{{#if size}}{{size}}{{else}}34{{/if}}" alt="" />
+<img class="{{#if base}}{{base}}{{else}}brand-logo{{/if}} {{#if base}}{{base}}{{else}}brand-logo{{/if}}--for-dark" src="{{{uiRootPath}}}/img/{{site.keys.headerLogoDark}}" width="{{#if size}}{{size}}{{else}}34{{/if}}" height="{{#if size}}{{size}}{{else}}34{{/if}}" alt="" />
+{{else if site.keys.headerLogo}}
+<img class="{{#if base}}{{base}}{{else}}brand-logo{{/if}}{{#if site.keys.headerLogoTone}} {{#if base}}{{base}}{{else}}brand-logo{{/if}}--{{site.keys.headerLogoTone}}{{/if}}" src="{{{uiRootPath}}}/img/{{site.keys.headerLogo}}" width="{{#if size}}{{size}}{{else}}34{{/if}}" height="{{#if size}}{{size}}{{else}}34{{/if}}" alt="" />
+{{else}}
+{{> brand-placeholder-logo base=base size=placeholder_size}}
+{{/if}}

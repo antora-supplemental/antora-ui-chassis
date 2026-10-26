@@ -1,0 +1,45 @@
+{
+  "name": "@antora-supplemental/brand-placeholder",
+  "version": "0.1.0",
+  "description": "Shared placeholder logo for Antora themes: neutral currentColor mark, logo/-dark/-mono SVGs, favicons, and the header_logo/favicon resolution partials. Sites replace it; themes never ship a brand logo.",
+  "main": "lib/index.js",
+  "exports": {
+    ".": "./lib/index.js",
+    "./lib": "./lib/index.js",
+    "./scripts/bake.mjs": "./scripts/bake.mjs",
+    "./scripts/validate-theme.mjs": "./scripts/validate-theme.mjs",
+    "./ui/*": "./ui/*"
+  },
+  "bin": {
+    "brand-placeholder-bake": "scripts/bake.mjs",
+    "brand-placeholder-validate": "scripts/validate-theme.mjs"
+  },
+  "files": [
+    "lib",
+    "ui",
+    "scripts",
+    "test",
+    "ui-component.json5",
+    "README.adoc",
+    "CHANGELOG.adoc"
+  ],
+  "scripts": {
+    "test": "node --test test/*.test.js"
+  },
+  "keywords": [
+    "antora",
+    "antora-ui",
+    "antora-extension",
+    "logo",
+    "placeholder-logo",
+    "favicon",
+    "brand-placeholder",
+    "chassis"
+  ],
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/antora-supplemental/antora-ui-chassis.git",
+    "directory": "packages/brand-placeholder"
+  }
+}

@@ -167,6 +167,24 @@
         "gitPath": "github:antora-supplemental/antora-ui-chassis#chassis-v0.2.0&path:packages/chassis-compose",
         "productTopic": "chassis-compose"
       }
+    },
+    {
+      "id": "brand-placeholder",
+      "name": "Brand placeholder (placeholder logo)",
+      "version": "0.1.0",
+      "type": "playbook-extension",
+      "layer": "chassis",
+      "description": "Shared placeholder logo and favicons for every Antora theme, plus header_logo/favicon resolution partials. Site first, then this placeholder; themes may not ship a brand logo.",
+      "repository": "https://github.com/antora-supplemental/antora-ui-chassis",
+      "manifestPath": "packages/brand-placeholder/package.json",
+      "modulePath": "packages/brand-placeholder",
+      "requires": [],
+      "recommends": [],
+      "conflicts": [],
+      "install": {
+        "gitPath": "github:antora-supplemental/antora-ui-chassis#brand-placeholder-v0.1.0&path:packages/brand-placeholder",
+        "productTopic": "brand-placeholder"
+      }
     }
   ],
   "recipes": []
