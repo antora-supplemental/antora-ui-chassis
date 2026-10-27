@@ -1,0 +1,19 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><title>state</title>
+<style>
+:root{--cs-canvas:#ffffff;--cs-ink:#1a1a1a;--cs-accent:#0b5cad}
+@media (prefers-color-scheme:dark){:root{--cs-canvas:#121212;--cs-ink:#f0f0f0;--cs-accent:#8cc4ff}}
+body{background:var(--cs-canvas);color:var(--cs-ink);font:16px/1.5 sans-serif}
+input{background:var(--cs-canvas);color:var(--cs-ink);border:2px solid var(--cs-ink)}
+input:focus-visible{outline:2px solid var(--cs-accent);outline-offset:2px}
+/* Search results: hidden until a query is typed. Light mode is fine; the dark
+   surface keeps lunr's hard-coded light-mode ink, so it only fails when open in dark. */
+.search-result-dropdown-menu{display:none;background:#ffffff}
+.search-result-dropdown-menu.open{display:block}
+.search-result-document-title{color:#02060c}
+@media (prefers-color-scheme:dark){.search-result-dropdown-menu{background:#141a22}}
+</style></head><body><main><h1>State</h1>
+<input id="search-input" type="search" aria-label="Search">
+<div class="search-result-dropdown-menu"><div class="search-result-document-hit"><span class="search-result-document-title">Getting started</span></div></div>
+<script>document.getElementById('search-input').addEventListener('input',function(){document.querySelector('.search-result-dropdown-menu').classList.toggle('open',!!this.value)})
+window.contrastCheckFixtures=(window.contrastCheckFixtures||[]).concat({name:'search-results',run:function(){document.querySelector('.search-result-dropdown-menu').classList.add('open')}})</script>
+</main></body></html>

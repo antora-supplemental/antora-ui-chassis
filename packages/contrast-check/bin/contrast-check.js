@@ -16,6 +16,7 @@ const HELP = `Usage: contrast-check <site-dir|url> [options]
   --near <ratio>      near-threshold margin (default 0.5)
   --apca              add APCA Lc readouts
   --no-focus          skip focus and hover checks
+  --state <name>      also check a dynamic UI state (repeatable); preset: search-results
   --json | --json=<file>  print JSON to stdout, or write it to a file
   --strict            fail on warnings too (same as --fail-on warning)
   --fail-on <level>   error (default), warning, or none (report only; still exits 2 on usage errors)
@@ -38,6 +39,7 @@ function parse (argv) {
     else if (a === '--near') o.nearMargin = +next()
     else if (a === '--apca') o.apca = true
     else if (a === '--no-focus') o.noFocus = true
+    else if (a === '--state') (o.states ||= []).push(next())
     else if (a === '--json') o.json = true
     else if (a.startsWith('--json=')) o.json = a.slice(7)
     else if (a === '--strict') o.strict = true
@@ -61,6 +63,7 @@ try {
   const { config: fileCfg } = await loadConfig(o.config)
   const cli = { pages: o.pages, maxPages: o.maxPages, schemes: o.schemes, paints: o.paints.length ? o.paints : undefined, nearMargin: o.nearMargin, apca: o.apca || undefined }
   if (o.noFocus) cli.maxFocus = 0
+  if (o.states) cli.states = [...(fileCfg.states || []), ...o.states]
   let failOn = o.failOn || (o.strict ? 'warning' : null) || fileCfg.failOn || (fileCfg.strict ? 'warning' : 'error')
   delete fileCfg.strict; delete fileCfg.failOn
   if (!['error', 'warning', 'none'].includes(failOn)) throw new Error(`--fail-on must be error, warning or none (got ${failOn})`)

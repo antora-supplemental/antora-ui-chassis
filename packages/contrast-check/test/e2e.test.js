@@ -33,6 +33,17 @@ describe('fixtures (browser)', { skip }, () => {
     const f = r.findings.find((x) => x.rule === 'color-contrast')
     assert.ok(f.fg && f.bg && f.ratio < 4.5 && f.suggestion && f.page === '/index.html')
   })
+  it('state: hidden search results pass statically, fail in dark once typed', () => {
+    const s = check('state', '--no-focus'); assert.equal(s.code, 0); assert.equal(s.counts.error, 0)
+    const r = check('state', '--no-focus', '--state', 'search-results')
+    assert.equal(r.code, 1); assert.deepEqual(r.meta.states, ['search-results'])
+    const bad = r.findings.filter((f) => f.level === 'error' && f.state === 'search-results')
+    assert.ok(bad.length && bad.every((f) => f.mode === 'dark'), JSON.stringify(r.findings))
+    for (const st of ['fixtures', 'reveal-hidden']) {
+      const x = check('state', '--no-focus', '--state', st)
+      assert.equal(x.code, 1, st); assert.ok(x.findings.some((f) => f.state === st && f.mode === 'dark' && f.rule === 'color-contrast'), st)
+    }
+  })
   it('warn: warnings only, exit 0; --strict and --fail-on', () => {
     const r = check('warn'); const s = rules(r)
     assert.equal(r.code, 0); assert.equal(r.counts.error, 0)

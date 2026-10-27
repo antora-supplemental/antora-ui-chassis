@@ -20,6 +20,9 @@ export const DEFAULTS = Object.freeze({
   maxAnnotations: 50,
   suppress: [], // [{ rule, selector, page, scheme, colors: { fg, bg }, reason, expires }]
   failOnStale: false, // exit 1 when a suppression is stale or expired
+  // Dynamic UI states checked after the static page: [{ name, pages?: [globs], steps: [{ click|fill|type|press|hover|waitFor|wait }] }].
+  // Each state reloads the page, runs its steps, then runs axe + the probe again (no focus/hover pass).
+  states: [],
 })
 
 const KEYS = new Set(Object.keys(DEFAULTS))
@@ -36,6 +39,8 @@ export function mergeConfig (...layers) {
     }
   }
   if (!Array.isArray(out.suppress)) throw new Error('contrast-check: suppress must be an array')
+  if (!Array.isArray(out.states)) throw new Error('contrast-check: states must be an array')
+  for (const s of out.states) if (typeof s !== 'string' && (!s || typeof s.name !== 'string' || !Array.isArray(s.steps))) throw new Error('contrast-check: each state is a preset name or { name, steps: [...] }')
   for (const k of ['selectors', 'rules', 'pages']) if (!Array.isArray(out.ignore[k])) throw new Error(`contrast-check: ignore.${k} must be an array`)
   for (const [k, v] of Object.entries(out.thresholds)) if (typeof v !== 'number' || v < 1 || v > 21) throw new Error(`contrast-check: thresholds.${k} must be a ratio between 1 and 21`)
   return out

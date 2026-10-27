@@ -1,5 +1,17 @@
 = Changelog
 
+== 0.3.0 - 2026-10-26
+
+=== Added
+
+* Dynamic UI states: `states` config, `--state` CLI flag and `states` Action input. Each state reloads the page, runs steps (click, hover, fill, type, press, waitFor, wait) and re-runs axe and the probe; findings carry `state`.
+* Presets: `search-results` (types a query so Lunr / antora-search-chat results open), `fixtures` (runs sample UI that extensions register on `window.contrastCheckFixtures`), `reveal-hidden` (forces closed details, collapsed `aria-expanded` targets, `[hidden]` and `display:none` text visible).
+* `state-not-reached` warning when a required step fails.
+
+=== Changed
+
+* Pages load with `prefers-reduced-motion: reduce` and transitions and animations disabled, so end states are measured.
+
 == 0.2.0 - 2026-10-26
 
 === Added

@@ -112,6 +112,32 @@ Mark an element (or an ancestor) in the page: `data-contrast-check-ignore="focus
 
 Inputs: `site`, `pages`, `max-pages`, `schemes`, `paint`, `config`, `fail-on`, `suppress` (suppression file), `show-suppressed`, `fail-on-stale` (`"true"`/`"false"`), `json` (report path, default `contrast-check.json`), `args`. GitHub-hosted Ubuntu runners already have Chrome.
 
+== Dynamic UI states
+
+A static page load only sees what is visible at rest. Search dropdowns, menus, popovers and other extension UI are `display:none` or not rendered yet, so their colors are never measured. States fix that: after the normal checks, each page is reloaded once per state, the state's steps run, and axe plus the probe run again on the result. Findings carry `state`.
+
+Every run uses `prefers-reduced-motion: reduce` and disables transitions and animations, so the end state is measured, not a frame mid-fade.
+
+Presets (CLI `--state <name>`, repeatable; Action input `states: search-results,fixtures`; config `"states": ["search-results"]`):
+
+`search-results`:: clicks `#search-input`, types a query and waits for Lunr / antora-search-chat results.
+`fixtures`:: runs every fixture an extension registered on `window.contrastCheckFixtures` (`{ name, run() }`) and dispatches `contrast-check:state` on `document`. Extensions use it to render sample JS UI (antora-search-chat opens its results with a sample query).
+`reveal-hidden`:: forces hidden-but-present nodes visible: closed `<details>`, `aria-expanded="false"` controls and their `aria-controls` targets, `[hidden]`, and `display:none` / `visibility:hidden` elements that contain text. Noisy on sites with many collapsed menus; use it as a report step or with suppressions.
+
+Custom states go in the config:
+
+[source,json]
+----
+{ "states": [
+  "search-results",
+  { "name": "nav-open", "pages": ["**/*.html"], "steps": [
+    { "click": ".navbar-burger" },
+    { "waitFor": ".navbar-menu.is-active" }
+  ] }
+] }
+----
+
+Steps: `click`, `hover`, `fill` / `type` (with `text`), `press` (a key), `waitFor` (selector, `timeout` ms), `wait` (ms), `reveal: true`, `fixtures: true | [names]`. A failed step reports `state-not-reached` (warning) unless the step has `optional: true`.
 == Rules
 
 [cols="1,1,3"]

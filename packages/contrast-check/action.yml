@@ -37,6 +37,9 @@ inputs:
   json:
     description: Write the JSON report to this file.
     default: contrast-check.json
+  states:
+    description: Comma-separated dynamic UI states to check after each page (preset search-results types a query and checks the open results). Config `states` takes custom steps.
+    default: ""
   args:
     description: Extra CLI arguments.
     default: ""
@@ -65,6 +68,7 @@ runs:
         CC_SUPPRESS: ${{ inputs.suppress }}
         CC_SHOW_SUP: ${{ inputs.show-suppressed }}
         CC_FAIL_STALE: ${{ inputs.fail-on-stale }}
+        CC_STATES: ${{ inputs.states }}
         CC_ARGS: ${{ inputs.args }}
         CC_BIN: ${{ github.action_path }}/bin/contrast-check.js
       run: |
@@ -77,6 +81,7 @@ runs:
         [ -n "$CC_SUPPRESS" ] && a+=(--suppress "$CC_SUPPRESS")
         [ "$CC_SHOW_SUP" = "true" ] && a+=(--show-suppressed)
         [ "$CC_FAIL_STALE" = "true" ] && a+=(--fail-on-stale)
+        IFS=',' read -ra _st <<< "$CC_STATES"; for s in "${_st[@]}"; do s="${s// /}"; [ -n "$s" ] && a+=(--state "$s"); done
         if [ -z "${CONTRAST_CHECK_CHROME:-}" ]; then
           for c in /usr/bin/google-chrome /usr/bin/chromium /usr/bin/chromium-browser; do [ -x "$c" ] && export CONTRAST_CHECK_CHROME="$c" && break; done
         fi
