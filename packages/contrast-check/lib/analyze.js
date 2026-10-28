@@ -79,18 +79,24 @@ const shadowColor = (s) => { const m = /rgba?\([^)]+\)/.exec(s || ''); return m 
 export function analyzeFocus (rest, foc, ctx, cfg) {
   const T = cfg.thresholds
   const base = { page: ctx.page, scheme: ctx.scheme, mode: ctx.mode, selector: foc.selector }
-  let ind = null
   // outline-style auto is the browser's own two-tone focus ring: visible on any background.
   if (foc.outlineStyle === 'auto') return null
-  if (foc.outlineStyle !== 'none' && foc.outlineWidth > 0) ind = foc.outlineColor
-  else if (foc.boxShadow !== rest.boxShadow && shadowColor(foc.boxShadow)) ind = shadowColor(foc.boxShadow)
-  else if (foc.borderColor !== rest.borderColor && foc.borderWidth > 0) ind = foc.borderColor
-  if (ind) {
-    const c = parseColor(ind)
-    if (!c || c.a === 0) ind = null
+  // Judge the strongest indicator, not the first one found (0.3.1): a faint halo
+  // shadow next to a solid border-colour change used to be reported as the only
+  // indicator, so a clearly visible focus state failed.
+  const cands = []
+  if (foc.outlineStyle !== 'none' && foc.outlineWidth > 0) cands.push(foc.outlineColor)
+  if (foc.boxShadow !== rest.boxShadow && shadowColor(foc.boxShadow)) cands.push(shadowColor(foc.boxShadow))
+  if (foc.borderColor !== rest.borderColor && foc.borderWidth > 0) cands.push(foc.borderColor)
+  let ind = null; let best = -1
+  for (const cand of cands) {
+    const c = parseColor(cand)
+    if (!c || c.a === 0) continue
+    const cr = contrast(cand, foc.outerBg)
+    if (cr > best) { ind = cand; best = cr }
   }
   if (ind) {
-    const r = contrast(ind, foc.outerBg)
+    const r = best
     if (r < T.nonText) return { ...base, level: 'error', rule: 'focus-indicator', fg: hex(ind), bg: hex(foc.outerBg), ratio: round(r), required: T.nonText, suggestion: fix(ind, foc.outerBg, T.nonText), message: `Focus indicator is ${round(r)}:1 against the background (needs ${T.nonText}:1)` }
     if (r < T.nonText + cfg.nearMargin) return { ...base, level: 'warning', rule: 'near-threshold', fg: hex(ind), bg: hex(foc.outerBg), ratio: round(r), required: T.nonText, suggestion: fix(ind, foc.outerBg, T.nonText + cfg.nearMargin), message: `Focus indicator passes by a thin margin: ${round(r)}:1` }
     return null

@@ -83,6 +83,13 @@ describe('analyze', () => {
     assert.equal(analyzeFocus(rest, { ...rest, outlineStyle: 'solid', outlineWidth: 2, outlineColor: '#eeeeee', selector: 'a' }, ctx, cfg).rule, 'focus-indicator')
     assert.equal(analyzeHover(rest, { ...rest, selector: 'a' }, ctx, cfg).rule, 'hover-unchanged')
   })
+  it('focus: the strongest indicator wins (faint halo + solid border change passes)', () => {
+    const rest = { outlineStyle: 'none', outlineWidth: 0, boxShadow: 'none', borderColor: 'rgba(61, 155, 143, 0.35)', borderWidth: 1, background: 'rgb(26, 35, 48)', color: 'rgb(232, 228, 217)', textDecoration: 'none', outerBg: '#161c26' }
+    const foc = { ...rest, borderColor: 'rgb(79, 179, 166)', boxShadow: 'rgba(232, 165, 75, 0.14) 0px 0px 0px 3px', selector: '#search-input' }
+    assert.equal(analyzeFocus(rest, foc, ctx, cfg), null)
+    // Faint halo alone still fails.
+    assert.equal(analyzeFocus(rest, { ...foc, borderColor: rest.borderColor }, ctx, cfg).rule, 'focus-indicator')
+  })
 })
 
 describe('report', () => {

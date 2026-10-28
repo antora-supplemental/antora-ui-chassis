@@ -1,5 +1,11 @@
 = Changelog
 
+== 0.3.1 - 2026-10-28
+
+=== Fixed
+
+* Focus-indicator check judges the strongest indicator (outline, changed shadow, changed border) instead of the first one found. A faint halo shadow next to a solid border-colour change no longer fails a clearly visible focus state (false positive on Valentus `#search-input` in dark mode).
+
 == 0.3.0 - 2026-10-26
 
 === Added

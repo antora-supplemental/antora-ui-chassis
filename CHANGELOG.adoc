@@ -1,5 +1,9 @@
 = Changelog
 
+== contrast-check-v0.3.1 - 2026-10-28
+
+* **`contrast-check` 0.3.1:** the focus-indicator check judges the strongest indicator (outline, changed shadow or changed border) instead of the first one found, so a faint halo next to a solid border change is no longer a false failure.
+
 == asset-fingerprint-v0.1.0 - 2026-10-26
 
 * **New package `asset-fingerprint` 0.1.0:** theme-agnostic cache-busting. An Antora extension (`sitePublished`) and CLI that rewrite CSS/JS URLs (optionally fonts and images) in built HTML to `?v=<content hash>`, with include/exclude globs and a hash length. See `packages/asset-fingerprint/README.adoc` and `docs/modules/ROOT/pages/asset-fingerprint.adoc`.
