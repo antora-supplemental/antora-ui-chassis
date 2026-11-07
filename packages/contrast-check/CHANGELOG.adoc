@@ -1,5 +1,11 @@
 = Changelog
 
+== 2026-11-07
+
+=== Compact exemption summaries
+
+* Contrast Check 0.4.1 lists each exempted rule id and its finding count, without example instances. `--exempted all` retains full detail; GitHub notices remain per rule. JSON `counts.bySuppression` includes per-rule counts.
+
 == 0.4.0 - 2026-11-07
 
 === Added

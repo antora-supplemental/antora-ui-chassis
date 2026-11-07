@@ -153,16 +153,19 @@ describe('suppress: report', () => {
 })
 describe('exempted findings report', () => {
   it('prints grouped info lines with expiry and reason, and annotations', async () => {
-    const { exemptedReport, exemptedLine, exemptedAnnotations, consoleReport } = await import('../lib/report.js')
+    const { exemptedReport, exemptedLine, exemptedAnnotations, consoleReport, suppressedCounts } = await import('../lib/report.js')
     const f = { level: 'error', rule: 'color-contrast', scheme: 'light', mode: 'light', selector: '.a', fg: '#178f80', bg: '#ffffff', suppressedBy: 'teal', suppressReason: 'brand', suppressExpires: '2027-01-31' }
     assert.equal(exemptedLine(f), 'exempted: color-contrast light/light .a #178f80 on #ffffff until 2027-01-31 (teal: brand)')
     const r = exemptedReport([f, f, f, f], 'summary', 3).join('\n')
     assert.match(r, /info {2}4 exempted finding\(s\) from 1 suppression\(s\)/)
-    assert.match(r, /exempted by teal until 2027-01-31: 4 finding\(s\) \(4 error, 0 warning\): brand/)
-    assert.match(r, /1 more/)
+    assert.match(r, /teal: 4 findings suppressed until 2027-01-31 \(4 error, 0 warning\): brand/)
+    assert.doesNotMatch(r, /exempted: color-contrast/); assert.equal(r.split('\n').length, 2)
+    assert.equal(exemptedReport([f, f], 'all').filter(x => x.includes('exempted: color-contrast')).length, 2)
     assert.equal(exemptedReport([f], 'none').length, 0)
+    assert.equal(suppressedCounts([f, f]).teal.count, 2)
+    assert.equal(exemptedAnnotations([f, f]).length, 1)
     assert.match(exemptedAnnotations([f])[0], /^::notice title=contrast-check exempted \(teal\)::1 finding/)
-    assert.match(consoleReport([], { pages: [], schemes: [], paints: [] }, 200, { suppressed: [f] }), /exempted: color-contrast/)
+    assert.match(consoleReport([], { pages: [], schemes: [], paints: [] }, 200, { suppressed: [f] }), /teal: 1 findings suppressed/)
   })
   it('applySuppressions carries the entry expiry', () => {
     const e = normalizeSuppressions([{ id: 'x', rule: 'color-contrast', reason: 'r', expires: '2099-01-01' }])

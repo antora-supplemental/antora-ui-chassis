@@ -168,3 +168,7 @@ import { run, mergeConfig, consoleReport } from '@antora-supplemental/contrast-c
 const { findings, meta } = await run('build/site', mergeConfig({ maxPages: 5 }))
 console.log(consoleReport(findings, meta))
 ----
+
+=== Compact exemption output
+
+The default `--exempted summary` lists only each suppression id and its matched finding count, for example `devcentr-accent-links-light: 670 findings suppressed`. Use `--exempted all` for individual findings. GitHub receives one notice per matched suppression; JSON `counts.bySuppression` retains counts and reasons alongside the full `suppressed` array.

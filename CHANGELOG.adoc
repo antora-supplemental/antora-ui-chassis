@@ -1,5 +1,11 @@
 = Changelog
 
+== 2026-11-07
+
+=== Compact exemption summaries
+
+* Contrast Check 0.4.1 lists each exempted rule id and its finding count, without example instances. `--exempted all` retains full detail; GitHub notices remain per rule. JSON `counts.bySuppression` includes per-rule counts.
+
 == contrast-check-v0.4.0 - 2026-11-07
 
 * **`contrast-check` 0.4.0:** exempted (suppressed) findings are now visible by default: an info block groups them by suppression entry (id, expiry, reason, error/warning counts, example lines such as `exempted: color-contrast light/light .a #178f80 on #ffffff until 2027-01-31 (id: reason)`), the step summary has an exempted table, and GitHub Actions gets one `::notice` per entry. `--exempted summary|all|none` (config `exempted`, Action input `exempted`) controls it.

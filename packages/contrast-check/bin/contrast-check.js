@@ -4,7 +4,7 @@
 import { writeFileSync } from 'node:fs'
 import { loadConfig, loadSuppressFile, mergeConfig } from '../lib/config.js'
 import { run } from '../lib/run.js'
-import { consoleReport, annotations, suppressionAnnotations, exemptedAnnotations, markdownSummary, writeSummary, counts, totals } from '../lib/report.js'
+import { consoleReport, annotations, suppressionAnnotations, exemptedAnnotations, markdownSummary, writeSummary, counts, totals, suppressedCounts } from '../lib/report.js'
 
 const HELP = `Usage: contrast-check <site-dir|url> [options]
 
@@ -79,7 +79,7 @@ try {
   const { findings, suppressed, suppressionWarnings, meta } = await run(o.target, cfg, o.quiet || o.json === true ? () => {} : (m) => process.stderr.write(m + '\n'))
   const c = counts(findings); const extra = { suppressed, suppressionWarnings, showSuppressed: o.showSuppressed, exempted }
   if (o.json) {
-    const doc = JSON.stringify({ meta, counts: { ...c, suppressed: suppressed.length }, findings, suppressed, suppressionWarnings }, null, 2)
+    const doc = JSON.stringify({ meta, counts: { ...c, suppressed: suppressed.length, bySuppression: suppressedCounts(suppressed) }, findings, suppressed, suppressionWarnings }, null, 2)
     if (o.json === true) console.log(doc); else writeFileSync(o.json, doc + '\n')
   }
   if (o.json !== true) console.log(o.quiet ? totals(findings, extra) : consoleReport(findings, meta, 200, extra))

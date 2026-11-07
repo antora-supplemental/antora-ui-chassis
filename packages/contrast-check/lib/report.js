@@ -43,20 +43,19 @@ export function exemptedGroups (sup = []) {
 
 /**
  * Info block for exempted findings. mode: 'summary' (default: one line per
- * suppression entry plus up to per example lines), 'all' (every finding),
+ * suppression entry, with no instance lines), 'all' (every finding),
  * 'none'. Printed to stdout, so it shows even when a host logger filters
  * info messages (e.g. Antora --log-level warn).
  */
-export function exemptedReport (sup = [], mode = 'summary', per = 3) {
+export function exemptedReport (sup = [], mode = 'summary') {
   if (mode === 'none' || !sup.length) return []
   const groups = exemptedGroups(sup)
   const out = [`info  ${sup.length} exempted finding(s) from ${groups.length} suppression(s):`]
   for (const g of groups) {
     const lv = { error: 0, warning: 0 }; for (const f of g.findings) lv[f.level]++
-    out.push(`info  exempted by ${g.id}${g.expires ? ` until ${g.expires}` : ''}: ${g.findings.length} finding(s) (${lv.error} error, ${lv.warning} warning): ${g.reason}`)
-    const show = mode === 'all' ? g.findings : g.findings.slice(0, per)
+    out.push(`info  ${g.id}: ${g.findings.length} findings suppressed${g.expires ? ` until ${g.expires}` : ''} (${lv.error} error, ${lv.warning} warning): ${g.reason}`)
+    const show = mode === 'all' ? g.findings : []
     for (const f of show) out.push('        ' + exemptedLine(f))
-    if (show.length < g.findings.length) out.push(`        ... ${g.findings.length - show.length} more (--exempted all)`)
   }
   return out
 }
@@ -122,3 +121,8 @@ export function exemptedAnnotations (sup = []) {
 export function suppressionAnnotations (ws = []) { return ws.map((w) => `::warning title=${escProp(`contrast-check suppression-${w.kind}`)}::${esc(w.message)}`) }
 
 export function writeSummary (md, file = process.env.GITHUB_STEP_SUMMARY) { if (file) appendFileSync(file, md) }
+
+/** Machine-readable per-suppression counts, using the same grouped findings as console and notices. */
+export function suppressedCounts (sup = []) {
+  return Object.fromEntries(exemptedGroups(sup).map((g) => [g.id, { count: g.findings.length, ...counts(g.findings), expires: g.expires, reason: g.reason }]))
+}
