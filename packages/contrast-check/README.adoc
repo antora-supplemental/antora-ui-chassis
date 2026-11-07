@@ -43,6 +43,7 @@ contrast-check build/site --json=contrast.json --fail-on warning
 | `--fail-on error\|warning\|none` | Exit 1 on errors (default), on any finding, or never (report only).
 | `--strict` | Same as `--fail-on warning`.
 | `--suppress <file>` | Suppression list (JSON, JSON5 or YAML; repeatable), added to the config's `suppress`. See <<Suppressions>>.
+| `--exempted <mode>` | Exempted (suppressed) findings as info lines: `summary` (default; per suppression entry, with expiry, reason and up to three examples), `all`, or `none`. Also a step-summary table and one `::notice` per entry in GitHub Actions.
 | `--show-suppressed` | List suppressed findings with the entry and reason.
 | `--fail-on-stale` | Exit 1 when a suppression matched nothing or has expired.
 | `--quiet` | Totals only.

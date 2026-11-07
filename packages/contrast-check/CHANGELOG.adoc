@@ -1,5 +1,14 @@
 = Changelog
 
+== 0.4.0 - 2026-11-07
+
+=== Added
+
+* Exempted findings are reported by default as info lines on stdout (so they show even when a host such as Antora runs with `--log-level warn`): one line per suppression entry with its expiry, reason and error/warning counts, plus up to three `exempted: <rule> <scheme> <selector> <fg> on <bg> until <date> (<id>: <reason>)` lines each.
+* `--exempted summary|all|none` (config `exempted`, Action input `exempted`); `all` prints every exempted finding.
+* Step summary: an exempted table (suppression, until, findings, reason). GitHub Actions: one `::notice` annotation per suppression entry.
+* JSON `suppressed[]` entries carry `suppressExpires`.
+
 == 0.3.1 - 2026-10-28
 
 === Fixed

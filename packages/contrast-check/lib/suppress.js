@@ -91,7 +91,7 @@ export function applySuppressions (findings, entries, now = today()) {
   for (const f of findings) {
     if (f.suppressedBy) { suppressed.push(f); continue }
     const s = active.find((x) => matches(x, f))
-    if (s) { used.add(s.id); suppressed.push({ ...f, suppressedBy: s.id, suppressReason: s.reason }) } else kept.push(f)
+    if (s) { used.add(s.id); suppressed.push({ ...f, suppressedBy: s.id, suppressReason: s.reason, suppressExpires: s.expires }) } else kept.push(f)
   }
   return { kept, suppressed, used, expired }
 }

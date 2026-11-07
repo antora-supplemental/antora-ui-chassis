@@ -25,6 +25,42 @@ export function line (f) {
   return `${f.level === 'error' ? 'error' : 'warn '} ${f.rule} ${where(f)} ${f.selector ?? ''}${bits.length ? ' | ' + bits.join(', ') : ''}\n        ${f.message}`
 }
 
+/** One info line per exempted finding: "exempted: <rule> <scheme> <selector> <fg> on <bg> until <date> (<id>: reason)". */
+export function exemptedLine (f) {
+  const bits = [f.rule, f.scheme ? `${f.scheme}/${f.mode}${f.state ? ' [' + f.state + ']' : ''}` : (f.file || ''), f.selector || '', colors(f), f.suppressExpires ? `until ${f.suppressExpires}` : (f.suppressedBy === 'inline' ? '' : 'no expiry')].filter(Boolean)
+  return `exempted: ${bits.join(' ')} (${f.suppressedBy}: ${f.suppressReason})`
+}
+
+/** Exempted findings grouped by suppression id: [{ id, expires, reason, findings }]. */
+export function exemptedGroups (sup = []) {
+  const m = new Map()
+  for (const f of sortFindings(sup)) {
+    if (!m.has(f.suppressedBy)) m.set(f.suppressedBy, { id: f.suppressedBy, expires: f.suppressExpires || null, reason: f.suppressReason, findings: [] })
+    m.get(f.suppressedBy).findings.push(f)
+  }
+  return [...m.values()]
+}
+
+/**
+ * Info block for exempted findings. mode: 'summary' (default: one line per
+ * suppression entry plus up to per example lines), 'all' (every finding),
+ * 'none'. Printed to stdout, so it shows even when a host logger filters
+ * info messages (e.g. Antora --log-level warn).
+ */
+export function exemptedReport (sup = [], mode = 'summary', per = 3) {
+  if (mode === 'none' || !sup.length) return []
+  const groups = exemptedGroups(sup)
+  const out = [`info  ${sup.length} exempted finding(s) from ${groups.length} suppression(s):`]
+  for (const g of groups) {
+    const lv = { error: 0, warning: 0 }; for (const f of g.findings) lv[f.level]++
+    out.push(`info  exempted by ${g.id}${g.expires ? ` until ${g.expires}` : ''}: ${g.findings.length} finding(s) (${lv.error} error, ${lv.warning} warning): ${g.reason}`)
+    const show = mode === 'all' ? g.findings : g.findings.slice(0, per)
+    for (const f of show) out.push('        ' + exemptedLine(f))
+    if (show.length < g.findings.length) out.push(`        ... ${g.findings.length - show.length} more (--exempted all)`)
+  }
+  return out
+}
+
 const supTail = (x) => x.suppressed?.length ? `, ${x.suppressed.length} suppressed` : ''
 /** Totals line: "E error(s), W warning(s)[, N suppressed]". */
 export function totals (fs, extra = {}) { const c = counts(fs); return `${c.error} error(s), ${c.warning} warning(s)${supTail(extra)}` }
@@ -35,6 +71,7 @@ export function consoleReport (fs, meta, limit = 200, extra = {}) {
   for (const f of s.slice(0, limit)) out.push(line(f))
   if (s.length > limit) out.push(`... ${s.length - limit} more (use --json for all)`)
   for (const w of extra.suppressionWarnings || []) out.push(`warn  suppression-${w.kind} ${w.message}`)
+  out.push(...exemptedReport(extra.suppressed, extra.showSuppressed ? 'none' : (extra.exempted ?? 'summary')))
   if (extra.showSuppressed && extra.suppressed?.length) {
     out.push('suppressed:')
     for (const f of sortFindings(extra.suppressed)) out.push(line(f).replace(/^(error|warn )/, 'supp ') + `\n        suppressed by ${f.suppressedBy}: ${f.suppressReason}`)
@@ -65,11 +102,20 @@ export function markdownSummary (fs, meta, top = 30, extra = {}) {
     for (const f of s.slice(0, top)) out.push(`| ${f.level} | ${f.rule} | ${cell(f.scheme ? `${f.scheme}/${f.mode}` : '')} | ${cell(f.pages?.[0] || f.file)} | \`${cell(f.selector)}\` | ${cell(colors(f))} | ${f.ratio != null ? `${f.ratio}:1` : ''} | ${cell(f.suggestion)} |`)
   }
   if (extra.suppressionWarnings?.length) out.push('', '### Suppression warnings', '', ...extra.suppressionWarnings.map((w) => `- **${w.kind}**: ${cell(w.message)}`))
+  if (!extra.showSuppressed && extra.suppressed?.length && extra.exempted !== 'none') {
+    out.push('', `### ${extra.suppressed.length} exempted`, '', '| Suppression | Until | Findings | Reason |', '| --- | --- | ---: | --- |')
+    for (const g of exemptedGroups(extra.suppressed)) out.push(`| ${cell(g.id)} | ${cell(g.expires || '')} | ${g.findings.length} | ${cell(g.reason)} |`)
+  }
   if (extra.showSuppressed && extra.suppressed?.length) {
     out.push('', `### ${extra.suppressed.length} suppressed`, '', '| Rule | Scheme | Page | Selector | By | Reason |', '| --- | --- | --- | --- | --- | --- |')
     for (const f of sortFindings(extra.suppressed)) out.push(`| ${f.rule} | ${cell(f.scheme ? `${f.scheme}/${f.mode}` : '')} | ${cell(f.pages?.[0] || f.file)} | \`${cell(f.selector)}\` | ${cell(f.suppressedBy)} | ${cell(f.suppressReason)} |`)
   }
   return out.join('\n') + '\n'
+}
+
+/** ::notice lines, one per suppression entry that exempted findings. */
+export function exemptedAnnotations (sup = []) {
+  return exemptedGroups(sup).map((g) => `::notice title=${escProp(`contrast-check exempted (${g.id})`)}::${esc(`${g.findings.length} finding(s) exempted${g.expires ? ` until ${g.expires}` : ''}: ${g.reason}`)}`)
 }
 
 /** ::warning lines for stale and expired suppressions. */

@@ -28,6 +28,9 @@ inputs:
   suppress:
     description: Suppression list file (JSON, JSON5 or YAML), added to the config's suppress entries.
     default: ""
+  exempted:
+    description: "Exempted (suppressed) findings as info lines: summary, all or none."
+    default: "summary"
   show-suppressed:
     description: "true to list suppressed findings in the log and summary."
     default: "false"
@@ -67,6 +70,7 @@ runs:
         CC_JSON: ${{ inputs.json }}
         CC_SUPPRESS: ${{ inputs.suppress }}
         CC_SHOW_SUP: ${{ inputs.show-suppressed }}
+        CC_EXEMPTED: ${{ inputs.exempted }}
         CC_FAIL_STALE: ${{ inputs.fail-on-stale }}
         CC_STATES: ${{ inputs.states }}
         CC_ARGS: ${{ inputs.args }}
@@ -80,6 +84,7 @@ runs:
         [ -n "$CC_CONFIG" ] && a+=(--config "$CC_CONFIG")
         [ -n "$CC_SUPPRESS" ] && a+=(--suppress "$CC_SUPPRESS")
         [ "$CC_SHOW_SUP" = "true" ] && a+=(--show-suppressed)
+        [ -n "$CC_EXEMPTED" ] && a+=(--exempted "$CC_EXEMPTED")
         [ "$CC_FAIL_STALE" = "true" ] && a+=(--fail-on-stale)
         IFS=',' read -ra _st <<< "$CC_STATES"; for s in "${_st[@]}"; do s="${s// /}"; [ -n "$s" ] && a+=(--state "$s"); done
         if [ -z "${CONTRAST_CHECK_CHROME:-}" ]; then

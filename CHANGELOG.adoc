@@ -1,5 +1,9 @@
 = Changelog
 
+== contrast-check-v0.4.0 - 2026-11-07
+
+* **`contrast-check` 0.4.0:** exempted (suppressed) findings are now visible by default: an info block groups them by suppression entry (id, expiry, reason, error/warning counts, example lines such as `exempted: color-contrast light/light .a #178f80 on #ffffff until 2027-01-31 (id: reason)`), the step summary has an exempted table, and GitHub Actions gets one `::notice` per entry. `--exempted summary|all|none` (config `exempted`, Action input `exempted`) controls it.
+
 == contrast-check-v0.3.1 - 2026-10-28
 
 * **`contrast-check` 0.3.1:** the focus-indicator check judges the strongest indicator (outline, changed shadow or changed border) instead of the first one found, so a faint halo next to a solid border change is no longer a false failure.
