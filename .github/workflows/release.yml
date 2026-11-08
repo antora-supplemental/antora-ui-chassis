@@ -66,6 +66,11 @@ jobs:
             echo "skip=false"; echo "dir=$DIR"; echo "version=$VERSION"; echo "name=$NAME"; echo "npm=$NPM"
           } >> "$GITHUB_OUTPUT"
 
+      - name: Install tested package dependencies
+        if: steps.pkg.outputs.skip == 'false'
+        working-directory: packages/${{ steps.pkg.outputs.dir }}
+        run: npm install --no-audit --no-fund --ignore-scripts
+
       - name: Test
         if: steps.pkg.outputs.skip == 'false'
         run: |
