@@ -1,5 +1,11 @@
 = Changelog
 
+== 2026-11-08
+
+=== Bounded total audit time
+
+* Contrast Check 0.4.2 enforces a configurable ten-minute total audit deadline across startup, pages, schemes and states. Incomplete audits fail clearly instead of silently passing or writing a successful partial report. Browser and server cleanup also covers launch failures.
+
 == 2026-11-07
 
 === Compact exemption summaries

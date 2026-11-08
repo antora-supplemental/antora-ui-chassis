@@ -172,3 +172,7 @@ console.log(consoleReport(findings, meta))
 === Compact exemption output
 
 The default `--exempted summary` lists only each suppression id and its matched finding count, for example `devcentr-accent-links-light: 670 findings suppressed`. Use `--exempted all` for individual findings. GitHub receives one notice per matched suppression; JSON `counts.bySuppression` retains counts and reasons alongside the full `suppressed` array.
+
+== Total audit time limit
+
+`maxDurationMs` (CLI `--max-duration-ms`, Action input `max-duration-ms`) defaults to 600000 milliseconds (10 minutes) across browser launch, every page, color scheme and dynamic state. On expiry the audit closes its browser/server and fails with exit 2, even with `--fail-on none`; it never produces a successful partial report. Allow up to five seconds for browser cleanup. Reduce representatives/states or explicitly raise the budget for an intentionally large source change.

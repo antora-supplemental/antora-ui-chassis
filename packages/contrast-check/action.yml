@@ -13,6 +13,9 @@ inputs:
   max-pages:
     description: Page cap.
     default: "20"
+  max-duration-ms:
+    description: Total audit time limit in milliseconds (default 600000; incomplete audits fail).
+    default: ""
   schemes:
     description: Comma-separated scheme ids (default every scheme in the paint manifest).
     default: ""
@@ -63,6 +66,7 @@ runs:
         CC_SITE: ${{ inputs.site }}
         CC_PAGES: ${{ inputs.pages }}
         CC_MAX: ${{ inputs.max-pages }}
+        CC_DURATION: ${{ inputs.max-duration-ms }}
         CC_SCHEMES: ${{ inputs.schemes }}
         CC_PAINT: ${{ inputs.paint }}
         CC_CONFIG: ${{ inputs.config }}
@@ -78,6 +82,7 @@ runs:
       run: |
         set -u
         a=("$CC_SITE" --max-pages "$CC_MAX" --fail-on "$CC_FAIL" "--json=$CC_JSON")
+        [ -n "$CC_DURATION" ] && a+=(--max-duration-ms "$CC_DURATION")
         [ -n "$CC_PAGES" ] && a+=(--pages "$CC_PAGES")
         [ -n "$CC_SCHEMES" ] && a+=(--schemes "$CC_SCHEMES")
         [ -n "$CC_PAINT" ] && a+=(--paint "$CC_PAINT")

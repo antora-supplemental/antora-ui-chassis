@@ -10,6 +10,7 @@ const HELP = `Usage: contrast-check <site-dir|url> [options]
 
   --pages <list>      comma-separated pages or globs (site-relative), e.g. "index.html,guide/**/*.html"
   --max-pages <n>     cap on pages (default 20)
+  --max-duration-ms <n> total audit time limit (default 600000 / 10 minutes; incomplete audits exit 2)
   --schemes <ids>     only these scheme ids (default: every scheme in the paint manifest)
   --paint <file.css>  paint stylesheet(s) for the manifest and static checks (repeatable; default: discovered)
   --config <file>     config file (default: ./contrast-check.config.json when present)
@@ -34,6 +35,7 @@ function parse (argv) {
     if (a === '-h' || a === '--help') o.help = true
     else if (a === '--pages') o.pages = next().split(',').map((s) => s.trim()).filter(Boolean)
     else if (a === '--max-pages') o.maxPages = +next()
+    else if (a === '--max-duration-ms') o.maxDurationMs = +next()
     else if (a === '--schemes') o.schemes = next().split(',').map((s) => s.trim()).filter(Boolean)
     else if (a === '--paint') o.paints.push(next())
     else if (a === '--config') o.config = next()
@@ -64,7 +66,7 @@ try {
   const o = parse(process.argv.slice(2))
   if (o.help || !o.target) { console.log(HELP); process.exit(o.help ? 0 : 2) }
   const { config: fileCfg } = await loadConfig(o.config)
-  const cli = { pages: o.pages, maxPages: o.maxPages, schemes: o.schemes, paints: o.paints.length ? o.paints : undefined, nearMargin: o.nearMargin, apca: o.apca || undefined }
+  const cli = { pages: o.pages, maxPages: o.maxPages, maxDurationMs: o.maxDurationMs, schemes: o.schemes, paints: o.paints.length ? o.paints : undefined, nearMargin: o.nearMargin, apca: o.apca || undefined }
   if (o.noFocus) cli.maxFocus = 0
   if (o.states) cli.states = [...(fileCfg.states || []), ...o.states]
   let failOn = o.failOn || (o.strict ? 'warning' : null) || fileCfg.failOn || (fileCfg.strict ? 'warning' : 'error')

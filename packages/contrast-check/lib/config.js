@@ -10,6 +10,7 @@ export const DEFAULTS = Object.freeze({
   apca: false, // add an APCA Lc readout to text findings
   pages: [], // site-relative paths or globs; empty = every .html (up to maxPages)
   maxPages: 20,
+  maxDurationMs: 600000, // total audit budget, including launch and all schemes/states
   schemes: [], // scheme ids to run; empty = every scheme in the manifest
   paints: [], // paint stylesheets for static checks; empty = discover from the page
   maxText: 1500,
@@ -38,6 +39,7 @@ export function mergeConfig (...layers) {
       else out[k] = v
     }
   }
+  if (!Number.isInteger(out.maxDurationMs) || out.maxDurationMs <= 0 || out.maxDurationMs > 2147483647) throw new Error('contrast-check: maxDurationMs must be a positive integer <= 2147483647')
   if (!Array.isArray(out.suppress)) throw new Error('contrast-check: suppress must be an array')
   if (!Array.isArray(out.states)) throw new Error('contrast-check: states must be an array')
   for (const s of out.states) if (typeof s !== 'string' && (!s || typeof s.name !== 'string' || !Array.isArray(s.steps))) throw new Error('contrast-check: each state is a preset name or { name, steps: [...] }')

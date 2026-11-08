@@ -166,13 +166,34 @@ export async function applyState (page, state) {
   return true
 }
 
+/** A deadline covers the complete audit, not a fresh timeout per page/state. */
 export async function run (target, cfg, log = () => {}) {
+  const ms = cfg.maxDurationMs ?? 600000
+  if (!Number.isInteger(ms) || ms <= 0 || ms > 2147483647) throw new Error('contrast-check: maxDurationMs must be a positive integer <= 2147483647')
+  const scope = {}; let timer
+  const expired = new Error('contrast-check: total time limit of ' + ms + ' ms exceeded; audit incomplete (no successful report/baseline). Reduce the representative pages/states or increase maxDurationMs / --max-duration-ms.')
+  const deadline = new Promise((resolve, reject) => { timer = setTimeout(() => reject(expired), ms) })
+  try {
+    return await Promise.race([audit(target, cfg, log, scope), deadline])
+  } finally {
+    clearTimeout(timer)
+    scope.closed = true
+    if (scope.srv) { scope.srv.server.closeAllConnections(); scope.srv.server.close() }
+    if (scope.browser) {
+      let grace
+      try { await Promise.race([scope.browser.close().catch(() => {}), new Promise(resolve => { grace = setTimeout(resolve, 5000) })]) } finally { clearTimeout(grace) }
+    }
+  }
+}
+
+async function audit (target, cfg, log, scope) {
   const { chromium } = require('playwright-core')
   const axeSource = readFileSync(require.resolve('axe-core/axe.min.js'), 'utf8')
   const isUrl = /^https?:\/\//.test(target)
   const dir = isUrl ? null : path.resolve(target)
   if (dir && !existsSync(dir)) throw new Error(`contrast-check: site directory not found: ${target}`)
-  const srv = dir ? await serve(dir) : null
+  const srv = scope.srv = dir ? await serve(dir) : null
+  if (scope.closed) { if (srv) srv.server.close(); throw new Error('contrast-check: audit deadline expired during server startup') }
   const base = srv ? srv.base : target.replace(/\/$/, '')
   const pages = selectPages(dir, cfg.pages, cfg.maxPages, cfg.ignore.pages)
   if (!pages.length) throw new Error('contrast-check: no pages to check')
@@ -183,9 +204,11 @@ export async function run (target, cfg, log = () => {}) {
     for (const p of ['/usr/bin/google-chrome', '/usr/bin/chromium', '/usr/bin/chromium-browser', 'C:/Program Files/Google/Chrome/Application/chrome.exe']) if (existsSync(p)) return chromium.launch({ headless: true, executablePath: p })
     throw e
   })
+  scope.browser = browser
+  if (scope.closed) { await browser.close(); throw new Error('contrast-check: audit deadline expired during browser launch') }
   const states = resolveStates(cfg.states)
   const findings = []; const meta = { pages, schemes: [], paints: [], states: states.map((s) => s.name), base: isUrl ? base : target }
-  try {
+  {
     // Paint discovery and manifest from the first page.
     const ctx0 = await browser.newContext()
     const p0 = await ctx0.newPage()
@@ -264,9 +287,6 @@ export async function run (target, cfg, log = () => {}) {
       }
       await context.close()
     }
-  } finally {
-    await browser.close()
-    if (srv) srv.server.close()
   }
   const entries = normalizeSuppressions(cfg.suppress)
   const { kept, suppressed, used, expired } = applySuppressions(findings, entries)

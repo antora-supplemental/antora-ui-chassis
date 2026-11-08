@@ -1,6 +1,6 @@
 {
   "name": "@antora-supplemental/contrast-check",
-  "version": "0.4.1",
+  "version": "0.4.2",
   "antoraRegistry": {
     "title": "Contrast Check",
     "antora": "3",
