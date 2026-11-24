@@ -1,0 +1,108 @@
+= Extension Style API (Surface Contract Protocol)
+:navtitle: Extension Style API
+:description: Strict, versioned styling protocol for Antora extensions — semantic parts, state hooks, scoped CSS custom properties, cascade layers, and static contract validation.
+
+Antora's extension model gives every package raw access to Handlebars partials, assets, and `<head>` links.
+Without a shared styling contract, themes and sibling extensions reach into private internal DOM classes and override layout invariants (for example, one extension setting `overflow-x: hidden` on another extension's horizontal scrollport).
+
+This document defines the **Extension Style API** (a *Component Style API* / *UI Surface Contract*) so extensions can be safely themed or extended without breaking whenever internal markup changes.
+
+[mermaid]
+----
+flowchart LR
+  Paint["Paint Layer (--cs-* tokens)"] --> Surface["Extension Style API (--ns-* tokens + data-ns-part/state)"]
+  Surface --> Base["Extension Base CSS"]
+  Surface --> Theme["Built-in Theme or Third-Party Style Extension"]
+  Contract["style-contract.json + Validator"] -. enforces .-> Theme
+----
+
+== The five pillars
+
+Every UI-emitting Antora extension that supports alternate styles publishes five artifacts under a short, unique namespace `<ns>` (for example `snt` for `@antora-supplemental/site-nav-tree`):
+
+=== 1. Semantic parts (`data-<ns>-part`)
+
+Public DOM hooks are exposed as semantic attributes, mirroring the Shadow DOM `::part()` model without requiring Shadow DOM:
+
+* `[data-snt-part="tree"]` — root scrollable tree container
+* `[data-snt-part="component-node"]` — top-level Antora component item
+* `[data-snt-part="component-expander"]` — top-level component toggle button
+* `[data-snt-part="component-label"]` — top-level component label/link
+
+Internal classes (`.nav-item`, `.nav-link`, `.nav-item-toggle`, layout wrappers) are **private implementation details**.
+A compliant style extension or theme never selects them directly.
+
+=== 2. Explicit states (`data-<ns>-state`) and themes (`data-<ns>-theme`)
+
+Interactive and visual states are exposed as attributes (`data-<ns>-state="expanded|collapsed|current|current-path"`), and the active style variant is stamped once on the extension's root (`data-<ns>-theme="default|framed|..."`).
+
+=== 3. Scoped design tokens (`--<ns>-*`) derived from `--cs-*`
+
+Every visual knob is a documented CSS custom property scoped to the extension namespace and defaulting to the chassis `--cs-*` token contract (see xref:color-scheme.adoc[color-scheme]):
+
+[source,css]
+----
+[data-snt-part='tree'][data-snt-theme='framed'] {
+  --snt-component-border-color: var(
+    --cs-border-subtle,
+    color-mix(in srgb, var(--cs-border, currentColor) 42%, transparent)
+  );
+  --snt-component-radius: 0px;
+  --snt-component-expander-size: 0.4375rem;
+}
+----
+
+Themes never hardcode hex/rgb/hsl color literals outside token declarations, so light/dark mode and custom color schemes work automatically.
+
+=== 4. Cascade layer discipline (`@layer`)
+
+When the host layout and paint declare the canonical layer order:
+
+[source,css]
+----
+@layer antora-base, antora-chassis, antora-layout, antora-paint,
+       antora-extension, antora-extension-theme, antora-site;
+----
+
+* Extension base styles live in `antora-extension`.
+* Built-in themes and third-party style extensions live in `antora-extension-theme`.
+* Site-specific tweaks live in `antora-site`.
+
+This removes specificity races and `!important` escalation.
+During the transition while Antora 3 bundles remain unlayered, extensions may keep unlayered base/theme CSS while still enforcing pillars 1, 2, 3, and 5.
+
+=== 5. Machine-readable contract + validator (`style-contract.json`)
+
+Each extension ships `style-contract.json` at the package root and declares its major version in `package.json`:
+
+[source,json]
+----
+{
+  "antoraRegistry": {
+    "provides": { "site-nav-tree-style-api": "1" }
+  }
+}
+----
+
+A separate style extension declares `"uses": { "site-nav-tree-style-api": "^1" }` and runs the extension's validator in CI (same model as `packages/color-scheme/scripts/validate-paint.mjs`).
+The validator rejects:
+
+* `@import` and external `url()` references,
+* private CSS classes or IDs not declared in `allowedParts`,
+* unknown `data-<ns>-part` / `data-<ns>-state` values,
+* undeclared custom properties,
+* layout-invariant violations declared in `forbiddenInThemes` (for example overriding `overflow`, `overflow-x`, or `overflow-y` on `[data-snt-part="tree"]`),
+* literal color values in strict mode.
+
+== Built-in theme vs. separate style extension
+
+* **Built-in theme option** (for example `siteNavTree: { theme: 'framed' }`): best for first-party styles maintained alongside the extension — zero extra repository or release churn while still written strictly against `style-contract.json`.
+* **Separate style extension**: best for community/brand styles or experimental skins once the Style API major is stable — it injects one CSS file targeting `[data-<ns>-part="..."]`, declares `"uses": { "<ext>-style-api": "^1" }`, and passes the contract validator in CI.
+
+== Reference implementation
+
+`@antora-supplemental/site-nav-tree` implements `site-nav-tree-style-api@1`:
+
+* Contract: `style-contract.json`
+* Validator: `lib/validate-style.js` (`@antora-supplemental/site-nav-tree/validate-style`)
+* Reference theme: `ui/css/themes/framed.css` (`theme: framed`)

@@ -11,3 +11,4 @@ There is no fair rule that limits them to additive patches only.
 * Prefer injecting into slots over replacing `body.hbs` / column shells.
 * Chassis contracts (viewport overflow, scheme hooks) change rarely; body silhouettes may change more often.
 * If an extension must re-weld the body, it becomes a fork of that body kit — own it explicitly.
+* Extensions that expose themeable UI should publish a versioned **Extension Style API** (`data-<ns>-part`, `data-<ns>-state`, `--<ns>-*` tokens, and `style-contract.json`) — see xref:extension-style-api.adoc[Extension Style API].

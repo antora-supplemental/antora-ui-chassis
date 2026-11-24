@@ -104,6 +104,20 @@
     return menu.querySelectorAll('li.nav-item[data-depth="0"]').length > 1
   }
 
+  function targetInForest (url) {
+    if (!siteForestEnabled()) return false
+    var targetComp = componentName(url)
+    if (!targetComp) return false
+    var menu = document.querySelector('.nav-container [data-panel=menu]')
+    if (!menu) return false
+    var roots = menu.querySelectorAll('li.nav-item[data-depth="0"] > a.nav-link')
+    for (var i = 0; i < roots.length; i++) {
+      var href = resolveForestNavHref(roots[i])
+      if (href && componentName(href) === targetComp) return true
+    }
+    return false
+  }
+
   function resolveForestNavHref (a) {
     if (!a) return ''
     if (typeof window.siteNavTreePrepareNavMenu === 'function') {
@@ -415,7 +429,7 @@
   document.addEventListener('click', function (ev) {
     if (!ev.target || !ev.target.closest) return
     var a = ev.target.closest('a')
-    if (!a || ev.defaultPrevented || a.target === '_blank' || a.hasAttribute('download')) return
+    if (!a || ev.defaultPrevented || a.target === '_blank' || a.hasAttribute('download') || a.getAttribute('data-soft-nav') === 'false') return
     var href = a.getAttribute('href')
     if (!href || href.charAt(0) === '#') return
     if (sameOrigin(a.href) && samePath(a.href)) {
@@ -428,7 +442,7 @@
     var forestNav = navForestMenuLink(a) && siteForestEnabled()
     var destHref = forestNav ? resolveForestNavHref(a) : a.href
     if (!sameOrigin(destHref)) return
-    if (!sameComponent(destHref) && !forestNav) {
+    if (!sameComponent(destHref) && !forestNav && !targetInForest(destHref)) {
       if (a.closest('.nav-container') && typeof window.siteNavTreeSaveScroll === 'function') {
         window.siteNavTreeSaveScroll()
       }
