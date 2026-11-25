@@ -33,6 +33,21 @@ describe('fixtures (browser)', { skip }, () => {
     const f = r.findings.find((x) => x.rule === 'color-contrast')
     assert.ok(f.fg && f.bg && f.ratio < 4.5 && f.suggestion && f.page === '/index.html')
   })
+  it('budget: stops before pages that do not fit, reports them pending, exits by findings only', () => {
+    const pages = ['c.html', 'a.html', 'b.html'] // given priority order is kept
+    const r = check('pages', '--no-focus', '--pages', pages.join(','), '--budget-ms', '1')
+    assert.equal(r.code, 0)
+    assert.equal(r.meta.incomplete, true); assert.equal(r.meta.stopReason, 'budget')
+    assert.deepEqual(r.meta.audited, ['c.html']); assert.deepEqual(r.meta.pending, pages.slice(1))
+    const all = check('pages', '--no-focus', '--pages', pages.join(','), '--budget-ms', '600000')
+    assert.equal(all.meta.incomplete, false); assert.deepEqual(all.meta.audited, pages); assert.deepEqual(all.meta.pending, [])
+  })
+  it('content pages skip dynamic states and focus/hover; full pages keep them', () => {
+    const c = check('state', '--state', 'search-results', '--content-pages', 'index.html')
+    assert.equal(c.code, 0); assert.ok(!c.findings.some((f) => f.state || /^focus|^hover/.test(f.rule)))
+    const f = check('state', '--no-focus', '--state', 'search-results')
+    assert.equal(f.code, 1); assert.ok(f.findings.some((x) => x.state === 'search-results'))
+  })
   it('state: hidden search results pass statically, fail in dark once typed', () => {
     const s = check('state', '--no-focus'); assert.equal(s.code, 0); assert.equal(s.counts.error, 0)
     const r = check('state', '--no-focus', '--state', 'search-results')

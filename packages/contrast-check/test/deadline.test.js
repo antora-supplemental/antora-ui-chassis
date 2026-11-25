@@ -7,6 +7,9 @@ import { run } from '../lib/run.js'
 test('total budget defaults and validation', () => {
   assert.equal(mergeConfig().maxDurationMs, 600000)
   for (const n of [0, -1, NaN, Infinity, 1.5, 2147483648]) assert.throws(() => mergeConfig({ maxDurationMs: n }), /maxDurationMs/)
+  assert.equal(mergeConfig().budgetMs, 0)
+  for (const n of [-1, 1.5, 600001]) assert.throws(() => mergeConfig({ budgetMs: n }), /budgetMs/)
+  assert.equal(mergeConfig({ budgetMs: 540000 }).budgetMs, 540000)
 })
 test('deadline fails even report-only CLI without emitting successful JSON', () => {
   const start = Date.now()

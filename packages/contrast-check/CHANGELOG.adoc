@@ -1,5 +1,14 @@
 = Changelog
 
+== 2026-11-25
+
+=== Soft budget and content-only pages
+
+* Contrast Check 0.4.3 adds `budgetMs` (CLI `--budget-ms`, Action input `budget-ms`; off by default). The audit stops before a page that would not finish within the budget, based on the slowest page so far. It reports the pages it did not reach in JSON `meta.pending` with `meta.incomplete` and `meta.stopReason`, and exits by findings only. A host can carry the pending pages over to its next run. Without a budget, the 0.4.2 behavior is unchanged: the total time limit fails with exit 2.
+* Pages are now audited page by page across every scheme, so a stop never leaves a page checked in light mode only. With a budget, the total time limit also returns the whole pages checked so far instead of discarding them.
+* `contentPages` (CLI `--content-pages`) checks listed pages for content only: axe and the text probe in every scheme, without the focus and hover pass or dynamic states. Those test site chrome, which representative pages already cover.
+* `--selection <file>` reads `pages` and `contentPages` from JSON, for lists too long for a command line.
+
 == 2026-11-08
 
 === Bounded total audit time

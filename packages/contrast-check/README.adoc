@@ -33,6 +33,10 @@ contrast-check build/site --json=contrast.json --fail-on warning
 |===
 | `--pages <list>` | Comma-separated pages or globs, site-relative. `_` folders and `404.html` are skipped.
 | `--max-pages <n>` | Page cap (20).
+| `--max-duration-ms <n>` | Total audit time limit (600000). See <<Total audit time limit>>.
+| `--budget-ms <n>` | Soft budget (off). Pages that would not finish in time are reported as pending instead of failing. See <<Soft budget>>.
+| `--content-pages <list>` | Pages checked for content only: axe and the text probe, no focus/hover pass, no dynamic states.
+| `--selection <file>` | JSON `{ "pages": [...], "contentPages": [...] }` for long lists.
 | `--schemes <ids>` | Only these scheme ids.
 | `--paint <file.css>` | Paint stylesheet(s) for the manifest and static checks; repeatable. Default: discovered from the first page.
 | `--config <file>` | Config file. Default `./contrast-check.config.json` when present.
@@ -175,4 +179,13 @@ The default `--exempted summary` lists only each suppression id and its matched 
 
 == Total audit time limit
 
-`maxDurationMs` (CLI `--max-duration-ms`, Action input `max-duration-ms`) defaults to 600000 milliseconds (10 minutes) across browser launch, every page, color scheme and dynamic state. On expiry the audit closes its browser/server and fails with exit 2, even with `--fail-on none`; it never produces a successful partial report. Allow up to five seconds for browser cleanup. Reduce representatives/states or explicitly raise the budget for an intentionally large source change.
+`maxDurationMs` (CLI `--max-duration-ms`, Action input `max-duration-ms`) defaults to 600000 milliseconds (10 minutes) across browser launch, every page, color scheme and dynamic state. On expiry the audit closes its browser/server and fails with exit 2, even with `--fail-on none`; without a soft budget it never produces a successful partial report. With `budgetMs` set, it returns the whole pages checked so far and lists the rest as pending (see <<Soft budget>>). Allow up to five seconds for browser cleanup. Reduce representatives/states or explicitly raise the budget for an intentionally large source change.
+
+== Soft budget
+
+`budgetMs` (CLI `--budget-ms`, Action input `budget-ms`) is off by default. When set, it must not exceed `maxDurationMs`. Before each page the audit estimates the page's cost from the slowest page of the same kind (full or content-only) so far. If the page would not finish within the budget, the audit stops. It always checks at least one page.
+
+Pages are checked in the given order, each in every scheme before the next page starts, so put the pages that matter most first. The JSON report lists `meta.audited`, `meta.pending`, `meta.incomplete` and `meta.stopReason` (`budget`, or `deadline` when the total time limit hit a slow page). The exit code depends on findings only. A host such as Facto saves the pending pages and checks them first on the next run, so nothing is skipped for good.
+
+`contentPages` lists pages whose own content changed but whose chrome is the same as a representative page. They get axe and the text probe in every scheme. The focus and hover pass and dynamic states run only on the other pages.
+

@@ -170,9 +170,18 @@ export async function applyState (page, state) {
 export async function run (target, cfg, log = () => {}) {
   const ms = cfg.maxDurationMs ?? 600000
   if (!Number.isInteger(ms) || ms <= 0 || ms > 2147483647) throw new Error('contrast-check: maxDurationMs must be a positive integer <= 2147483647')
-  const scope = {}; let timer
+  const scope = { started: Date.now() }; let timer
   const expired = new Error('contrast-check: total time limit of ' + ms + ' ms exceeded; audit incomplete (no successful report/baseline). Reduce the representative pages/states or increase maxDurationMs / --max-duration-ms.')
-  const deadline = new Promise((resolve, reject) => { timer = setTimeout(() => reject(expired), ms) })
+  // With a soft budget (budgetMs) the hard deadline is a safety net for a hung
+  // page: whole pages checked so far are reported and the rest stay pending.
+  const deadline = new Promise((resolve, reject) => {
+    timer = setTimeout(() => {
+      const p = scope.progress
+      if (!cfg.budgetMs || !p || !p.audited.length) return reject(expired)
+      scope.closed = true
+      resolve(finish(p.findings.slice(), p.meta, tally(scope), cfg, { stopReason: 'deadline' }))
+    }, ms)
+  })
   try {
     return await Promise.race([audit(target, cfg, log, scope), deadline])
   } finally {
@@ -225,15 +234,33 @@ async function audit (target, cfg, log, scope) {
     meta.paints = paints.map((p) => p.file)
     for (const p of paints) findings.push(...(await checkPaint(p.css, p.file, cfg)).filter((f) => !cfg.ignore.rules.includes(f.rule)))
 
+    const contexts = []
     for (const r of runs) {
       const context = await browser.newContext({ viewport: { width: 1280, height: 900 }, colorScheme: r.mode, reducedMotion: 'reduce' })
-      const page = await context.newPage()
-      for (const pg of pages) {
+      contexts.push({ r, context, page: await context.newPage() })
+    }
+    // Page-major order: a page counts as audited only once every scheme run has
+    // checked it, so a budget stop leaves whole pages pending, never half pages.
+    const contentPages = new Set((cfg.contentPages || []).map((p) => String(p).replace(/^\//, '')))
+    const cost = { full: 0, content: 0 }
+    const progress = scope.progress = { findings, meta, audited: [], pages }
+    for (let i = 0; i < pages.length; i++) {
+      if (scope.closed) break
+      const pg = pages[i]
+      const contentOnly = contentPages.has(pg)
+      const kind = contentOnly ? 'content' : 'full'
+      if (cfg.budgetMs && progress.audited.length) {
+        const estimate = cost[kind] || Math.max(cost.full, cost.content)
+        if (Date.now() - scope.started + estimate > cfg.budgetMs) break
+      }
+      const t0 = Date.now()
+      const pageFindings = []
+      for (const { r, page } of contexts) {
         const url = withQuery(`${base}/${pg}`, r, 'scheme')
         const ctx = { page: '/' + pg, scheme: r.id, mode: r.mode, file: dir ? path.relative(process.cwd(), path.join(dir, pg.split('?')[0])) : url }
         log(`  ${r.id}/${r.mode} ${ctx.page}`)
         const state = await open(page, url, r)
-        if (r.query && state.scheme !== r.id) { findings.push({ ...ctx, level: 'warning', rule: 'scheme-not-applied', selector: 'html', message: `?scheme=${r.id} did not apply (data-scheme is ${state.scheme})` }); continue }
+        if (r.query && state.scheme !== r.id) { pageFindings.push({ ...ctx, level: 'warning', rule: 'scheme-not-applied', selector: 'html', message: `?scheme=${r.id} did not apply (data-scheme is ${state.scheme})` }); continue }
         await page.addScriptTag({ content: axeSource })
         const axeRes = await page.evaluate(async () => (await window.axe.run(document, { runOnly: ['color-contrast'], resultTypes: ['violations'] })).violations)
         const ax = axeFindings(axeRes, ctx, cfg).filter((f) => !cfg.ignore.selectors.some((s) => f.selector.includes(s)))
@@ -243,7 +270,7 @@ async function audit (target, cfg, log, scope) {
         const pf = analyze(m, { ...ctx, axeSelectors: axeSel }, cfg)
         // Focus: one Tab so Chrome treats focus as keyboard focus, then each focusable.
         const fs = []
-        if (cfg.maxFocus > 0) {
+        if (cfg.maxFocus > 0 && !contentOnly) {
           const ids = await page.evaluate(focusables, { max: cfg.maxFocus, ignoreSelectors: cfg.ignore.selectors })
           await page.keyboard.press('Tab')
           for (const i of ids) {
@@ -270,24 +297,44 @@ async function audit (target, cfg, log, scope) {
         const pageFs = [...ax, ...pf, ...fs].filter((f) => !cfg.ignore.rules.includes(f.rule))
         // Inline opt-out: data-contrast-check-ignore="rule1 rule2" on the element or an ancestor (empty = every rule).
         const marks = await page.evaluate((sels) => sels.map((s) => { try { const h = s && document.querySelector(s)?.closest('[data-contrast-check-ignore]'); return h ? h.getAttribute('data-contrast-check-ignore') : null } catch { return null } }), pageFs.map((f) => f.selector))
-        pageFs.forEach((f, i) => findings.push({ ...f, file: ctx.file, ...(marks[i] != null && inlineIgnores(marks[i], f.rule) ? { suppressedBy: 'inline', suppressReason: `data-contrast-check-ignore="${marks[i]}"` } : {}) }))
-        for (const s of states) {
+        pageFs.forEach((f, i) => pageFindings.push({ ...f, file: ctx.file, ...(marks[i] != null && inlineIgnores(marks[i], f.rule) ? { suppressedBy: 'inline', suppressReason: `data-contrast-check-ignore="${marks[i]}"` } : {}) }))
+        for (const s of contentOnly ? [] : states) {
           if (s.pages && !s.pages.map(globToRegExp).some((re) => re.test(pg))) continue
           const sctx = { ...ctx, state: s.name }
           log(`  ${r.id}/${r.mode} ${ctx.page} [${s.name}]`)
           await open(page, url, r)
-          if (!(await applyState(page, s))) { findings.push({ ...sctx, level: 'warning', rule: 'state-not-reached', selector: 'html', message: `state '${s.name}' could not be reached on ${ctx.page}` }); continue }
+          if (!(await applyState(page, s))) { pageFindings.push({ ...sctx, level: 'warning', rule: 'state-not-reached', selector: 'html', message: `state '${s.name}' could not be reached on ${ctx.page}` }); continue }
           await page.addScriptTag({ content: axeSource })
           const sAxe = await page.evaluate(async () => (await window.axe.run(document, { runOnly: ['color-contrast'], resultTypes: ['violations'] })).violations)
           const sSel = new Set(); for (const v of sAxe) for (const n of v.nodes) sSel.add(n.target.join(' '))
           const sm = await page.evaluate(probe, { maxText: cfg.maxText, ignoreSelectors: cfg.ignore.selectors, tokens: TOKENS })
           const sFs = [...axeFindings(sAxe, sctx, cfg).filter((f) => !cfg.ignore.selectors.some((x) => f.selector.includes(x))), ...analyze(sm, { ...sctx, axeSelectors: sSel }, cfg)].filter((f) => !cfg.ignore.rules.includes(f.rule))
-          sFs.forEach((f) => findings.push({ ...f, state: s.name, file: ctx.file }))
+          sFs.forEach((f) => pageFindings.push({ ...f, state: s.name, file: ctx.file }))
         }
       }
-      await context.close()
+      if (scope.closed) break
+      findings.push(...pageFindings)
+      progress.audited.push(pg)
+      cost[kind] = Math.max(cost[kind], Date.now() - t0)
     }
+    for (const { context } of contexts) await context.close()
   }
+  return finish(findings, meta, tally(scope), cfg)
+}
+
+/** Audited/pending bookkeeping; pending pages are left for the caller to carry over. */
+function tally (scope) {
+  const p = scope.progress || { audited: [], pages: scope.pages || [] }
+  const done = new Set(p.audited)
+  return { audited: p.audited.slice(), pending: p.pages.filter((pg) => !done.has(pg)) }
+}
+
+function finish (findings, meta, { audited, pending }, cfg, extra = {}) {
+  meta.audited = audited
+  meta.pending = pending
+  meta.incomplete = pending.length > 0
+  if (meta.incomplete) meta.stopReason = extra.stopReason || 'budget'
+  if (cfg.budgetMs) meta.budgetMs = cfg.budgetMs
   const entries = normalizeSuppressions(cfg.suppress)
   const { kept, suppressed, used, expired } = applySuppressions(findings, entries)
   return { findings: dedupe(kept), suppressed: dedupe(suppressed), suppressionWarnings: suppressionWarnings(entries, used, expired), meta }

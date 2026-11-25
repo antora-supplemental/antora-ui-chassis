@@ -60,6 +60,12 @@ export function exemptedReport (sup = [], mode = 'summary') {
   return out
 }
 
+/** "stopped at the 540000 ms budget: audited 12 of 40 page(s); 28 pending" */
+export function pendingLine (meta) {
+  const why = meta.stopReason === 'deadline' ? 'stopped at the total time limit' : `stopped at the ${meta.budgetMs} ms budget`
+  return `contrast-check: ${why}: audited ${meta.audited.length} of ${meta.pages.length} page(s); ${meta.pending.length} pending (JSON meta.pending)`
+}
+
 const supTail = (x) => x.suppressed?.length ? `, ${x.suppressed.length} suppressed` : ''
 /** Totals line: "E error(s), W warning(s)[, N suppressed]". */
 export function totals (fs, extra = {}) { const c = counts(fs); return `${c.error} error(s), ${c.warning} warning(s)${supTail(extra)}` }
@@ -67,6 +73,7 @@ export function totals (fs, extra = {}) { const c = counts(fs); return `${c.erro
 export function consoleReport (fs, meta, limit = 200, extra = {}) {
   const s = sortFindings(fs); const c = counts(fs)
   const out = [`contrast-check: ${meta.pages.length} page(s) x ${meta.schemes.length} scheme run(s) [${meta.schemes.join(', ')}]${meta.paints.length ? `; paints: ${meta.paints.join(', ')}` : ''}`]
+  if (meta.incomplete) out.push(pendingLine(meta))
   for (const f of s.slice(0, limit)) out.push(line(f))
   if (s.length > limit) out.push(`... ${s.length - limit} more (use --json for all)`)
   for (const w of extra.suppressionWarnings || []) out.push(`warn  suppression-${w.kind} ${w.message}`)
@@ -94,6 +101,7 @@ export function markdownSummary (fs, meta, top = 30, extra = {}) {
   const c = counts(fs); const s = sortFindings(fs)
   const out = [`## Contrast check: ${c.error ? '❌' : '✅'} ${c.error} error(s), ${c.warning} warning(s)${supTail(extra)}`, '',
     `${meta.pages.length} page(s), schemes: ${meta.schemes.map((x) => '`' + x + '`').join(', ')}`, '',
+    ...(meta.incomplete ? [pendingLine(meta).replace(/^contrast-check: /, ''), ''] : []),
     '| Scheme | Errors | Warnings |', '| --- | ---: | ---: |',
     ...Object.entries(c.byScheme).map(([k, v]) => `| ${k} | ${v.error} | ${v.warning} |`), '']
   if (s.length) {

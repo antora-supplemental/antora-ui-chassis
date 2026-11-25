@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 // contrast-check <site-dir|url> [--pages a.html,b/**/*.html] [--config f] [--json[=file]]
 //   [--strict] [--schemes light,dark] [--paint f.css] [--max-pages n] [--near n] [--apca]
-import { writeFileSync } from 'node:fs'
+import { readFileSync, writeFileSync } from 'node:fs'
 import { loadConfig, loadSuppressFile, mergeConfig } from '../lib/config.js'
 import { run } from '../lib/run.js'
 import { consoleReport, annotations, suppressionAnnotations, exemptedAnnotations, markdownSummary, writeSummary, counts, totals, suppressedCounts } from '../lib/report.js'
@@ -11,6 +11,10 @@ const HELP = `Usage: contrast-check <site-dir|url> [options]
   --pages <list>      comma-separated pages or globs (site-relative), e.g. "index.html,guide/**/*.html"
   --max-pages <n>     cap on pages (default 20)
   --max-duration-ms <n> total audit time limit (default 600000 / 10 minutes; incomplete audits exit 2)
+  --budget-ms <n>     soft budget: stop before a page that would not finish in time, report the
+                      rest as pending (JSON meta.pending) and exit by findings only (default off)
+  --content-pages <list> pages checked for content only (axe + text probe; no focus/hover, no states)
+  --selection <file>  JSON { "pages": [...], "contentPages": [...] } (for lists too long for a command line)
   --schemes <ids>     only these scheme ids (default: every scheme in the paint manifest)
   --paint <file.css>  paint stylesheet(s) for the manifest and static checks (repeatable; default: discovered)
   --config <file>     config file (default: ./contrast-check.config.json when present)
@@ -36,6 +40,9 @@ function parse (argv) {
     else if (a === '--pages') o.pages = next().split(',').map((s) => s.trim()).filter(Boolean)
     else if (a === '--max-pages') o.maxPages = +next()
     else if (a === '--max-duration-ms') o.maxDurationMs = +next()
+    else if (a === '--budget-ms') o.budgetMs = +next()
+    else if (a === '--content-pages') o.contentPages = next().split(',').map((s) => s.trim()).filter(Boolean)
+    else if (a === '--selection') o.selection = next()
     else if (a === '--schemes') o.schemes = next().split(',').map((s) => s.trim()).filter(Boolean)
     else if (a === '--paint') o.paints.push(next())
     else if (a === '--config') o.config = next()
@@ -66,7 +73,8 @@ try {
   const o = parse(process.argv.slice(2))
   if (o.help || !o.target) { console.log(HELP); process.exit(o.help ? 0 : 2) }
   const { config: fileCfg } = await loadConfig(o.config)
-  const cli = { pages: o.pages, maxPages: o.maxPages, maxDurationMs: o.maxDurationMs, schemes: o.schemes, paints: o.paints.length ? o.paints : undefined, nearMargin: o.nearMargin, apca: o.apca || undefined }
+  const selection = o.selection ? JSON.parse(readFileSync(o.selection, 'utf8').replace(/^\uFEFF/, '')) : {}
+  const cli = { pages: o.pages || selection.pages, maxPages: o.maxPages, maxDurationMs: o.maxDurationMs, budgetMs: o.budgetMs, contentPages: o.contentPages || selection.contentPages, schemes: o.schemes, paints: o.paints.length ? o.paints : undefined, nearMargin: o.nearMargin, apca: o.apca || undefined }
   if (o.noFocus) cli.maxFocus = 0
   if (o.states) cli.states = [...(fileCfg.states || []), ...o.states]
   let failOn = o.failOn || (o.strict ? 'warning' : null) || fileCfg.failOn || (fileCfg.strict ? 'warning' : 'error')
